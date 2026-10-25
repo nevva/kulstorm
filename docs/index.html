@@ -113,6 +113,7 @@ body.od-on #odglow{opacity:1}
 .sub{font-size:14px;color:var(--muted);margin:0;max-width:36ch;text-wrap:balance}
 .best{font-family:var(--font-display);font-size:16px;color:var(--mint);margin:0;font-variant-numeric:tabular-nums}
 .coins{font-family:var(--font-display);font-size:16px;color:var(--gold);margin:0;font-variant-numeric:tabular-nums}
+.ver{font-size:12px;color:var(--muted);opacity:.7;margin:0;font-variant-numeric:tabular-nums}
 .btn{font-family:var(--font-display);font-size:24px;background:var(--coral);color:#fff;border:0;border-radius:18px;padding:14px 38px;
   box-shadow:0 6px 0 var(--coral-deep),0 12px 24px rgba(0,0,0,.35);cursor:pointer;margin-top:6px;letter-spacing:.03em}
 .btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--coral-deep)}
@@ -213,6 +214,7 @@ select{font-family:var(--font-body);font-weight:800;font-size:14px;background:va
       <button class="btn small ghost" id="open-heroprog" type="button">Hjälte</button>
       <button class="btn small ghost" id="open-opts" type="button">Inställningar</button>
     </div>
+    <p class="ver" id="menu-ver"></p>
   </div>
 
   <div class="panel" id="menu-shop" hidden>
@@ -327,6 +329,32 @@ select{font-family:var(--font-body);font-weight:800;font-size:14px;background:va
   </div>
 </div>
 
+<script>
+// ---------- version: version.json holds the deployed version (bump both with ./bump-version.sh). When it differs from
+// VERSION the page reloads with ?v=<new> so the browser and CDN caches are bypassed. A run is never interrupted:
+// the reload waits until window.kulstormBusy() says the game is back in the menu.
+const VERSION='2026.10.25-1';
+(function(){
+  const el=document.getElementById('menu-ver'); if(el) el.textContent='Version '+VERSION;
+  let pending=null;
+  const busy=()=>{ try{ return !!(window.kulstormBusy&&window.kulstormBusy()); }catch(e){ return false; } };
+  function reload(v){
+    // Guard against a reload loop if a stale cache still serves the old page for the new URL.
+    try{ if(sessionStorage.getItem('kulstorm_reloaded')===v) return; sessionStorage.setItem('kulstorm_reloaded',v); }catch(e){}
+    const u=new URL(location.href); u.searchParams.set('v',v); location.replace(u.href);
+  }
+  function check(){
+    fetch(new URL('version.json?t='+Date.now(),location.href),{cache:'no-store'})
+      .then(r=>r.ok?r.json():null)
+      .then(j=>{ if(j&&j.version&&j.version!==VERSION){ pending=j.version; if(!busy()) reload(pending); } })
+      .catch(()=>{});
+  }
+  check();
+  setInterval(check,5*60*1000);
+  setInterval(()=>{ if(pending&&!busy()) reload(pending); },3000);
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') check(); });
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
@@ -1355,6 +1383,7 @@ if(owned.indexOf(heroId)<0) heroId='rookie';
 function saveBank(){ store('kulstorm_coins',Math.round(bank)); store('kulstorm_owned',owned); store('kulstorm_hero',heroId); }
 
 // ---------- game state
+window.kulstormBusy=()=>mode!=='menu';
 let mode='menu',time=0,dist=0,scroll=5,kills=0,best=0,coinsRun=0,labRun=false,spawnT=1.5,boss=null,bossNo=0,nextBossAt=600,nextUpgradeAt=50,upgradeStep=90,zoneDistNext=400,deadT=0,overShown=false,shakeAmt=0,camX=0;
 const DIFF={hp:1,speed:1,spawn:1.2,dmg:1,crowd:1};
 let S=null;
