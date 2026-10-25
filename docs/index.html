@@ -2610,8 +2610,9 @@ function buyOffer(o){
   sfx.buy(); rebuildChips(); updatePower(0,true); renderBuy();
   return true;
 }
+let shopRelock=false;
 function openShop(){
-  unlockMouse();
+  shopRelock=locked(); unlockMouse();
   if(mode!=='playing'||!xpOn()) { R.pending=0; return; }
   R.pending--; mode='shop'; keys.l=keys.r=false; drag=null;
   buildOffers(); R.sel=Math.max(0,R.offers.findIndex(o=>coinsRun>=o.cost)); renderBuy(); shopEl.hidden=false; sfx.level();
@@ -2620,6 +2621,7 @@ function openShop(){
 function closeShop(){
   if(mode!=='shop') return;
   shopEl.hidden=true; mode='playing'; last=performance.now();
+  if(shopRelock&&OPT.mouse) lockMouse(); shopRelock=false;
   for(const m of squad) m.invuln=0.6;
   updateHUD();
 }
