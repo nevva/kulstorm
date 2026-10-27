@@ -42,12 +42,14 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 .vitalrow{flex-wrap:nowrap}
 .hud-row:empty{display:none}
 /* One bar: HP on the top half, XP on the bottom half. */
-.vitals{flex:1;min-width:0;height:30px;display:flex;flex-direction:column;background:rgba(13,16,48,.65);border-radius:999px;overflow:hidden;border:2px solid rgba(255,248,230,.55)}
+.vitals{flex:1;min-width:0;height:30px;display:flex;flex-direction:column;background:rgba(13,16,48,.75);border-radius:5px;overflow:hidden;border:2px solid var(--paper);
+  transform:skewX(-12deg);margin:0 6px 3px;box-shadow:0 3px 0 var(--ink),0 8px 16px rgba(0,0,0,.35)}
 .vhp,.vxp{position:relative;flex:1;min-height:0}
-.vxp{border-top:2px solid rgba(13,16,48,.8)}
+.vxp{border-top:2px solid var(--ink)}
+.vhp .hp,.vxp .xp{box-shadow:inset 0 -3px 0 rgba(13,16,48,.28)}
 .hp{height:100%;width:100%;background:linear-gradient(90deg,var(--mint),#9dffb0);transition:width .15s}
 .hp.low{background:linear-gradient(90deg,var(--coral),#ff9aa8)}
-#hptext,#xplvl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+#hptext,#xplvl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:800;color:var(--paper);text-shadow:0 1.5px 0 var(--ink),0 3px 6px rgba(0,0,0,.35);font-variant-numeric:tabular-nums}
 .chip{font-weight:800;font-size:12px;color:var(--ink);background:var(--paper);padding:6px 11px;border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .chip.shield{background:var(--accent)}
 .chip.coin{background:var(--gold)}
