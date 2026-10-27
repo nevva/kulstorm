@@ -89,7 +89,7 @@ function breakWall(w){
   fxShatter(p.x,p.z,wallPieceMat(w),w.boss?wallGoldMat:wallPostMat,1.3); sfx.explode(1.6); shake(0.5);
   removeWall(w);
   if(w.gid) for(const o of walls){ if(o!==w&&!o.dead&&o.gid===w.gid){ o.dead=true; fxShatter(o.g.position.x,o.g.position.z,wallPieceMat(o),o.boss?wallGoldMat:wallPostMat,0.7); removeWall(o); } }
-  if(OPT.coins) for(let i=0;i<3;i++) spawnCoin(p.x+rand(-1,1),p.z+rand(-0.5,0.5));
+  if(OPT.coins) spawnCoin(p.x+rand(-0.5,0.5),p.z,3);
   if(w.u.kind==='pet'){ addUnicorn(); toast('En enhörning ansluter!'); }
   else if(w.u.kind==='gubbe'){ const m=addMember(w.u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(w.u.shirt)); toast(w.u.name+' ansluter!'); }
   else { applyTeamPerk(w.u); toast(w.u.name+'!'); }

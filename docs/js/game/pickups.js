@@ -30,17 +30,32 @@ function updateHearts(dt){
   hearts=hearts.filter(h=>!h.dead);
 }
 let coins=[]; const coinPool=[]; const coinMat=mat(0xffc83d,{e:0.35,r:0.2,m:0.6});
-function spawnCoin(x,z){
-  const g=coinPool.pop()||(function(){ const c=M(G.coin,coinMat,[0.26,0.07,0.26],[0,0,0],false); c.rotation.x=Math.PI/2; return c; })();
-  g.position.set(clamp(x,-HALF+0.3,HALF-0.3),0.55,z); g.visible=true; scene.add(g);
-  coins.push({g,t:rand(0,6),vz:rand(-1,1),vx:rand(-1,1),dead:false});
+// A coin pickup is a stack worth 1-5: one upright coin for 1, a flat pile for more.
+function buildCoin(){
+  const g=new THREE.Group(),one=M(G.coin,coinMat,[0.26,0.07,0.26],[0,0,0],false); one.rotation.x=Math.PI/2; g.add(one);
+  const pile=[]; for(let i=0;i<5;i++){ const c=M(G.coin,coinMat,[0.24,0.06,0.24],[rand(-0.04,0.04),-0.2+i*0.075,rand(-0.04,0.04)],false); g.add(c); pile.push(c); }
+  g.userData={one,pile}; return g;
+}
+function rollCoinStack(){ const r=Math.random(); return r<0.45?1:r<0.7?2:r<0.85?3:r<0.95?4:5; }
+function spawnCoin(x,z,val){
+  val=clamp(Math.round(val||1),1,5);
+  const g=coinPool.pop()||buildCoin(),u=g.userData;
+  u.one.visible=val===1; u.pile.forEach((c,i)=>c.visible=val>1&&i<val);
+  g.scale.setScalar(val===1?1:1+val*0.06);
+  g.position.set(clamp(x,-HALF+0.3,HALF-0.3),0.55,z); g.rotation.set(0,rand(0,6),0); g.visible=true; scene.add(g);
+  coins.push({g,val,t:rand(0,6),vz:rand(-1,1),vx:rand(-1,1),dead:false});
+}
+// Drop `total` coins as stacks of up to 5.
+function spawnCoins(x,z,total,spread){
+  spread=spread||0.8;
+  while(total>0){ const v=Math.min(5,total); spawnCoin(x+rand(-spread,spread),z+rand(-spread,spread),v); total-=v; }
 }
 function updateCoins(dt){
   for(const c of coins){
-    const p=c.g.position; c.t+=dt; p.z+=(scroll+c.vz)*dt; p.x+=c.vx*dt; c.vz*=0.9; c.vx*=0.9; c.g.rotation.z+=dt*4; p.y=0.55+0.12*Math.sin(c.t*5);
+    const p=c.g.position; c.t+=dt; p.z+=(scroll+c.vz)*dt; p.x+=c.vx*dt; c.vz*=0.9; c.vx*=0.9; c.g.rotation.y+=dt*(c.val>1?2:4); p.y=0.55+0.12*Math.sin(c.t*5);
     if(S.A&&S.A.magnet&&mode==='playing'){ const dx=S.x-p.x,dz=0-p.z,d=Math.hypot(dx,dz); if(d<9&&d>0.1){ p.x+=dx/d*14*dt; p.z+=dz/d*14*dt; } }
     if(mode==='playing') for(const m of squad){ if(Math.abs(m.g.position.x-p.x)<0.8&&Math.abs(m.g.position.z-p.z)<0.8){ c.dead=true; break; } }
-    if(c.dead){ coinsRun+=S.T.coinMult; sfx.coin(); fxSpark(p.x,p.y,p.z,GOLD); hudCoins=-1; }
+    if(c.dead){ coinsRun+=c.val*S.T.coinMult; sfx.coin(); fxSpark(p.x,p.y,p.z,GOLD); hudCoins=-1; if(c.val>1) pushDmg(p.x,1.6,p.z,'+'+c.val,'#ffc83d',false); }
     else if(p.z>4) c.dead=true;
     if(c.dead){ scene.remove(c.g); coinPool.push(c.g); }
   }

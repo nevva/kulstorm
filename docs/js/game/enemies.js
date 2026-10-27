@@ -172,7 +172,7 @@ function spawnEnemy(type,lane,z){
   e.r=def.r; e.speed=def.speed*DIFF.speed*(isW('rain')?rand(0.85,1.15):1)*(isW('heat')?1.15:1); e.dmg=def.dmg; e.maxHp=e.hp=def.hp*DIFF.hp*PF; e.lane=lane;
   const lim=Math.max(0,LANE_W/2-def.r-0.3);
   const x=def.boss?0:LANE_X[lane]+rand(-lim,lim);
-  e.g.position.set(x,0,z); e.g.scale.set(1,1,1); e.g.rotation.x=0; e.g.visible=true; scene.add(e.g); enemies.push(e);
+  e.g.position.set(x,0,z); e.g.scale.set(1,1,1); e.g.rotation.x=0; e.g.rotation.z=0; e.g.visible=true; scene.add(e.g); enemies.push(e);
   if(type==='knight'){ e.shieldHp=e.maxHp*0.9; e.u.shield.visible=true; e.u.sbar.visible=true; e.u.sfg.scale.x=1; e.u.sfg.position.x=0; }
   if(def.boss) bossInit(e);
   if(type==='necro'&&!necroSeen){ necroSeen=true; toast('Nekromantiker! Döda honom först'); }
@@ -207,7 +207,11 @@ function killEnemy(e,byPlayer){
     const dropK=isW('heat')?1.5:1;
     if(OPT.hearts){ const chance=(e.type==='tank'||e.isBoss)?1:0.08*dropK; if(Math.random()<chance) spawnHeart(p.x,p.z,e.isBoss?40:e.type==='tank'?ri(15,30):ri(5,30)); }
     if(xpOn()){ const v=(XP_VAL[e.isBoss?'boss':e.type]||1)*(DN.full&&DN.nightF>0.5?1.5:1); if((e.type!=='swarm'&&e.type!=='bats')||Math.random()<0.5) spawnXp(p.x+rand(-0.5,0.5),p.z+rand(-0.5,0.5),v); }
-    if(OPT.coins){ const n=(e.isBoss?20:e.type==='tank'?5:(e.type==='knight'||e.type==='necro'||e.type==='charger'||e.type==='bloater')?2:(Math.random()<0.35*dropK?1:0))*(S.combos.has('goldrush')?2:1); for(let i=0;i<n;i++) spawnCoin(p.x+rand(-0.8,0.8),p.z+rand(-0.8,0.8)); }
+    if(OPT.coins){
+      // Bosses and big enemies drop fixed amounts; small ones sometimes drop a stack worth 1-5.
+      const n=e.isBoss?20:e.type==='tank'?5:(e.type==='knight'||e.type==='necro'||e.type==='charger'||e.type==='bloater')?ri(2,4):(Math.random()<0.35*dropK?rollCoinStack():0);
+      if(n) spawnCoins(p.x,p.z,n*(S.combos.has('goldrush')?2:1));
+    }
   }
   if(e.type==='bomber') explodeAt(p.x,0.5,p.z,3,45*DIFF.hp,45*DIFF.hp,byPlayer,null,1);
   if(e.isBoss){ boss=null; bossDefeated(); }
@@ -314,6 +318,7 @@ function updateEnemies(dt){
     if(q.rise){ c.rise=c.riseMax=q.rise; c.g.position.y=-1.4; if(q.type==='crawler') c.revived=true; }
   }
   updatePuddles(dt);
+  let tug=0;
   for(const e of enemies){
     if(e.dead) continue;
     const p=e.g.position,u=e.u; e.t+=dt;
@@ -376,13 +381,18 @@ function updateEnemies(dt){
         if(tg){ hurtMember(tg,e.dmg*DIFF.dmg,true); tg.hurtT=0.7; shake(0.9); sfx.smack(); pushDmg(tg.g.position.x,2.8,tg.g.position.z,'RAM!','#ff5c7a',true,true); }
         e.atkCd=1.4;
       }
+      // At the wall they grab at the squad: tug it toward themselves and hit anyone within reach, even across a lane line.
+      const reach=1.4+e.r,gx=S.x-p.x;
+      if(playing&&!(e.stun>0)&&Math.abs(gx)<reach+2.5){ tug-=Math.sign(gx)*(1-Math.abs(gx)/(reach+2.5))*(0.6+e.r*0.8); e.g.rotation.z=clamp(-gx*0.1,-0.3,0.3); }
+      else e.g.rotation.z*=Math.exp(-dt*6);
       let target=null,bd=1e9;
-      if(playing) for(const m of squad){ const mp=m.g.position; if(laneOf(mp.x)!==e.lane) continue; const dx=mp.x-p.x,dz=mp.z-p.z,d2=dx*dx+dz*dz; if(d2<bd){ bd=d2; target=m; } }
+      if(playing) for(const m of squad){ const mp=m.g.position; if(laneOf(mp.x)!==e.lane&&Math.abs(mp.x-p.x)>reach) continue; const dx=mp.x-p.x,dz=mp.z-p.z,d2=dx*dx+dz*dz; if(d2<bd){ bd=d2; target=m; } }
       if(target&&!(e.stun>0)){
         e.atkCd-=dt;
         if(e.atkCd<=0){ e.atkCd=(e.type==='tank'||e.type==='charger')?1.2:0.8; e.lunge=1; hurtMember(target,e.dmg*0.5*DIFF.dmg); fxSpark(target.g.position.x+rand(-0.3,0.3),1,target.g.position.z-0.2,e.colorL); }
       } else e.atkCd=Math.min(e.atkCd,0.3);
     }
+    else if(e.g.rotation.z) e.g.rotation.z*=Math.exp(-dt*6);
     if(e.burn>0){
       e.burn-=dt; const bd=e.burnDps*dt;
       e.hp-=bd; e.accDmg+=bd; e.accTier=Math.max(e.accTier,2); if(e.accT<0) e.accT=0; if(e.burnOwner) e.burnOwner.dealt+=bd; credit(e.burnSrc||'c:burn',bd);
@@ -397,6 +407,7 @@ function updateEnemies(dt){
     else if(e.flashOn){ e.flashOn=false; e.mats.forEach(m=>m.emissive.setRGB(0,0,0)); }
     if(p.z>6) killEnemy(e,false);
   }
+  if(playing&&tug){ const t=clamp(tug,-3.5,3.5)*dt; S.targetX=clamp(S.targetX+t,-HALF+0.5,HALF-0.5); S.x=clamp(S.x+t,-HALF+0.5,HALF-0.5); }
   // Separation: the horde jostles into a pile instead of stacking inside each other.
   const near=[];
   for(const e of enemies){ if(!e.dead&&!e.isBoss&&e.g.position.z>-14) near.push(e); }
