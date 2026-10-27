@@ -117,7 +117,8 @@ const OD_T=6;
 function addOD(x){ if(!OPT.overdrive||mode!=='playing'||S.odT>0||S.odLock>0) return; const was=S.od; S.od=Math.min(1,S.od+x); if(was<1&&S.od>=1){ toast('OVERDRIVE redo! Tryck E'); sfx.combo(); } }
 function triggerOD(force){
   if(!OPT.overdrive||mode!=='playing'||S.odT>0||(S.od<1&&!force)) return;
-  S.od=0; S.odT=OD_T; S.odUsed=true; tutAct('od'); sfx.odStart(); shake(1.2); toast(force?'NÖD-OVERDRIVE!':'OVERDRIVE!',!!force);
+  S.od=0; S.odT=OD_T; S.odUsed=true; S.odForce=!!force; tutAct('od'); sfx.odStart(); shake(1.2); toast(force?'NÖD-OVERDRIVE! Räddad från döden':'OVERDRIVE!',!!force);
+  if(force){ const hp=squad[0].g.position; pushDmg(hp.x,3.2,hp.z,'RÄDDAD!','#ff5c7a',true,true,'NÖD-OVERDRIVE'); }
   for(const e of enemies){ if(e.dead||e.isBoss||e.under) continue; if(e.g.position.z>-22){ e.kb=Math.min(4,(e.kb||0)+2.6); e.stun=1; e.sq=1; } }
   const p=headMember().g.position; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; chunks.spawn(p.x,0.6,p.z-0.5,Math.cos(a)*9,rand(1,3),Math.sin(a)*9-3,0.6,0.3,0.08,C(0xffe066),C(0xffc23d),C(0xff8a3d),4,1.2,false,rand(4,10)); }
 }
