@@ -380,9 +380,9 @@ function updateEnemies(dt){
         if(tg){ hurtMember(tg,e.dmg*DIFF.dmg,true); tg.hurtT=0.7; shake(0.9); sfx.smack(); pushDmg(tg.g.position.x,2.8,tg.g.position.z,'RAM!','#ff5c7a',true,true); }
         e.atkCd=1.4;
       }
-      // At the wall they shuffle sideways toward the squad, crossing lanes, and hit anyone within reach.
+      // At the wall they shuffle sideways toward the squad within their own lane, and hit anyone within reach.
       const reach=1.4+e.r,gx=S.x-p.x;
-      if(playing&&!(e.stun>0)&&Math.abs(gx)>0.3){ p.x+=clamp(gx,-1,1)*2.6*dt/Math.max(0.6,e.r); e.lane=laneOf(p.x); clampLane(e); e.g.rotation.z=clamp(-gx*0.1,-0.3,0.3); }
+      if(playing&&!(e.stun>0)&&Math.abs(gx)>0.3){ p.x+=clamp(gx,-1,1)*2.6*dt/Math.max(0.6,e.r); clampLane(e); e.g.rotation.z=clamp(-gx*0.1,-0.3,0.3); }
       else e.g.rotation.z*=Math.exp(-dt*6);
       let target=null,bd=1e9;
       if(playing) for(const m of squad){ const mp=m.g.position; if(laneOf(mp.x)!==e.lane&&Math.abs(mp.x-p.x)>reach) continue; const dx=mp.x-p.x,dz=mp.z-p.z,d2=dx*dx+dz*dz; if(d2<bd){ bd=d2; target=m; } }
