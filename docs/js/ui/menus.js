@@ -27,16 +27,19 @@ function renderShop(){
     const t=document.createElement('h4'); t.textContent=h.name; card.appendChild(t);
     const p=document.createElement('p'); p.textContent=h.desc; card.appendChild(p);
     const b=document.createElement('button'); b.type='button';
+    const joins=own&&!sel&&h.price>0;
     if(sel){ b.textContent='Vald'; b.disabled=true; }
+    else if(joins){
+      // The button is the start-group checkbox; making this gubbe the leader is the small link under it.
+      const on=benched.indexOf(h.id)<0;
+      b.textContent=on?'✓ I startgruppen':'Inte med'; b.className='own toggle'+(on?' on':''); b.setAttribute('role','checkbox'); b.setAttribute('aria-checked',String(on));
+      b.addEventListener('click',()=>{ benched=benched.filter(x=>x!==h.id); if(on) benched.push(h.id); saveBank(); sfx.init(); sfx.pickup(); renderShop(); });
+    }
     else if(own){ b.textContent='Välj'; b.className='own'; b.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); }
     else if(bank>=h.price){ b.textContent='Köp · '+fmt(h.price); b.addEventListener('click',()=>{ bank-=h.price; owned.push(h.id); heroId=h.id; saveBank(); sfx.init(); sfx.upgrade(); renderShop(); }); }
     else { b.textContent='Kostar '+fmt(h.price)+' · saknas '+fmt(h.price-bank); b.disabled=true; }
     card.appendChild(b);
-    if(own&&!sel&&h.price>0){
-      const lb=document.createElement('label'); lb.className='join'; const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=benched.indexOf(h.id)<0;
-      cb.addEventListener('change',()=>{ benched=benched.filter(x=>x!==h.id); if(!cb.checked) benched.push(h.id); saveBank(); sfx.init(); sfx.pickup(); });
-      lb.append(cb,document.createTextNode(' Med i startgruppen')); card.appendChild(lb);
-    }
+    if(joins){ const l=document.createElement('button'); l.type='button'; l.className='lead'; l.textContent='Välj som startgubbe'; l.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); card.appendChild(l); }
     box.appendChild(card);
   });
 }
