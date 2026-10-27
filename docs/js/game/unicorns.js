@@ -1,5 +1,5 @@
 'use strict';
-// ---------- unicorns: helpers that fire rainbow roads; gubbar standing on a road can't be hurt (and for 1.5 s after)
+// ---------- unicorns: helpers that fire rainbow roads; gubbar standing on a road take half damage (and for 1.5 s after)
 const RAINBOW=[0xff5252,0xffa726,0xffee58,0x66bb6a,0x42a5f5,0xab47bc].map(h=>C(h));
 const rbMats=[0xff5252,0xffa726,0xffee58,0x66bb6a,0x42a5f5,0xab47bc].map(h=>mat(h,{e:0.65,r:0.2}));
 let unicorns=[],roads=[];

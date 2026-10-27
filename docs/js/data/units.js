@@ -41,7 +41,7 @@ const UPGRADES=[
   {id:'steel',kind:'team',rarity:'common',name:'Stålkulor',short:'Stål',desc:'+15 % skada för hela truppen, för alltid'},
   {id:'fastload',kind:'team',rarity:'common',name:'Snabbladdare',short:'Laddare',desc:'+15 % eldhastighet för hela truppen, för alltid'},
   {id:'armor',kind:'team',rarity:'rare',name:'Hårt pansar',short:'Pansar+',desc:'+30 max-HP till alla gubbar, nu och framöver'},
-  {id:'unicorn',kind:'pet',rarity:'epic',name:'Enhörning',short:'Enhörning',desc:'Skjuter regnbågsvägar. Stå på dem så är du skyddad'},
+  {id:'unicorn',kind:'pet',rarity:'epic',name:'Enhörning',short:'Enhörning',desc:'Skjuter regnbågsvägar. Stå på dem så tar du halv skada'},
   {id:'hospital',kind:'team',rarity:'rare',name:'Fältsjukhus',short:'Sjukhus',desc:'Hjärtan läker dubbelt så mycket',unique:true},
 ];
 const RARITY={common:'Vanlig',rare:'Sällsynt',epic:'Episk'};

@@ -23,6 +23,6 @@ const OPT_DEFS=[
   ['tutorial','Guide','Stannar spelet och förklarar varje förmåga första gången den behövs'],
   ['music','Musik','Lofi i en egen genre per zon (jazz, bossa nova, hiphop, techno, ambient, trap) som formas av fienderna du spränger'],
   ['heroprog','Hjälteprogression','Ledaren samlar XP mellan rundorna och får talangpoäng'],
-  ['unicorns','Enhörningar','Hjälpredor som skjuter regnbågsvägar där truppen är skyddad'],
+  ['unicorns','Enhörningar','Hjälpredor som skjuter regnbågsvägar som halverar skadan truppen tar'],
   ['xpshop','XP och köpskärm','Fiender släpper XP; varje nivå öppnar en butik där du köper med rundans mynt'],
 ];

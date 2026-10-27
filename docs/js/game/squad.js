@@ -177,13 +177,13 @@ function totalShield(){ let n=0; for(const m of squad) n+=m.charges; return n; }
 function hurtMember(m,d,force){
   if(mode!=='playing'||m.dead) return;
   if(S.odT>0){ if(Math.random()<0.4){ const p=m.g.position; fxSparkle(p.x,1.2,p.z,C(0xffe066)); } return; }
-  if(m.safeT>0){ if(Math.random()<0.5){ const p=m.g.position; fxSparkle(p.x,1.2,p.z,pick(RAINBOW)); } return; }
   if(m.invuln>0&&!force) return;
   m.invuln=0.3;
   const p=m.g.position;
   const sb=squad.find(x=>x.charges>0);
   if(sb){ sb.charges--; sfx.shield(); fxShield(p.x,0.9,p.z); hudShield=-1; return; }
   if(m.def.id==='tank'&&S.combos.has('fortress')) d*=0.5;
+  if(m.safeT>0){ d*=0.5; fxSparkle(p.x,1.2,p.z,pick(RAINBOW)); }
   m.hp-=d; m.hurtT=0.3;
   // Emergency OVERDRIVE: once per run, if you never fired it yourself, it saves you at 10 % HP (even from a lethal hit).
   if(m===squad[0]&&OPT.overdrive&&!S.odUsed&&S.odT<=0&&m.hp<=m.maxHp*0.1){ m.hp=Math.max(m.hp,m.maxHp*0.25); triggerOD(true); sfx.heartbeat(); flashEl.classList.add('on'); setTimeout(()=>flashEl.classList.remove('on'),120); }
