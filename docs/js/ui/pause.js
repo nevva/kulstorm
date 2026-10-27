@@ -7,11 +7,16 @@ function pauseGame(){
   mode='paused'; keys.l=keys.r=false; drag=null;
   $('pdist').textContent=fmt(dist); $('pkills').textContent=fmt(kills); $('pcoins').textContent=fmt(coinsRun);
   $('ppower').textContent='Fiender på skärmen: '+aliveCount()+' / '+enemyCap()+' · Truppstyrka ×'+squadPower().toFixed(1)+' · Fiende-HP ×'+(DIFF.hp*PF).toFixed(1)+' · Fiendeskada ×'+DIFF.dmg.toFixed(1);
-  const ps=$('psquad'); ps.innerHTML='';
-  squad.forEach(m=>{ const el=document.createElement('span'); el.className='chip sq'+(OPT.front&&m===S.frontM?' front':''); el.style.borderColor=hexCss(m.def.shirt); el.textContent=chipText(m); ps.appendChild(el); });
-  S.perks.forEach(p=>{ const el=document.createElement('span'); el.className='chip tp'; el.textContent=p.short; ps.appendChild(el); });
-  unicorns.forEach(()=>{ const el=document.createElement('span'); el.className='chip uni'; el.textContent='Enhörning'; ps.appendChild(el); });
-  COMBOS.forEach(c=>{ if(!S.combos.has(c.id)) return; const el=document.createElement('span'); el.className='chip combo'; el.textContent=c.name; ps.appendChild(el); });
+  const ps=$('psquad'),pd=$('pdesc'); ps.innerHTML=''; pd.textContent='Tryck på en gubbe eller uppgradering för att läsa mer';
+  // Each chip is a button: tapping it shows its name and what it does under the list.
+  const chip=(cls,text,name,desc)=>{ const el=document.createElement('button'); el.type='button'; el.className='chip '+cls; el.textContent=text;
+    el.addEventListener('click',()=>{ ps.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel')); el.classList.add('sel'); pd.textContent=name+(desc?' – '+desc:''); });
+    ps.appendChild(el); return el; };
+  const hero=heroById(lastCfg&&lastCfg.hero);
+  squad.forEach(m=>{ const lead=m.def.id==='leader'; chip('sq'+(OPT.front&&m===S.frontM?' front':''),chipText(m),lead?'Du ('+hero.name+')':m.def.name,lead?hero.desc:m.def.desc).style.borderColor=hexCss(m.def.shirt); });
+  S.perks.forEach(p=>chip('tp',p.short,p.name,p.desc));
+  { const u=UPGRADES.find(x=>x.id==='unicorn'); unicorns.forEach(()=>chip('uni',u.short,u.name,u.desc)); }
+  COMBOS.forEach(c=>{ if(S.combos.has(c.id)) chip('combo',c.name,'Kombo: '+c.name,c.desc); });
   $('pause-main').hidden=false; $('pause-opts').hidden=true;
   pauseEl.hidden=false; $('p-resume').focus({preventScroll:true});
 }
