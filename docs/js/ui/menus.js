@@ -11,7 +11,7 @@ function leaderDef(h){ return {id:'leader',kind:'gubbe',name:'Du',short:'Du',wea
 function renderMain(){
   $('menubest').textContent=best>0?'Rekord: '+fmt(best)+' m':'Inget rekord ännu';
   $('menucoins').textContent=OPT.coins?fmt(bank)+' mynt i banken':''; $('menucoins').hidden=!OPT.coins;
-  const free=HERO.lvl-heroSpent();
+  const free=heroFree();
   $('menuhero').textContent='Startgubbe: '+heroById(heroId).name+(OPT.heroprog?' · Hjältenivå '+HERO.lvl+(free>0?' · '+free+' poäng att fördela':''):'');
   $('open-heroprog').hidden=!OPT.heroprog; $('open-heroprog').textContent=free>0?'Hjälte ('+free+')':'Hjälte';
   $('open-shop').hidden=!OPT.coins;
@@ -135,21 +135,32 @@ $('open-heroprog').addEventListener('click',()=>showMenu('heroprog'));
 $('close-heroprog').addEventListener('click',()=>showMenu('main'));
 $('hp-reset').addEventListener('click',()=>{ HERO.pts={}; saveHero(); renderHeroProg(); });
 function renderHeroProg(){
-  const free=HERO.lvl-heroSpent();
+  const free=heroFree();
   $('hp-level').textContent='Hjältenivå '+HERO.lvl;
   $('hp-xpbar').style.width=(100*HERO.xp/heroNeed(HERO.lvl)).toFixed(1)+'%';
   $('hp-info').textContent=fmt(HERO.xp)+' / '+fmt(heroNeed(HERO.lvl))+' XP till nästa nivå · '+free+' poäng att fördela. Du får hjälte-XP för varje fiende du dödar (inte i labbet).';
-  const box=$('hp-talents'); box.innerHTML='';
+  renderTalents($('hp-talents'),renderHeroProg);
+}
+// Talent rows with −/+. With no free point left, + buys one with banked coins (TALENT_COST). Used by the Hjälte panel and the game-over screen.
+function renderTalents(box,redraw){
+  const free=heroFree(),price=TALENT_COST(HERO.bought||0);
+  box.innerHTML='';
   TALENTS.forEach(t=>{
-    const n=HERO.pts[t.id]||0;
+    const n=HERO.pts[t.id]||0,buy=free<=0&&OPT.coins&&n<t.max;
     const row=document.createElement('div'); row.className='row'+(n>0?' on':'');
     const nm=document.createElement('div'); nm.className='nm'; nm.textContent=t.name+' · '+n+'/'+t.max; const sm=document.createElement('small'); sm.textContent=t.desc; nm.appendChild(sm); row.appendChild(nm);
     const cnt=document.createElement('div'); cnt.className='cnt';
     const minus=document.createElement('button'); minus.type='button'; minus.textContent='−'; minus.setAttribute('aria-label','Ta bort poäng från '+t.name); minus.disabled=n<=0;
     const num=document.createElement('b'); num.textContent=String(n);
-    const plus=document.createElement('button'); plus.type='button'; plus.textContent='+'; plus.setAttribute('aria-label','Lägg poäng på '+t.name); plus.disabled=free<=0||n>=t.max;
-    minus.addEventListener('click',()=>{ HERO.pts[t.id]=Math.max(0,n-1); saveHero(); renderHeroProg(); });
-    plus.addEventListener('click',()=>{ if(HERO.lvl-heroSpent()>0&&n<t.max){ HERO.pts[t.id]=n+1; saveHero(); sfx.init(); sfx.buy(); renderHeroProg(); } });
+    const plus=document.createElement('button'); plus.type='button';
+    if(buy){ plus.className='buy'; plus.textContent=fmt(price)+' mynt'; plus.setAttribute('aria-label','Köp en poäng i '+t.name+' för '+fmt(price)+' mynt'); plus.disabled=bank<price; }
+    else { plus.textContent='+'; plus.setAttribute('aria-label','Lägg poäng på '+t.name); plus.disabled=free<=0||n>=t.max; }
+    minus.addEventListener('click',()=>{ HERO.pts[t.id]=Math.max(0,n-1); saveHero(); redraw(); });
+    plus.addEventListener('click',()=>{
+      if(n>=t.max) return;
+      if(heroFree()<=0){ if(!OPT.coins||bank<price) return; bank-=price; HERO.bought=(HERO.bought||0)+1; saveBank(); }
+      HERO.pts[t.id]=n+1; saveHero(); sfx.init(); sfx.buy(); redraw();
+    });
     cnt.append(minus,num,plus); row.appendChild(cnt); box.appendChild(row);
   });
 }

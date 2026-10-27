@@ -8,6 +8,8 @@ if(!HERO.pts) HERO.pts={};
 let runHeroXp=0;
 const heroNeed=l=>Math.round(60+l*30);
 function heroSpent(){ let n=0; for(const k in HERO.pts) n+=HERO.pts[k]||0; return n; }
+// Talent points: one per hero level, plus any bought with coins.
+const heroFree=()=>HERO.lvl+(HERO.bought||0)-heroSpent();
 function saveHero(){ store('kulstorm_heroprog',HERO); }
 function commitHeroXp(){
   if(labRun||!OPT.heroprog||runHeroXp<=0) return {gain:0,ups:0};

@@ -107,7 +107,7 @@ function laserMember(m,w,A,dt){
     const base=w.dps*A.dmg*A.rate*0.1*memberMult(m)*flowK()*flowK()*odK()*odRate(),burn=S.combos.has('burn');
     m.beams.forEach(b=>{
       if(!b.visible) return; const bx=b.position.x;
-      for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position; if(p.z<0.5&&Math.abs(p.x-bx)<e.r+0.15){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitEnemy(e,dv,crit,tier,m,true); fxDamage(bx,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(burn&&!e.dead){ e.burn=3; e.burnDps=base*4; e.burnOwner=m; } if(crit&&S.combos.has('chain')&&!e.dead) chainFrom(e,dv,m); } }
+      for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position; if(p.z<0.5&&Math.abs(p.x-bx)<e.r+0.15){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitEnemy(e,dv,crit,tier,m,true); fxDamage(bx,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(burn&&!e.dead){ e.burn=3; e.burnDps=base*4; e.burnOwner=m; e.burnSrc='c:burn'; } if(crit&&S.combos.has('chain')&&!e.dead) chainFrom(e,dv,m); } }
       for(const wl of walls){ const wp=wl.g.position; if(!wl.dead&&wp.z<0.5&&Math.abs(wp.x-bx)<1.8){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitWall(wl,dv,bx,rand(0.5,1.9),wp.z+0.3,crit,tier); fxDamage(bx,rand(0.6,1.8),wp.z+0.3,tier); } }
     });
     sfx.laser();
@@ -118,20 +118,21 @@ function spawnBullet(o){
   const d=bullets.d[k],A=o.A,w=o.w,crit=Math.random()<A.crit;
   d.x=o.x; d.y=o.y; d.z=o.z; d.vx=Math.sin(o.angle)*w.speed; d.vz=-Math.cos(o.angle)*w.speed;
   d.base=o.base; d.dmg=o.base*(o.mult||1)*varyDmg(0.75,1.25)*(crit?(o.owner&&o.owner.def.id==='glass'&&S.combos.has('crystal')?3:2):1); d.pierce=S.odT>0&&!w.rocket?99:(o.pierce!==undefined?o.pierce:(w.rocket?0:A.pierce)); d.size=w.size*A.bullet*(crit?1.4:1)*(o.gen?0.8:1)*(S.odT>0?1.4:1);
-  d.col=crit?SPARK:(S.odT>0?OD_COL:(S.flowT>0&&!o.gen?FLOW_COL:w.colorL)); d.rocket=!!w.rocket; d.aoe=w.aoe||0; d.bounce=A.bounce; d.hits=[]; d.trail=0; d.crit=crit; d.gen=o.gen||0; d.owner=o.owner||null; d.wid=w.id||''; d.tgt=null; d.ht=0;
+  d.col=crit?SPARK:(S.odT>0?OD_COL:(S.flowT>0&&!o.gen?FLOW_COL:w.colorL)); d.rocket=!!w.rocket; d.aoe=w.aoe||0; d.bounce=A.bounce; d.hits=[]; d.trail=0; d.crit=crit; d.gen=o.gen||0; d.owner=o.owner||null; d.wid=w.id||''; d.tgt=null; d.ht=0; d.homed=false; d.x0=d.x; d.z0=d.z; d.dxz=d.vx/d.vz; d.pin=1; d.cry=crit&&!!o.owner&&o.owner.def.id==='glass'&&S.combos.has('crystal'); d.cp=o.cp||null; d.p0=A.pierce;
 }
 function fireFrom(m,w,A){
   m.g.userData.tip.getWorldPosition(tipV);
   const n=w.bullets+A.extra;
   const spread=w.spread+(n>1?0.07*(n-1):0);
   const base=w.dmg*A.dmg*memberMult(m)*flowK()*odK();
+  const cp=S.combos.has('spike')&&w.id==='shotgun'?'c:spike':w.id==='minigun'&&S.combos.has('leadrain')?'c:leadrain':null;
   const pierce=(S.combos.has('spike')&&w.id==='shotgun')?99:w.id==='shuriken'?A.pierce+2:(w.id==='minigun'&&S.combos.has('leadrain'))?A.pierce+1:undefined;
   // Light close-range aim assist: bend shots up to ~8° toward the nearest enemy within 6 m in this gubbe's lane.
   let aim=0; { const ln=laneOf(tipV.x); let best=null,bz=-1e9; for(const e of enemies){ if(e.dead||e.under||e.type==='boss') continue; const ep=e.g.position; if(ep.z<tipV.z-0.2&&ep.z>tipV.z-6&&laneOf(ep.x)===ln&&ep.z>bz){ bz=ep.z; best=e; } }
     if(best){ const ep=best.g.position; aim=clamp(Math.atan2(ep.x-tipV.x,tipV.z-ep.z),-0.14,0.14)*(m===headMember()?1:0.6); } }
   for(let i=0;i<n;i++){
     let a=(n===1?0:-spread/2+spread*(i/(n-1)))+aim; a+=rand(-w.jitter,w.jitter);
-    spawnBullet({x:tipV.x,y:tipV.y,z:tipV.z,angle:a,w,A,base,gen:0,mult:1,owner:m,pierce});
+    spawnBullet({x:tipV.x,y:tipV.y,z:tipV.z,angle:a,w,A,base,gen:0,mult:1,owner:m,pierce,cp});
   }
   m.recoil=w.rocket?0.25:0.12;
   fxMuzzle(tipV.x,tipV.y,tipV.z,w.colorL);
@@ -151,13 +152,13 @@ function updateBullets(dt){
     const i=al[k],d=bullets.d[i];
     if(homing&&!d.rocket){
       d.ht-=dt; if(d.ht<=0||(d.tgt&&d.tgt.dead)){ d.ht=0.12; d.tgt=homingTarget(d.x,d.z); }
-      if(d.tgt){ const q=d.tgt.g.position,sp=Math.hypot(d.vx,d.vz),a=Math.atan2(d.vx,-d.vz),da=clamp(Math.atan2(q.x-d.x,d.z-q.z)-a,-HOMING_TURN*dt,HOMING_TURN*dt); d.vx=Math.sin(a+da)*sp; d.vz=-Math.cos(a+da)*sp; }
+      if(d.tgt){ const q=d.tgt.g.position,sp=Math.hypot(d.vx,d.vz),a=Math.atan2(d.vx,-d.vz),da=clamp(Math.atan2(q.x-d.x,d.z-q.z)-a,-HOMING_TURN*dt,HOMING_TURN*dt); d.vx=Math.sin(a+da)*sp; d.vz=-Math.cos(a+da)*sp; d.homed=true; }
     }
     if(wind) d.vx+=wind*dt;
     d.x+=d.vx*dt; d.z+=d.vz*dt;
     let dead=false;
     if(Math.abs(d.x)>HALF){
-      if(d.bounce){ d.x=clamp(d.x,-HALF,HALF); d.vx=-d.vx; fxSpark(d.x,d.y,d.z,d.col); if(pinball) d.dmg*=1.3; }
+      if(d.bounce){ d.x=clamp(d.x,-HALF,HALF); d.vx=-d.vx; fxSpark(d.x,d.y,d.z,d.col); if(pinball){ d.dmg*=1.3; d.pin*=1.3; } }
       else if(gutter){ d.x=clamp(d.x,-HALF+0.05,HALF-0.05); if(d.vx!==0){ d.vz=-Math.hypot(d.vx,d.vz); d.vx=0; fxSpark(d.x,d.y,d.z,GOLD); } }
       else if(Math.abs(d.x)>HALF+1.5) dead=true;
     }
@@ -183,7 +184,10 @@ function updateBullets(dt){
           if(e.type==='crawler'&&p.z<-8&&!d.rocket&&d.pierce<=0&&Math.random()<0.5){ d.hits.push(e); continue; }
           if(d.rocket){ explodeAt(d.x,d.y,d.z,d.aoe,d.dmg,d.base,false,d.owner,0); dead=true; break; }
           const tier=dmgTier(d.dmg/d.base,d.crit);
-          d.hits.push(e); hitEnemy(e,d.dmg,d.crit,tier,d.owner,d.gen>0); fxHit(d.x,d.y,d.z,e.colorL); fxDamage(d.x,d.y,d.z,tier); sfx.hit();
+          // credit the hit: ricochet children, hits only reached by homing or by a combo's extra pierce go to that perk or combo
+          dmgSrc=d.gen>0?'p:ricochet':d.cp&&d.hits.length>d.p0?d.cp:d.homed&&Math.abs(d.x0+d.dxz*(p.z-d.z0)-p.x)>rr?'c:homing':null;
+          hitBoost=d.pin>1||d.cry?[{key:'c:pinball',k:d.pin},{key:'c:crystal',k:d.cry?1.5:1}]:null;
+          d.hits.push(e); hitEnemy(e,d.dmg,d.crit,tier,d.owner,d.gen>0); dmgSrc=null; hitBoost=null; fxHit(d.x,d.y,d.z,e.colorL); fxDamage(d.x,d.y,d.z,tier); sfx.hit();
           if(!e.dead) onHitEffects(e,d);
           if(S.T.ricochet&&d.gen<1){
             const w={id:d.wid,speed:Math.hypot(d.vx,d.vz),size:d.size/(A.bullet||1)/(d.crit?1.4:1),colorL:d.col,rocket:false,aoe:0};
@@ -219,7 +223,7 @@ function updateEnemyBullets(dt){
   al.length=n; ebullets.flush();
 }
 function updateDelayed(dt){
-  for(let i=delayed.length-1;i>=0;i--){ const q=delayed[i]; q.t-=dt; q.z+=scroll*dt; if(q.t<=0){ delayed.splice(i,1); explodeAt(q.x,0.6,q.z,q.radius,q.dmg,q.base,false,q.owner,1); } }
+  for(let i=delayed.length-1;i>=0;i--){ const q=delayed[i]; q.t-=dt; q.z+=scroll*dt; if(q.t<=0){ delayed.splice(i,1); dmgSrc='c:rain'; explodeAt(q.x,0.6,q.z,q.radius,q.dmg,q.base,false,q.owner,1); dmgSrc=null; } }
 }
 function die(){
   unlockMouse();
@@ -238,5 +242,29 @@ function showOver(){
   $('odist').textContent=fmt(dist); $('okills').textContent=fmt(kills); $('obest').textContent=fmt(best);
   const hx=$('oherox'); hx.hidden=!(OPT.heroprog&&lastHeroGain.gain>0); hx.textContent='+'+fmt(lastHeroGain.gain)+' hjälte-XP'+(lastHeroGain.ups?' · Hjältenivå '+HERO.lvl+'! +'+lastHeroGain.ups+' talangpoäng':'');
   $('ocoins').textContent=labRun?'Labbrunda – inga mynt eller rekord':(OPT.coins?'+'+fmt(coinsRun)+' mynt · totalt '+fmt(bank):'');
-  overEl.hidden=false;
+  renderRunSummary(); renderOverUpgrades();
+  overEl.hidden=false; overEl.scrollTop=0;
+}
+// Game over: damage per gubbe, team perk, combo and ability this run, biggest first, with a bar for each one's share.
+function renderRunSummary(){
+  const rows=runSummary(),total=rows.reduce((a,r)=>a+r.dmg,0),box=$('o-summary'); box.innerHTML='';
+  $('o-total').textContent='Total skada '+fmt(total);
+  rows.forEach(r=>{
+    const row=document.createElement('div'); row.className='row sum';
+    const nm=document.createElement('div'); nm.className='nm'; nm.textContent=r.name;
+    const sm=document.createElement('small'); sm.textContent=r.kind+(r.dmg<1&&r.desc?' · '+r.desc:''); nm.appendChild(sm);
+    const v=document.createElement('div'); v.className='dmgv';
+    const b=document.createElement('b'); b.textContent=r.dmg>=1?fmt(r.dmg):'–';
+    const pc=document.createElement('small'); pc.textContent=r.dmg>=1&&total>0?Math.round(100*r.dmg/total)+' %':'';
+    v.append(b,pc);
+    const bar=document.createElement('i'); bar.style.width=(total>0?100*r.dmg/total:0).toFixed(1)+'%';
+    row.append(nm,v,bar); box.appendChild(row);
+  });
+}
+// Game over: spend talent points (or banked coins) on the hero before the next round.
+function renderOverUpgrades(){
+  const on=OPT.heroprog; $('o-up').hidden=!on; if(!on) return;
+  const free=heroFree();
+  $('o-up-info').textContent=free>0?free+' talangpoäng att fördela. Det gäller från nästa runda.':OPT.coins?'Köp talangpoäng med mynt. Nästa kostar '+fmt(TALENT_COST(HERO.bought||0))+' · du har '+fmt(bank)+'.':'Du får talangpoäng när hjälten går upp i nivå.';
+  renderTalents($('o-talents'),renderOverUpgrades);
 }

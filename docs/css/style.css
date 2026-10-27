@@ -67,7 +67,7 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 #toast.boss{color:var(--coral)}
 #flash{position:fixed;inset:0;background:var(--coral);opacity:0;pointer-events:none;transition:opacity .4s}
 #flash.on{opacity:.45;transition:none}
-#pause,#shop{background:rgba(13,16,48,.86)}
+#pause,#shop,#over{background:rgba(13,16,48,.86)}
 #flash2{position:fixed;inset:0;background:#f4f8ff;opacity:0;pointer-events:none;transition:opacity .5s}
 #flash2.on{opacity:.75;transition:none}
 .chip.weather{background:var(--sky)}
@@ -177,3 +177,14 @@ select{font-family:var(--font-body);font-weight:800;font-size:14px;background:va
 #tut-off:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
 @keyframes tutin{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 @media (prefers-reduced-motion:reduce){ #tut{animation:none} }
+
+/* Game over: damage summary (a bar under each row shows its share) and talent upgrades */
+.row.sum{position:relative;overflow:hidden;padding-bottom:11px}
+.row.sum i{position:absolute;left:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--accent),var(--coral));border-radius:0 2px 2px 0}
+.dmgv{text-align:right;font-variant-numeric:tabular-nums}
+.dmgv b{display:block;font-family:var(--font-display);font-size:15px;color:var(--accent)}
+.dmgv small{font-size:11px;color:var(--muted)}
+.sumtotal{align-self:flex-start;margin-top:-8px}
+#o-up h3.sh{margin-top:8px}
+#o-up .sub{align-self:flex-start;text-align:left;max-width:none}
+.cnt button.buy{width:auto;border-radius:999px;padding:0 10px;font-size:12px;background:var(--gold);white-space:nowrap}

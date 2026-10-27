@@ -229,8 +229,8 @@ function breakShield(e){
 function hitEnemy(e,dmg,crit,tier,owner,heavy){
   if(e.dead||e.under) return;
   if(e.shieldHp>0){ e.shieldHp-=dmg*(heavy?2.5:1); dmg*=0.3; const f=Math.max(0,e.shieldHp/(e.maxHp*0.9)); e.u.sfg.scale.x=Math.max(0.001,f); e.u.sfg.position.x=-0.38*(1-f); if(e.shieldHp<=0) breakShield(e); }
-  if(owner) owner.dealt+=dmg;
   if(S.odT>0&&e.type==='boss') dmg*=2/3;
+  creditDamage(dmg,owner);
   e.hp-=dmg; e.flash=0.08;
   const mass=e.type==='boss'?0.05:(e.type==='tank'||e.type==='charger')?0.25:(e.type==='bloater'||e.type==='knight')?0.6:(e.type==='swarm'||e.type==='bats'||e.type==='crawler')?1.6:1;
   const push=(0.25+0.6*Math.min(1,dmg/Math.max(1,e.maxHp*0.5)))*(crit?1.8:1)*mass*S.T.kb;
@@ -247,7 +247,7 @@ function chainFrom(e,dmg,owner){
   if(!best) return;
   const q=best.g.position;
   zapFx(p.x,p.y+e.r*0.8,p.z,q.x,q.y+best.r*0.8,q.z); sfx.zap();
-  hitEnemy(best,dmg*0.5,false,4,owner); fxDamage(q.x,q.y+best.r*0.8,q.z+best.r*0.5,4);
+  const was=dmgSrc; dmgSrc='c:chain'; hitEnemy(best,dmg*0.5,false,4,owner); dmgSrc=was; fxDamage(q.x,q.y+best.r*0.8,q.z+best.r*0.5,4);
 }
 function shockRing(src){
   const p=src.g.position;
@@ -266,7 +266,7 @@ function explodeAt(x,y,z,radius,dmg,base,hurtPlayer,owner,depth){
   fxExplosion(x,y,z,radius/1.7,FIRE1);
   sfx.explode(1.4); shake(0.4);
   const napalm=S.combos.has('napalm');
-  for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position,dx=p.x-x,dz=p.z-z,rr=radius+e.r; if(dx*dx+dz*dz<rr*rr){ const dv=dmg*varyDmg(0.8,1.2),tier=dmgTier(dv/base,false); hitEnemy(e,dv,false,tier,owner,true); fxDamage(p.x,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(napalm&&!e.dead){ e.burn=3; e.burnDps=Math.max(e.burnDps,dmg*0.15); e.burnOwner=owner; } } }
+  for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position,dx=p.x-x,dz=p.z-z,rr=radius+e.r; if(dx*dx+dz*dz<rr*rr){ const dv=dmg*varyDmg(0.8,1.2),tier=dmgTier(dv/base,false); hitEnemy(e,dv,false,tier,owner,true); fxDamage(p.x,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(napalm&&!e.dead){ e.burn=3; e.burnDps=Math.max(e.burnDps,dmg*0.15); e.burnOwner=owner; e.burnSrc='c:napalm'; } } }
   for(const wl of walls){ const wp=wl.g.position; if(!wl.dead&&Math.abs(wp.z-z)<radius+0.3&&Math.abs(wp.x-x)<radius+1.8) hitWall(wl,dmg,wp.x,1.15,wp.z+0.3,false,1); }
   if(hurtPlayer) blastSquad(x,z,radius,20*DIFF.dmg);
   if(!depth&&S.combos.has('rain')){ for(let i=0;i<3;i++) delayed.push({t:0.35+i*0.12,x:clamp(x+rand(-2.5,2.5),-HALF,HALF),z:z+rand(-2.5,2.5),radius:radius*0.7,dmg:dmg*0.5,base,owner}); }
@@ -403,7 +403,7 @@ function updateEnemies(dt){
     }
     if(e.burn>0){
       e.burn-=dt; const bd=e.burnDps*dt;
-      e.hp-=bd; e.accDmg+=bd; e.accTier=Math.max(e.accTier,2); if(e.accT<0) e.accT=0; if(e.burnOwner) e.burnOwner.dealt+=bd;
+      e.hp-=bd; e.accDmg+=bd; e.accTier=Math.max(e.accTier,2); if(e.accT<0) e.accT=0; if(e.burnOwner) e.burnOwner.dealt+=bd; credit(e.burnSrc||'c:burn',bd);
       e.burnFx-=dt; if(e.burnFx<=0){ e.burnFx=0.09; fxFlame(p.x,p.y+e.r*0.9,p.z); }
       if(e.hp<=0){ flushEnemyDmg(e); killEnemy(e,true); continue; }
     }

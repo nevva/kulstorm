@@ -22,7 +22,7 @@ function startGame(cfg){
   sfx.init(); sfx.resume(); music.ensure(); music.reset();
   pauseEl.hidden=true;
   clearRun();
-  S=freshState(); dist=cfg.dist||0; kills=0; coinsRun=0; spawnT=1.8; bossNo=Math.floor(dist/600); nextBossAt=(bossNo+1)*600; nextUpgradeAt=dist+100; upgradeStep=160; if(cfg.bossNow) nextBossAt=dist+3; zoneDistNext=Math.floor(dist/400+1)*400; deadT=0; overShown=false; shakeAmt=0;
+  S=freshState(); runReset(); dist=cfg.dist||0; kills=0; coinsRun=0; spawnT=1.8; bossNo=Math.floor(dist/600); nextBossAt=(bossNo+1)*600; nextUpgradeAt=dist+100; upgradeStep=160; if(cfg.bossNow) nextBossAt=dist+3; zoneDistNext=Math.floor(dist/400+1)*400; deadT=0; overShown=false; shakeAmt=0;
   hudDist=hudHp=hudKills=hudShield=hudCoins=-1;
   VIEW.scale=1; VIEW.fogNear=44; VIEW.fogFar=96; VIEW.spawn=-78; resize();
   applyCurve();

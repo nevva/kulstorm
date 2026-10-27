@@ -74,7 +74,7 @@ function addMember(def){
   const g=buildGubbe(def); scene.add(g);
   const hp=(def.hp||60)+(def.id==='leader'?0:S.T.hpBonus);
   const m={def,g,hp,maxHp:hp,cd:rand(0,0.3),phase:rand(0,6.3),recoil:0,beams:[],laserTick:rand(0,0.1),invuln:0,charges:def.id==='shield'?3:0,rt:0,hurtT:0,slot:FORM[0],dead:false,chip:null,chipTxt:'',dealt:0,lvl:1,jumpT:0,duckT:0,jumpDelay:-1,duckDelay:-1,jy:0,vy:0,dbUsed:false,flip:0};
-  squad.push(m);
+  squad.push(m); runAddMember(m);
   if(def.id==='tank'&&OPT.front){ S.frontM=m; hudFront=null; }
   layoutSquad();
   const last=squad.length>1?squad[squad.length-2].g.position:null;
@@ -99,6 +99,7 @@ function recomputeAuras(){
   if(OPT.combos) for(const c of COMBOS) if(hasPart(c.a)&&hasPart(c.b)) S.combos.add(c.id);
   if(S.combos.has('fieldhosp')) A.regen+=2*squad.filter(m=>m.def.id==='medic').length;
   if(S.combos.has('hawk')) A.crit=Math.min(0.75,A.crit+0.1);
+  S.boosts=runBoosts(A); if(mode==='playing') S.combos.forEach(c=>RUN.combos.add(c));
   if(mode==='playing') for(const c of COMBOS) if(S.combos.has(c.id)&&!prev.has(c.id)){ toast('KOMBO: '+c.name+'!'); sfx.combo(); }
   rebuildChips();
 }

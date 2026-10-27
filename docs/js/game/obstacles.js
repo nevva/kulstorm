@@ -33,7 +33,7 @@ function groundPound(m){
     const q=e.g.position,d=Math.hypot(q.x-p.x,q.z-p.z);
     if(d<POUND_R+e.r){
       const k=1-0.5*Math.min(1,d/POUND_R),dv=e.type==='boss'?e.maxHp*0.04:Math.min(e.maxHp*0.7,35*DIFF.hp*PF)*k;
-      hitEnemy(e,dv,false,3,m,true);
+      dmgSrc='a:pound'; hitEnemy(e,dv,false,3,m,true); dmgSrc=null;
       if(e.type!=='boss'&&e.type!=='tank'&&e.type!=='charger') e.kb=Math.min(4,(e.kb||0)+2.2*k);
       e.sq=Math.max(e.sq||0,0.8);
     } else if(d<POUND_PULL&&e.type!=='boss') e.pull=1.2;

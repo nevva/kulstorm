@@ -29,6 +29,7 @@ const FILES=[
   'audio/music.js',
   'game/units.js',
   'game/state.js',
+  'game/stats.js',
   'game/squad.js',
   'game/enemies.js',
   'game/pickups.js',
