@@ -39,7 +39,7 @@ function tutCheck(){
       if(o.type==='tall'&&tutWants('tall')&&dz<sp*0.75) return tutShow('tall');
     }
     if(tutSeen.jump&&tutWants('pound')&&dist>tutD0+40&&!obstacles.some(o=>o.z>hp.z-14&&o.z<hp.z+1)){
-      for(const e of enemies){ if(e.dead||e.under||e.type==='boss') continue; const q=e.g.position; if(q.z<hp.z&&Math.hypot(q.x-hp.x,q.z-hp.z)<POUND_R+1) return tutShow('pound'); }
+      for(const e of enemies){ if(e.dead||e.under||e.isBoss) continue; const q=e.g.position; if(q.z<hp.z&&Math.hypot(q.x-hp.x,q.z-hp.z)<POUND_R+1) return tutShow('pound'); }
     }
   }
   if(tutWants('wall')&&walls.some(w=>!w.dead&&w.g.position.z>-22)) return tutShow('wall');

@@ -32,11 +32,11 @@ function groundPound(m){
     if(e.dead||e.under) continue;
     const q=e.g.position,d=Math.hypot(q.x-p.x,q.z-p.z);
     if(d<POUND_R+e.r){
-      const k=1-0.5*Math.min(1,d/POUND_R),dv=e.type==='boss'?e.maxHp*0.04:Math.min(e.maxHp*0.7,35*DIFF.hp*PF)*k;
+      const k=1-0.5*Math.min(1,d/POUND_R),dv=e.isBoss?e.maxHp*0.04:Math.min(e.maxHp*0.7,35*DIFF.hp*PF)*k;
       dmgSrc='a:pound'; hitEnemy(e,dv,false,3,m,true); dmgSrc=null;
-      if(e.type!=='boss'&&e.type!=='tank'&&e.type!=='charger') e.kb=Math.min(4,(e.kb||0)+2.2*k);
+      if(!e.isBoss&&e.type!=='tank'&&e.type!=='charger') e.kb=Math.min(4,(e.kb||0)+2.2*k);
       e.sq=Math.max(e.sq||0,0.8);
-    } else if(d<POUND_PULL&&e.type!=='boss') e.pull=1.2;
+    } else if(d<POUND_PULL&&!e.isBoss) e.pull=1.2;
   }
   for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; chunks.spawn(p.x,0.3,p.z,Math.cos(a)*10,0.8,Math.sin(a)*10,0.4,0.22,0.05,C(0xfff3c4),C(0xffd21f),C(0xffb74d),2,1.5,false,rand(4,10)); }
   poundRing.position.set(p.x,0.15,p.z); poundRing.visible=true; poundT=0;
@@ -118,7 +118,7 @@ function addOD(x){ if(!OPT.overdrive||mode!=='playing'||S.odT>0||S.odLock>0) ret
 function triggerOD(force){
   if(!OPT.overdrive||mode!=='playing'||S.odT>0||(S.od<1&&!force)) return;
   S.od=0; S.odT=OD_T; S.odUsed=true; tutAct('od'); sfx.odStart(); shake(1.2); toast(force?'NÖD-OVERDRIVE!':'OVERDRIVE!',!!force);
-  for(const e of enemies){ if(e.dead||e.type==='boss'||e.under) continue; if(e.g.position.z>-22){ e.kb=Math.min(4,(e.kb||0)+2.6); e.stun=1; e.sq=1; } }
+  for(const e of enemies){ if(e.dead||e.isBoss||e.under) continue; if(e.g.position.z>-22){ e.kb=Math.min(4,(e.kb||0)+2.6); e.stun=1; e.sq=1; } }
   const p=headMember().g.position; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; chunks.spawn(p.x,0.6,p.z-0.5,Math.cos(a)*9,rand(1,3),Math.sin(a)*9-3,0.6,0.3,0.08,C(0xffe066),C(0xffc23d),C(0xff8a3d),4,1.2,false,rand(4,10)); }
 }
 const odK=()=>S.odT>0?3:1, odRate=()=>S.odT>0?2:1;

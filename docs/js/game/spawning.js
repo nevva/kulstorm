@@ -15,7 +15,7 @@ function pickType(){
 // Pacing: waves of ~20 s with 4 s breathers, extra pauses after bosses and when a shop appears, and a cap on enemies alive.
 let waveClock=0,spawnPause=0;
 const enemyCap=()=>Math.round(Math.min(30,10+dist/150));
-const aliveCount=()=>{ let n=0; for(const e of enemies) if(!e.dead&&e.type!=='boss') n++; return n; };
+const aliveCount=()=>{ let n=0; for(const e of enemies) if(!e.dead&&!e.isBoss) n++; return n; };
 function spawner(dt){
   const prevWave=Math.floor(waveClock/24); waveClock+=dt;
   if(Math.floor(waveClock/24)>prevWave&&OPT.unicorns&&unicorns.length<2&&!wildUni.active&&dist>200&&Math.random()<0.02) startWildUnicorn();
@@ -51,12 +51,13 @@ function checkEvents(){
   if(dist>=nextUpgradeAt){ nextUpgradeAt+=upgradeStep; upgradeStep+=25; spawnRandomWalls(); }
   if(dist>=nextBossAt&&!boss){
     nextBossAt+=600; bossNo++;
-    boss=spawnEnemy('boss',1,VIEW.spawn); boss.maxHp=boss.hp=300*DIFF.hp*(1+0.35*bossNo)*PF;
-    bossNameEl.textContent='BOSS '+bossNo; bossBar.hidden=false;
-    toast('BOSS!',true); sfx.boss(); shake(0.6);
+    const bt=pickBoss();
+    boss=spawnEnemy(bt,1,VIEW.spawn); boss.maxHp=boss.hp=300*ENEMY[bt].hpK*DIFF.hp*(1+0.35*bossNo)*PF;
+    bossNameEl.textContent='BOSS '+bossNo+' · '+BOSS_NAMES[bt]; bossBar.hidden=false;
+    toast(BOSS_NAMES[bt]+'!',true); sfx.boss(); shake(0.6);
   }
 }
 function bossDefeated(){
-  bossBar.hidden=true; spawnPause=Math.max(spawnPause,5); toast('Boss besegrad!'); shake(0.8); kills+=10;
+  bossBar.hidden=true; clearBossFx(); spawnPause=Math.max(spawnPause,5); toast('Boss besegrad!'); shake(0.8); kills+=10;
   setTimeout(()=>{ if(mode==='playing') spawnWalls([0,1,2],true); },300);
 }

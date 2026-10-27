@@ -167,7 +167,7 @@ function renderTalents(box,redraw){
 $('close-shop').addEventListener('click',()=>showMenu('main'));
 $('close-lab').addEventListener('click',()=>showMenu('main'));
 $('close-opts').addEventListener('click',()=>showMenu('main'));
-$('lab-boss').addEventListener('click',()=>{ const extras=[]; for(const k in lab.counts) for(let i=0;i<lab.counts[k];i++) extras.push(k); startGame({hero:lab.hero,extras,perks:Object.keys(lab.perks).filter(k=>lab.perks[k]),dist:lab.dist,lab:true,off:Object.keys(lab.off).filter(k=>lab.off[k]),weather:lab.weather||null,tod:lab.tod?+lab.tod:null,bossNow:true}); });
+$('lab-boss').addEventListener('click',()=>{ const extras=[]; for(const k in lab.counts) for(let i=0;i<lab.counts[k];i++) extras.push(k); startGame({hero:lab.hero,extras,perks:Object.keys(lab.perks).filter(k=>lab.perks[k]),dist:lab.dist,lab:true,off:Object.keys(lab.off).filter(k=>lab.off[k]),weather:lab.weather||null,tod:lab.tod?+lab.tod:null,bossNow:true,bossType:$('lab-bosstype').value||null}); });
 $('lab-clear').addEventListener('click',()=>{ lab.counts={}; lab.perks={}; renderLab(); });
 $('lab-start').addEventListener('click',()=>{
   const extras=[]; for(const k in lab.counts) for(let i=0;i<lab.counts[k];i++) extras.push(k);

@@ -1,7 +1,7 @@
 'use strict';
 // Enemy stats: hp, speed, radius r, contact dmg, unlock distance (m), spawn weight w. Looks are built in js/game/enemies.js.
 // Pure data: no three.js, DOM or game state. Carry these over as-is when porting to another engine.
-const SMALL_E=new Set(['crawler','swarm','bats','mole']);
+const SMALL_E=new Set(['crawler','swarm','bats','mole','spiderling']);
 const ENEMY_NAMES={blob:'Blob',runner:'Löpare',swarm:'Svärm',shooter:'Skytt',bomber:'Bombare',tank:'Tank',wolf:'Varg',bats:'Fladdermöss',ghost:'Spöke',shambler:'Zombie',crawler:'Krypande zombie',bloater:'Pösig zombie',knight:'Sköldriddare',splitter:'Delare',mole:'Mullvad',necro:'Nekromantiker',charger:'Noshörning'};
 const ENEMY={
   shambler:{hp:22,speed:1.3,r:0.5,dmg:10,unlock:120,w:4,group:[3,5],loose:true,zombie:true},
@@ -21,5 +21,12 @@ const ENEMY={
   shooter:{hp:30,speed:1.4,r:0.6,dmg:12,unlock:320,w:4},
   bomber:{hp:18,speed:3.3,r:0.55,dmg:30,unlock:450,w:3},
   tank:{hp:120,speed:0.9,r:1.1,dmg:30,unlock:600,w:3},
-  boss:{hp:300,speed:0,r:2.1,dmg:0,unlock:1e9,w:0},
+  spiderling:{hp:8,speed:3.2,r:0.4,dmg:5,unlock:1e9,w:0},  // only hatched by the spider queen
+  // Bosses (boss:true): one every 600 m, hp is 300 × hpK, scaled by difficulty and boss number when spawned.
+  boss:{hp:300,speed:0,r:2.1,dmg:0,unlock:1e9,w:0,boss:true,hpK:1},
+  snake:{hp:300,speed:0,r:1.4,dmg:0,unlock:1e9,w:0,boss:true,hpK:0.9},
+  hydra:{hp:300,speed:0,r:2.4,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.2},
+  spider:{hp:300,speed:0,r:1.9,dmg:0,unlock:1e9,w:0,boss:true,hpK:0.95},
+  golem:{hp:300,speed:0,r:2.2,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.3},
 };
+const BOSS_NAMES={boss:'Trollkungen',snake:'Jätteormen',hydra:'Trehövdade draken',spider:'Spindeldrottningen',golem:'Stengolemen'};

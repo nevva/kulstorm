@@ -32,6 +32,7 @@ const FILES=[
   'game/stats.js',
   'game/squad.js',
   'game/enemies.js',
+  'game/bosses.js',
   'game/pickups.js',
   'game/walls.js',
   'game/weather.js',

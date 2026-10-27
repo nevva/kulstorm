@@ -9,7 +9,7 @@ function clearRun(){
   coins.forEach(c=>{ scene.remove(c.g); coinPool.push(c.g); }); coins=[];
   walls.forEach(w=>{ if(!w.dead) removeWall(w); }); walls=[];
   zaps.forEach(z=>{ z.t=0; z.m.visible=false; });
-  clearWeatherFx(); clearObstacles(); clearXp(); clearUnicorns(); shopEl.hidden=true; document.body.classList.remove('od-on');
+  clearWeatherFx(); clearObstacles(); clearXp(); clearUnicorns(); clearBossFx(); shopEl.hidden=true; document.body.classList.remove('od-on');
   puddles.forEach(q=>scene.remove(q.m)); puddles.length=0; pendSpawn.length=0;
   clearDmg(); clearSquad(); clearShards(); poundRing.visible=false; tutStart();
   shieldRing.visible=false; frontMarker.visible=false; bossBar.hidden=true;
@@ -22,7 +22,7 @@ function startGame(cfg){
   sfx.init(); sfx.resume(); music.ensure(); music.reset();
   pauseEl.hidden=true;
   clearRun();
-  S=freshState(); runReset(); dist=cfg.dist||0; kills=0; coinsRun=0; spawnT=1.8; bossNo=Math.floor(dist/600); nextBossAt=(bossNo+1)*600; nextUpgradeAt=dist+100; upgradeStep=160; if(cfg.bossNow) nextBossAt=dist+3; zoneDistNext=Math.floor(dist/400+1)*400; deadT=0; overShown=false; shakeAmt=0;
+  S=freshState(); runReset(); dist=cfg.dist||0; kills=0; coinsRun=0; spawnT=1.8; bossNo=Math.floor(dist/600); nextBossAt=(bossNo+1)*600; nextUpgradeAt=dist+100; upgradeStep=160; if(cfg.bossNow) nextBossAt=dist+3; bossForce=cfg.bossType||null; lastBoss=null; zoneDistNext=Math.floor(dist/400+1)*400; deadT=0; overShown=false; shakeAmt=0;
   hudDist=hudHp=hudKills=hudShield=hudCoins=-1;
   VIEW.scale=1; VIEW.fogNear=44; VIEW.fogFar=96; VIEW.spawn=-78; resize();
   applyCurve();
@@ -72,7 +72,7 @@ function update(dt){
   updateWorld(dt); updateWalls(dt);
   if(mode==='playing'){ updatePlayer(dt); updateSquad(dt); updateFire(dt); updateDelayed(dt); }
   else if(mode==='menu'){ S.x=0; updateSquad(dt); }
-  updateBullets(dt); updateEnemies(dt); updateEnemyBullets(dt); updateHearts(dt); updateCoins(dt); updateZaps(dt); updateWeather(dt); updateObstacles(dt); updateXp(dt); updateUnicorns(dt); if(mode==='playing') updateOD(dt); updatePound(dt);
+  updateBullets(dt); updateEnemies(dt); updateEnemyBullets(dt); updateHearts(dt); updateCoins(dt); updateZaps(dt); updateWeather(dt); updateObstacles(dt); updateXp(dt); updateUnicorns(dt); updateBossFx(dt); if(mode==='playing') updateOD(dt); updatePound(dt);
   blobs.update(dt,scroll); chunks.update(dt,scroll); updateShards(dt);
   updateCamera(dt); updateSky(dt); updateColors(dt);
   if(mode==='playing') updateHUD();

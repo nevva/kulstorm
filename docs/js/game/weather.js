@@ -99,7 +99,7 @@ function strikeLane(lane,cloud){
     fxExplosion(lx+rand(-1,1),0.4,z,1.1,CYAN);
   }
   if(cloud){ cloud.state='out'; cloud.glow=2; }
-  for(const e of enemies){ if(e.dead) continue; const p=e.g.position; if((e.type==='boss'?laneOf(p.x):e.lane)===lane&&p.z>-30){ const dv=(e.type==='boss'?0.08:0.45)*e.maxHp; hitEnemy(e,dv,false,3,null); fxDamage(p.x,p.y+e.r,p.z,3); } }
+  for(const e of enemies){ if(e.dead) continue; const p=e.g.position; if((e.isBoss?laneOf(p.x):e.lane)===lane&&p.z>-30){ const dv=(e.isBoss?0.08:0.45)*e.maxHp; hitEnemy(e,dv,false,3,null); fxDamage(p.x,p.y+e.r,p.z,3); } }
   for(const wl of walls){ if(!wl.dead&&wl.lane===lane&&wl.g.position.z>-30) hitWall(wl,wl.maxHp*0.3,wl.g.position.x,1.2,wl.g.position.z,false,3); }
   if(mode==='playing') for(const m of squad.slice()){ if(laneOf(m.g.position.x)===lane) hurtMember(m,18*DIFF.dmg,true); }
   flash2.classList.add('on'); setTimeout(()=>flash2.classList.remove('on'),70);

@@ -128,7 +128,7 @@ function fireFrom(m,w,A){
   const cp=S.combos.has('spike')&&w.id==='shotgun'?'c:spike':w.id==='minigun'&&S.combos.has('leadrain')?'c:leadrain':null;
   const pierce=(S.combos.has('spike')&&w.id==='shotgun')?99:w.id==='shuriken'?A.pierce+2:(w.id==='minigun'&&S.combos.has('leadrain'))?A.pierce+1:undefined;
   // Light close-range aim assist: bend shots up to ~8° toward the nearest enemy within 6 m in this gubbe's lane.
-  let aim=0; { const ln=laneOf(tipV.x); let best=null,bz=-1e9; for(const e of enemies){ if(e.dead||e.under||e.type==='boss') continue; const ep=e.g.position; if(ep.z<tipV.z-0.2&&ep.z>tipV.z-6&&laneOf(ep.x)===ln&&ep.z>bz){ bz=ep.z; best=e; } }
+  let aim=0; { const ln=laneOf(tipV.x); let best=null,bz=-1e9; for(const e of enemies){ if(e.dead||e.under||e.isBoss) continue; const ep=e.g.position; if(ep.z<tipV.z-0.2&&ep.z>tipV.z-6&&laneOf(ep.x)===ln&&ep.z>bz){ bz=ep.z; best=e; } }
     if(best){ const ep=best.g.position; aim=clamp(Math.atan2(ep.x-tipV.x,tipV.z-ep.z),-0.14,0.14)*(m===headMember()?1:0.6); } }
   for(let i=0;i<n;i++){
     let a=(n===1?0:-spread/2+spread*(i/(n-1)))+aim; a+=rand(-w.jitter,w.jitter);
