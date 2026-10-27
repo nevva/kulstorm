@@ -32,7 +32,7 @@ function renderShop(){
     else if(joins){
       // The button is the start-group checkbox; making this gubbe the leader is the small link under it.
       const on=benched.indexOf(h.id)<0;
-      b.textContent=on?'✓ I startgruppen':'Inte med'; b.className='own toggle'+(on?' on':''); b.setAttribute('role','checkbox'); b.setAttribute('aria-checked',String(on));
+      b.textContent=on?'✓ I gruppen':'Lägg till'; b.className='own toggle'+(on?' on':''); b.setAttribute('role','checkbox'); b.setAttribute('aria-checked',String(on));
       b.addEventListener('click',()=>{ benched=benched.filter(x=>x!==h.id); if(on) benched.push(h.id); saveBank(); sfx.init(); sfx.pickup(); renderShop(); });
     }
     else if(own){ b.textContent='Välj'; b.className='own'; b.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); }
