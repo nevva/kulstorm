@@ -163,6 +163,9 @@ $('lab-start').addEventListener('click',()=>{
   const perks=Object.keys(lab.perks).filter(k=>lab.perks[k]);
   startGame({hero:lab.hero,extras,perks,dist:lab.dist,lab:true,odFull:$('lab-odfull').checked,off:Object.keys(lab.off).filter(k=>lab.off[k]),weather:lab.weather||null,tod:lab.tod?+lab.tod:null,moon:lab.moon!==undefined&&lab.moon!==''?+lab.moon:null});
 });
+$('reset-tut').addEventListener('click',()=>{
+  const b=$('reset-tut'); tutReset(); OPT.tutorial=true; saveOpts(); renderOpts(); b.textContent='Guiden visas igen'; setTimeout(()=>{ b.textContent='Visa guiden igen'; },1500);
+});
 $('reset-save').addEventListener('click',()=>{
   const b=$('reset-save');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent='Tryck igen för att nollställa'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='Nollställ mynt och köp'; },3000); return; }

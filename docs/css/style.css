@@ -164,3 +164,16 @@ select{font-family:var(--font-body);font-weight:800;font-size:14px;background:va
 @media (prefers-reduced-motion:reduce){
   .btn,#toast,#hint{transition:none}
 }
+
+/* Tutorial card: the game is frozen behind it until the player does what it asks (or taps it, which does the same) */
+#tut{position:absolute;left:50%;top:24%;transform:translateX(-50%);width:min(340px,calc(100% - 32px));box-sizing:border-box;pointer-events:auto;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 16px 10px;text-align:center;background:rgba(13,16,48,.92);
+  border:3px solid var(--accent);border-radius:18px;box-shadow:0 0 0 4px rgba(13,16,48,.5),0 12px 30px rgba(0,0,0,.45);animation:tutin .25s ease-out}
+#tut-title{font-family:var(--font-display);font-size:24px;font-weight:400;line-height:1.05;color:var(--accent);text-shadow:0 2px 0 var(--accent-deep)}
+#tut-how{font-weight:800;font-size:14px;color:var(--ink);background:var(--paper);border-radius:999px;padding:5px 12px}
+#tut-text{margin:0;font-size:13px;line-height:1.4;color:var(--paper);text-wrap:pretty}
+#tut-foot{font-size:11px;color:var(--muted)}
+#tut-off{font:inherit;font-size:11px;font-weight:800;color:var(--muted);background:none;border:0;padding:4px 8px;cursor:pointer;text-decoration:underline}
+#tut-off:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+@keyframes tutin{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+@media (prefers-reduced-motion:reduce){ #tut{animation:none} }

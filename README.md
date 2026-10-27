@@ -5,10 +5,10 @@ A lane-runner shooter built with three.js, served from `docs/` by GitHub Pages. 
 ## Run locally
 
 ```
-python3 -m http.server 8000 -d docs
+node dev.js          # or node dev.js 3000
 ```
 
-Then open http://localhost:8000 (in a Codespace, use the forwarded port).
+Then open http://localhost:8000 (in a Codespace, use the forwarded port). The page reloads whenever a file under `docs/` changes, and nothing is cached. Without Node, `python3 -m http.server 8000 -d docs` serves the same files without the reload.
 
 ## Release
 
@@ -26,7 +26,7 @@ docs/
   css/style.css
   js/version.js     version number and update check
   js/main.js        loads the files below, in order
-  js/data/          pure data: weapons, upgrades, heroes, enemy stats, zones, weather, options
+  js/data/          pure data: weapons, upgrades, combos, heroes, enemy stats, zones, weather, options, music genres, tutorial texts
   js/core/          helpers, DOM lookups, saved settings
   js/render/        three.js: renderer, materials, sky, world, particles, projectiles
   js/audio/         WebAudio sound effects and generated music

@@ -55,6 +55,15 @@ const COMBOS=[
   {id:'spike',name:'Spikvägg',a:'shotgun',b:'pierce',desc:'Haglet går igenom allt'},
   {id:'frost',name:'Frostkulor',a:'smg',b:'speed',desc:'K-pistens träffar saktar ner fienderna'},
   {id:'recharge',name:'Återladdning',a:'shield',b:'medic',desc:'Sköldarna laddar om en laddning var 12:e sekund'},
+  {id:'homing',name:'Målsökare',a:'steel',b:'magnet',desc:'Kulorna svänger mot närmaste fiende framför dem'},
+  {id:'napalm',name:'Napalm',a:'rocket',b:'fastload',desc:'Explosionerna sätter fienderna i brand'},
+  {id:'goldrush',name:'Guldregn',a:'banker',b:'magnet',desc:'Fienderna släpper dubbelt så många mynt'},
+  {id:'fortress',name:'Bergvägg',a:'tank',b:'armor',desc:'Tanken tar bara halva skadan'},
+  {id:'crystal',name:'Kristallkanon',a:'glass',b:'crit',desc:'Glaskanonens kritiska träffar gör tredubbel skada i stället för dubbel'},
+  {id:'pinball',name:'Flipper',a:'bounce',b:'gutter',desc:'Varje studs mot vägkanten ger kulan +30 % skada'},
+  {id:'leadrain',name:'Blyregn',a:'minigun',b:'fastload',desc:'Minigunnens kulor går igenom en fiende till'},
+  {id:'fieldhosp',name:'Fältlasarett',a:'medic',b:'hospital',desc:'Sjukvårdaren läker 3 HP/s i stället för 1'},
+  {id:'hawk',name:'Örnöga',a:'eagle',b:'crit',desc:'+10 % chans till kritisk träff för alla'},
 ];
 const HEROES=[
   {id:'rookie',name:'Rookie',price:0,desc:'100 HP och en pistol. Standardgubben.',shirt:0xff5c7a,hp:100,weapon:'pistol'},

@@ -6,7 +6,7 @@
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.26-0730">
+<link rel="stylesheet" href="css/style.css?v=2026.10.27-1116">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -42,6 +42,7 @@
   </div>
   <div class="hud-bottom"><div class="hb-col"><div id="hint"></div><button id="odbtn" class="odbtn" type="button" hidden><span id="odtxt">OVERDRIVE</span><i id="odfill"></i></button></div></div>
   <div id="toast"></div>
+  <div id="tut" hidden><b id="tut-title"></b><span id="tut-how"></span><p id="tut-text"></p><small id="tut-foot"></small><button id="tut-off" type="button">Stäng av guiden</button></div>
 </div>
 
 <div id="menu" class="screen">
@@ -116,6 +117,7 @@
     <p class="sub">Allt är på från början. Stäng av det du inte vill ha.</p>
     <div class="list" id="opts"></div>
     <div class="btnrow">
+      <button class="btn small ghost" id="reset-tut" type="button">Visa guiden igen</button>
       <button class="btn small ghost" id="reset-save" type="button">Nollställ mynt och köp</button>
       <button class="btn small ghost" id="close-opts" type="button">Tillbaka</button>
     </div>
@@ -175,8 +177,8 @@
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.26-0730"></script>
+<script src="js/version.js?v=2026.10.27-1116"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.26-0730"></script>
+<script src="js/main.js?v=2026.10.27-1116"></script>
 </body>
 </html>

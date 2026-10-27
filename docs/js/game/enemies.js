@@ -210,7 +210,7 @@ function killEnemy(e,byPlayer){
     const dropK=isW('heat')?1.5:1;
     if(OPT.hearts){ const chance=(e.type==='tank'||e.type==='boss')?1:0.08*dropK; if(Math.random()<chance) spawnHeart(p.x,p.z,e.type==='boss'?40:e.type==='tank'?ri(15,30):ri(5,30)); }
     if(xpOn()){ const v=(XP_VAL[e.type]||1)*(DN.full&&DN.nightF>0.5?1.5:1); if((e.type!=='swarm'&&e.type!=='bats')||Math.random()<0.5) spawnXp(p.x+rand(-0.5,0.5),p.z+rand(-0.5,0.5),v); }
-    if(OPT.coins){ const n=e.type==='boss'?20:e.type==='tank'?5:(e.type==='knight'||e.type==='necro'||e.type==='charger'||e.type==='bloater')?2:(Math.random()<0.35*dropK?1:0); for(let i=0;i<n;i++) spawnCoin(p.x+rand(-0.8,0.8),p.z+rand(-0.8,0.8)); }
+    if(OPT.coins){ const n=(e.type==='boss'?20:e.type==='tank'?5:(e.type==='knight'||e.type==='necro'||e.type==='charger'||e.type==='bloater')?2:(Math.random()<0.35*dropK?1:0))*(S.combos.has('goldrush')?2:1); for(let i=0;i<n;i++) spawnCoin(p.x+rand(-0.8,0.8),p.z+rand(-0.8,0.8)); }
   }
   if(e.type==='bomber') explodeAt(p.x,0.5,p.z,3,45*DIFF.hp,45*DIFF.hp,byPlayer,null,1);
   if(e.type==='boss'){ boss=null; bossDefeated(); }
@@ -265,7 +265,8 @@ function onHitEffects(e,d){
 function explodeAt(x,y,z,radius,dmg,base,hurtPlayer,owner,depth){
   fxExplosion(x,y,z,radius/1.7,FIRE1);
   sfx.explode(1.4); shake(0.4);
-  for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position,dx=p.x-x,dz=p.z-z,rr=radius+e.r; if(dx*dx+dz*dz<rr*rr){ const dv=dmg*varyDmg(0.8,1.2),tier=dmgTier(dv/base,false); hitEnemy(e,dv,false,tier,owner,true); fxDamage(p.x,p.y+e.r*0.8,p.z+e.r*0.5,tier); } }
+  const napalm=S.combos.has('napalm');
+  for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position,dx=p.x-x,dz=p.z-z,rr=radius+e.r; if(dx*dx+dz*dz<rr*rr){ const dv=dmg*varyDmg(0.8,1.2),tier=dmgTier(dv/base,false); hitEnemy(e,dv,false,tier,owner,true); fxDamage(p.x,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(napalm&&!e.dead){ e.burn=3; e.burnDps=Math.max(e.burnDps,dmg*0.15); e.burnOwner=owner; } } }
   for(const wl of walls){ const wp=wl.g.position; if(!wl.dead&&Math.abs(wp.z-z)<radius+0.3&&Math.abs(wp.x-x)<radius+1.8) hitWall(wl,dmg,wp.x,1.15,wp.z+0.3,false,1); }
   if(hurtPlayer) blastSquad(x,z,radius,20*DIFF.dmg);
   if(!depth&&S.combos.has('rain')){ for(let i=0;i<3;i++) delayed.push({t:0.35+i*0.12,x:clamp(x+rand(-2.5,2.5),-HALF,HALF),z:z+rand(-2.5,2.5),radius:radius*0.7,dmg:dmg*0.5,base,owner}); }

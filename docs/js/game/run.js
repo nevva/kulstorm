@@ -11,7 +11,7 @@ function clearRun(){
   zaps.forEach(z=>{ z.t=0; z.m.visible=false; });
   clearWeatherFx(); clearObstacles(); clearXp(); clearUnicorns(); shopEl.hidden=true; document.body.classList.remove('od-on');
   puddles.forEach(q=>scene.remove(q.m)); puddles.length=0; pendSpawn.length=0;
-  clearDmg(); clearSquad(); clearShards(); poundRing.visible=false;
+  clearDmg(); clearSquad(); clearShards(); poundRing.visible=false; tutStart();
   shieldRing.visible=false; frontMarker.visible=false; bossBar.hidden=true;
   VIEW.scale=1; VIEW.fogNear=44; VIEW.fogFar=96; VIEW.spawn=-78; camK=0.78;
   setZone(0,true); rebuildTiles();
@@ -51,13 +51,15 @@ function startGame(cfg){
   mode='playing'; menuEl.hidden=true; overEl.hidden=true; hudEl.hidden=false;
   recomputeAuras(); updatePower(0,true); updateDifficulty(); updateHUD();
   nextObsAt=dist+150; obsHinted={low:false,high:false,tall:false}; refreshKioskSign(); if(cfg.odFull&&OPT.overdrive) S.od=1;
-  showHint(OPT.obstacles?'Dra åt sidan för att styra · svep upp = hopp, ner = ducka, ner i luften = markstöt · spring in i en vägg för att skalla den':'Dra åt sidan för att styra · spring in i en vägg för att skalla den');
+  tutStart();
+  if(!tutWants('steer')) showHint(OPT.obstacles?'Dra åt sidan för att styra · svep upp = hopp, ner = ducka, ner i luften = markstöt · spring in i en vägg för att skalla den':'Dra åt sidan för att styra · spring in i en vägg för att skalla den');
 }
 let last=performance.now();
 function frame(now){
   requestAnimationFrame(frame);
   let dt=(now-last)/1000; last=now; if(dt>0.05) dt=0.05;
-  const frozen=mode==='paused'||mode==='shop';
+  if(mode==='playing') tutCheck();
+  const frozen=mode==='paused'||mode==='shop'||tutOn();
   if(!frozen) update(dt);
   renderer.render(scene,camera);
   if(!frozen) updateDmg(dt);

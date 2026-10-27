@@ -97,6 +97,8 @@ function recomputeAuras(){
   S.A=A;
   const prev=S.combos; S.combos=new Set();
   if(OPT.combos) for(const c of COMBOS) if(hasPart(c.a)&&hasPart(c.b)) S.combos.add(c.id);
+  if(S.combos.has('fieldhosp')) A.regen+=2*squad.filter(m=>m.def.id==='medic').length;
+  if(S.combos.has('hawk')) A.crit=Math.min(0.75,A.crit+0.1);
   if(mode==='playing') for(const c of COMBOS) if(S.combos.has(c.id)&&!prev.has(c.id)){ toast('KOMBO: '+c.name+'!'); sfx.combo(); }
   rebuildChips();
 }
@@ -180,6 +182,7 @@ function hurtMember(m,d,force){
   const p=m.g.position;
   const sb=squad.find(x=>x.charges>0);
   if(sb){ sb.charges--; sfx.shield(); fxShield(p.x,0.9,p.z); hudShield=-1; return; }
+  if(m.def.id==='tank'&&S.combos.has('fortress')) d*=0.5;
   m.hp-=d; m.hurtT=0.3;
   // Emergency OVERDRIVE: once per run, if you never fired it yourself, it saves you at 10 % HP (even from a lethal hit).
   if(m===squad[0]&&OPT.overdrive&&!S.odUsed&&S.odT<=0&&m.hp<=m.maxHp*0.1){ m.hp=Math.max(m.hp,m.maxHp*0.25); triggerOD(true); sfx.heartbeat(); flashEl.classList.add('on'); setTimeout(()=>flashEl.classList.remove('on'),120); }

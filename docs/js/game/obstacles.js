@@ -15,6 +15,7 @@ function squadWave(kind){
     else { m.duckDelay=d; m.jumpDelay=-1; }
   }
   if(kind==='jump'){ if((headMember().jy||0)>0.05&&OPT.dbljump) sfx.jump2(); else sfx.jump(); } else sfx.duck();
+  tutAct(kind);
 }
 const squadJump=()=>squadWave('jump'),squadDuck=()=>squadWave('duck');
 // Ground pound: ducking in the air does a quick somersault, hanging for POUND_SPIN s, then slams the gubbe down. When the front gubbe lands, a shockwave hits enemies within
@@ -91,7 +92,7 @@ function updateObstacles(dt){
   for(const o of obstacles){
     o.z+=(scroll+(o.roll?2.5:0))*dt; o.g.position.z=o.z;
     if(o.roll) o.g.userData.roll.rotation.x-=dt*6;
-    if(playing&&!obsHinted[o.type]&&o.z>-16){ obsHinted[o.type]=true; showHint(o.type==='low'?'Hoppa! Svep upp, W, Space eller pil upp':o.type==='tall'?'Dubbelhopp! Hoppa och hoppa igen i luften':'Ducka! Svep ner, S, pil ner eller Shift'); }
+    if(playing&&!obsHinted[o.type]&&o.z>-16){ obsHinted[o.type]=true; if(!tutWants(o.type==='low'?'jump':o.type==='high'?'duck':'tall')) showHint(o.type==='low'?'Hoppa! Svep upp, W, Space eller pil upp':o.type==='tall'?'Dubbelhopp! Hoppa och hoppa igen i luften':'Ducka! Svep ner, S, pil ner eller Shift'); }
     if(playing) for(const m of squad.slice()){
       if(o.hit.has(m)) continue;
       const p=m.g.position;
@@ -116,7 +117,7 @@ const OD_T=6;
 function addOD(x){ if(!OPT.overdrive||mode!=='playing'||S.odT>0||S.odLock>0) return; const was=S.od; S.od=Math.min(1,S.od+x); if(was<1&&S.od>=1){ toast('OVERDRIVE redo! Tryck E'); sfx.combo(); } }
 function triggerOD(force){
   if(!OPT.overdrive||mode!=='playing'||S.odT>0||(S.od<1&&!force)) return;
-  S.od=0; S.odT=OD_T; S.odUsed=true; sfx.odStart(); shake(1.2); toast(force?'NÖD-OVERDRIVE!':'OVERDRIVE!',!!force);
+  S.od=0; S.odT=OD_T; S.odUsed=true; tutAct('od'); sfx.odStart(); shake(1.2); toast(force?'NÖD-OVERDRIVE!':'OVERDRIVE!',!!force);
   for(const e of enemies){ if(e.dead||e.type==='boss'||e.under) continue; if(e.g.position.z>-22){ e.kb=Math.min(4,(e.kb||0)+2.6); e.stun=1; e.sq=1; } }
   const p=headMember().g.position; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; chunks.spawn(p.x,0.6,p.z-0.5,Math.cos(a)*9,rand(1,3),Math.sin(a)*9-3,0.6,0.3,0.08,C(0xffe066),C(0xffc23d),C(0xff8a3d),4,1.2,false,rand(4,10)); }
 }

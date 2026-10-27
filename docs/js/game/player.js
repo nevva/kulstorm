@@ -53,9 +53,13 @@ function updateSquad(dt){
     u.legL.rotation.x=Math.sin(t)*0.9; u.legR.rotation.x=-Math.sin(t)*0.9;
     const air=m.jy||0;
     g.position.y=air>0?air:Math.abs(Math.sin(t))*0.07;
-    const s0=m.def.id==='tank'?1.22:1,duck=m.duckT>0?0.5:1;
+    // ducking on the ground: curl up into a ball and roll forward one full turn, around the ball's centre
+    const s0=m.def.id==='tank'?1.22:1,rolling=m.duckT>0&&air<=0&&!(m.butt>0)&&!(m.flip>0);
+    if(rolling||m.rollA>0){ m.rollA=(m.rollA||0)+dt*Math.PI*2/DUCK_T; if(m.rollA>=Math.PI*2){ if(m.duckT>0.05) m.rollA-=Math.PI*2; else { m.rollA=0; g.rotation.x=0; } } }
+    const ball=m.rollA>0,duck=ball?0.55:m.duckT>0?0.5:1;
     g.scale.set(s0*(duck<1?1.15:1),s0*duck,s0);
     if(air>0){ u.legL.rotation.x=0.6; u.legR.rotation.x=-0.3; }
+    if(ball){ const a=m.rollA,c=0.55*s0,off=c*Math.sin(a); g.rotation.x=-a; g.position.y+=c*(1-Math.cos(a)); g.position.z+=off; m.boff=(m.boff||0)+off; u.legL.rotation.x=u.legR.rotation.x=-1.3; }
     m.recoil*=Math.exp(-dt*18);
     u.gun.position.z=-0.62+m.recoil;
     u.armL.rotation.x=u.armR.rotation.x=1.35-m.recoil*0.8;
@@ -113,15 +117,15 @@ function spawnBullet(o){
   const k=bullets.take(); if(k<0) return;
   const d=bullets.d[k],A=o.A,w=o.w,crit=Math.random()<A.crit;
   d.x=o.x; d.y=o.y; d.z=o.z; d.vx=Math.sin(o.angle)*w.speed; d.vz=-Math.cos(o.angle)*w.speed;
-  d.base=o.base; d.dmg=o.base*(o.mult||1)*varyDmg(0.75,1.25)*(crit?2:1); d.pierce=S.odT>0&&!w.rocket?99:(o.pierce!==undefined?o.pierce:(w.rocket?0:A.pierce)); d.size=w.size*A.bullet*(crit?1.4:1)*(o.gen?0.8:1)*(S.odT>0?1.4:1);
-  d.col=crit?SPARK:(S.odT>0?OD_COL:(S.flowT>0&&!o.gen?FLOW_COL:w.colorL)); d.rocket=!!w.rocket; d.aoe=w.aoe||0; d.bounce=A.bounce; d.hits=[]; d.trail=0; d.crit=crit; d.gen=o.gen||0; d.owner=o.owner||null; d.wid=w.id||'';
+  d.base=o.base; d.dmg=o.base*(o.mult||1)*varyDmg(0.75,1.25)*(crit?(o.owner&&o.owner.def.id==='glass'&&S.combos.has('crystal')?3:2):1); d.pierce=S.odT>0&&!w.rocket?99:(o.pierce!==undefined?o.pierce:(w.rocket?0:A.pierce)); d.size=w.size*A.bullet*(crit?1.4:1)*(o.gen?0.8:1)*(S.odT>0?1.4:1);
+  d.col=crit?SPARK:(S.odT>0?OD_COL:(S.flowT>0&&!o.gen?FLOW_COL:w.colorL)); d.rocket=!!w.rocket; d.aoe=w.aoe||0; d.bounce=A.bounce; d.hits=[]; d.trail=0; d.crit=crit; d.gen=o.gen||0; d.owner=o.owner||null; d.wid=w.id||''; d.tgt=null; d.ht=0;
 }
 function fireFrom(m,w,A){
   m.g.userData.tip.getWorldPosition(tipV);
   const n=w.bullets+A.extra;
   const spread=w.spread+(n>1?0.07*(n-1):0);
   const base=w.dmg*A.dmg*memberMult(m)*flowK()*odK();
-  const pierce=(S.combos.has('spike')&&w.id==='shotgun')?99:w.id==='shuriken'?A.pierce+2:undefined;
+  const pierce=(S.combos.has('spike')&&w.id==='shotgun')?99:w.id==='shuriken'?A.pierce+2:(w.id==='minigun'&&S.combos.has('leadrain'))?A.pierce+1:undefined;
   // Light close-range aim assist: bend shots up to ~8° toward the nearest enemy within 6 m in this gubbe's lane.
   let aim=0; { const ln=laneOf(tipV.x); let best=null,bz=-1e9; for(const e of enemies){ if(e.dead||e.under||e.type==='boss') continue; const ep=e.g.position; if(ep.z<tipV.z-0.2&&ep.z>tipV.z-6&&laneOf(ep.x)===ln&&ep.z>bz){ bz=ep.z; best=e; } }
     if(best){ const ep=best.g.position; aim=clamp(Math.atan2(ep.x-tipV.x,tipV.z-ep.z),-0.14,0.14)*(m===headMember()?1:0.6); } }
@@ -133,16 +137,27 @@ function fireFrom(m,w,A){
   fxMuzzle(tipV.x,tipV.y,tipV.z,w.colorL);
   sfx.shoot(w);
 }
+// Målsökare (homing combo): the nearest enemy ahead of a bullet, within 25 m.
+function homingTarget(x,z){
+  let best=null,bd=625;
+  for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position; if(p.z>z-0.5) continue; const d2=(p.x-x)**2+(p.z-z)**2; if(d2<bd){ bd=d2; best=e; } }
+  return best;
+}
+const HOMING_TURN=3;  // rad/s
 function updateBullets(dt){
   const al=bullets.alive; let n=0;
-  const A=S.A,minZ=(VIEW.spawn-8)*(isW('rain')?0.8:1),gutter=S.T.gutter,wind=W.wind*1.3;
+  const A=S.A,minZ=(VIEW.spawn-8)*(isW('rain')?0.8:1),gutter=S.T.gutter,wind=W.wind*1.3,homing=S.combos.has('homing'),pinball=S.combos.has('pinball');
   for(let k=0;k<al.length;k++){
     const i=al[k],d=bullets.d[i];
+    if(homing&&!d.rocket){
+      d.ht-=dt; if(d.ht<=0||(d.tgt&&d.tgt.dead)){ d.ht=0.12; d.tgt=homingTarget(d.x,d.z); }
+      if(d.tgt){ const q=d.tgt.g.position,sp=Math.hypot(d.vx,d.vz),a=Math.atan2(d.vx,-d.vz),da=clamp(Math.atan2(q.x-d.x,d.z-q.z)-a,-HOMING_TURN*dt,HOMING_TURN*dt); d.vx=Math.sin(a+da)*sp; d.vz=-Math.cos(a+da)*sp; }
+    }
     if(wind) d.vx+=wind*dt;
     d.x+=d.vx*dt; d.z+=d.vz*dt;
     let dead=false;
     if(Math.abs(d.x)>HALF){
-      if(d.bounce){ d.x=clamp(d.x,-HALF,HALF); d.vx=-d.vx; fxSpark(d.x,d.y,d.z,d.col); }
+      if(d.bounce){ d.x=clamp(d.x,-HALF,HALF); d.vx=-d.vx; fxSpark(d.x,d.y,d.z,d.col); if(pinball) d.dmg*=1.3; }
       else if(gutter){ d.x=clamp(d.x,-HALF+0.05,HALF-0.05); if(d.vx!==0){ d.vz=-Math.hypot(d.vx,d.vz); d.vx=0; fxSpark(d.x,d.y,d.z,GOLD); } }
       else if(Math.abs(d.x)>HALF+1.5) dead=true;
     }
