@@ -2,7 +2,7 @@
 // Version: version.json holds the deployed version (bump both with ./bump-version.sh). When it differs from
 // VERSION the page reloads with ?v=<new> so the browser and CDN caches are bypassed. A run is never interrupted:
 // the reload waits until window.kulstormBusy() says the game is back in the menu.
-const VERSION='2026.10.27-2059';
+const VERSION='2026.10.27-2100';
 (function(){
   const el=document.getElementById('menu-ver'); if(el) el.textContent='Version '+VERSION;
   let pending=null;

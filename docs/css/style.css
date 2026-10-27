@@ -38,6 +38,10 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 .btn.wide{width:100%;max-width:320px}
 .pinfo{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .pinfo .chip{font-size:11px;padding:4px 9px;font-family:inherit;cursor:pointer;border:2px solid transparent}
+.effh{margin:4px 0 0;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.effects{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 14px;width:100%;max-width:420px;font-size:13px}
+.effects div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(255,248,230,.12);padding:2px 0}
+.effects b{color:var(--accent);font-variant-numeric:tabular-nums}
 .pinfo .chip.sel{outline:3px solid var(--sky);outline-offset:2px}
 .pinfo .chip:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
 .hud-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}

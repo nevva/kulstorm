@@ -17,8 +17,35 @@ function pauseGame(){
   S.perks.forEach(p=>chip('tp',p.short,p.name,p.desc));
   { const u=UPGRADES.find(x=>x.id==='unicorn'); unicorns.forEach(()=>chip('uni',u.short,u.name,u.desc)); }
   COMBOS.forEach(c=>{ if(S.combos.has(c.id)) chip('combo',c.name,'Kombo: '+c.name,c.desc); });
+  renderEffects();
   $('pause-main').hidden=false; $('pause-opts').hidden=true;
   pauseEl.hidden=false; $('p-resume').focus({preventScroll:true});
+}
+// Combined effects: what all gubbar, team upgrades, combos and talents add up to right now. Only non-default values are listed.
+function renderEffects(){
+  const A=S.A,T=S.T,L=[],pct=k=>(k>=1?'+':'')+Math.round((k-1)*100)+' %';
+  if(A){
+    if(Math.abs(A.dmg-1)>0.005) L.push(['Skada',pct(A.dmg)]);
+    if(Math.abs(A.rate-1)>0.005) L.push(['Eldhastighet',pct(A.rate)]);
+    if(A.extra) L.push(['Extra kulor','+'+A.extra]);
+    if(A.pierce) L.push(['Genomslag','+'+A.pierce]);
+    if(A.crit>0) L.push(['Kritisk chans',Math.round(A.crit*100)+' %']);
+    if(Math.abs(A.bullet-1)>0.005) L.push(['Kulstorlek',pct(A.bullet)]);
+    if(Math.abs(A.speed-1)>0.005) L.push(['Fart',pct(A.speed)]);
+    if(A.regen>0) L.push(['Läkning',A.regen+' HP/s']);
+    if(A.magnet) L.push(['Magnet','på']);
+    if(A.bounce) L.push(['Studsande kulor','på']);
+  }
+  if(T.hpBonus) L.push(['Max-HP','+'+T.hpBonus]);
+  if(T.heartMult!==1) L.push(['Hjärtan',pct(T.heartMult)]);
+  if(Math.abs(T.coinMult-1)>0.005) L.push(['Mynt',pct(T.coinMult)]);
+  if(Math.abs(T.kb-1)>0.005) L.push(['Knuff',pct(T.kb)]);
+  if(T.shockLv) L.push(['Chockring',Math.round(10*T.shockLv)+' % chans']);
+  if(T.ricochet) L.push(['Rikoschett','på']);
+  if(T.gutter) L.push(['Kantstudsar','på']);
+  if(T.eagle) L.push(['Längre sikt','på']);
+  const el=$('peffects'); el.innerHTML=''; $('peffects-h').hidden=!L.length;
+  for(const [k,v] of L){ const r=document.createElement('div'); const a=document.createElement('span'); a.textContent=k; const b=document.createElement('b'); b.textContent=v; r.append(a,b); el.appendChild(r); }
 }
 function resumeGame(){
   if(mode!=='paused') return;
