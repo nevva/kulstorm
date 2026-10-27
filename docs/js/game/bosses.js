@@ -179,7 +179,7 @@ const BOSS_AI={
     while(b.heads>want){
       const alive=hs.filter((h,i)=>!h.dead&&i!==1),h=alive.length?pick(alive):hs[1]; h.dead=true; b.heads--;
       const q=headPos(e,h); fxExplosion(q[0],q[1],q[2],1.6,FIREB); sfx.explode(2); shake(0.8);
-      h.grp.visible=false; h.neck.forEach(n=>n.visible=false); toast(b.heads===2?'Ett huvud föll! Draken blir rasande':'Bara ett huvud kvar!',true);
+      h.grp.visible=false; h.neck.forEach(n=>n.visible=false); sayAt(q[0],q[1]+1,q[2],b.heads===2?'Ett huvud föll!':'Bara ett huvud kvar!','#ff5c7a',b.heads===2?'Draken blir rasande':'');
     }
     const rage=1+(3-b.heads)*0.35;
     hs.forEach((h,i)=>{
@@ -236,7 +236,7 @@ const BOSS_AI={
       const n=Math.max(0,Math.min(e.hp<e.maxHp*0.5?6:4,14-alive));
       for(let i=0;i<n;i++){ const l=i%LANES; pendSpawn.push({t:i*0.12,type:'spiderling',lane:l,x:LANE_X[l]+rand(-1,1),z:p.z+1.5}); }
       for(let i=0;i<10;i++) blobs.spawn(p.x+rand(-1,1),1.5,p.z-1.6,rand(-2,2),rand(1,3),rand(0,2),0.6,0.3,0.05,WHITE,C(0xce93d8),C(0x4a2a6a),-1,1,false,0);
-      if(n>0) toast('Spindelungar!'); b.cd=2.2;
+      if(n>0) sayAt(p.x,3.4,p.z,'Spindelungar!','#ce93d8'); b.cd=2.2;
     } else { // leap to a new spot and land with a web burst
       b.st='leap'; b.st_t=0.8; b.x0=p.x; b.tx=clamp(S.x+rand(-2,2),-3.6,3.6); sfx.jump(); b.cd=99;
     }
@@ -256,7 +256,7 @@ const BOSS_AI={
     const angry=e.hp<e.maxHp*0.5;
     if(b.n%2===1){ // slam one lane (two when angry), or quake all but one lane
       let lanes=[laneOf(S.x)];
-      if(angry&&b.n%4===3){ const safe=ri(0,2); lanes=[0,1,2].filter(l=>l!==safe); toast('Jordbävning! Hitta den säkra filen',true); }
+      if(angry&&b.n%4===3){ const safe=ri(0,2); lanes=[0,1,2].filter(l=>l!==safe); sayAt(e.g.position.x,4.6,e.g.position.z,'Jordbävning!','#ff5c7a','Hitta den säkra filen'); }
       else if(angry){ const o=ri(0,1); lanes.push([0,1,2].filter(l=>l!==lanes[0])[o]); }
       b.st='wind'; b.st_t=1.4; b.lanes=lanes; lanes.forEach(l=>laneWarn(l,1.4,0xffb74d)); sfx.boss();
     } else { // hurl a burst of rocks

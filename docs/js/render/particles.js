@@ -143,13 +143,15 @@ function fxDamage(x,y,z,tier){
 }
 const dmgLayer=$('dmgs'),dmgPool=[],dmgLive=[];
 for(let i=0;i<40;i++){ const el=document.createElement('div'); el.className='dmg'; el.hidden=true; dmgLayer.appendChild(el); dmgPool.push(el); }
-// sub: optional smaller second line under the text
-function pushDmg(x,y,z,text,css,big,force,sub){
+// sub: optional smaller second line under the text; life: seconds on screen (default 0.75)
+function pushDmg(x,y,z,text,css,big,force,sub,life){
   if(!OPT.numbers&&!force) return;
   const el=dmgPool.pop(); if(!el) return;
   el.hidden=false; el.textContent=text; if(sub){ const s=document.createElement('small'); s.textContent=sub; el.appendChild(s); } el.style.color=css; el.style.opacity='1'; el.classList.toggle('big',!!big);
-  dmgLive.push({el,x,y,z,life:0.75,max:0.75,vx:rand(-0.6,0.6)});
+  life=life||0.75; dmgLive.push({el,x,y,z,life,max:life,vx:life>1?0:rand(-0.6,0.6)});
 }
+// A message that floats up from an enemy, like the hit numbers but readable for longer.
+function sayAt(x,y,z,text,css,sub){ pushDmg(x,y,z,text,css||'#fff',true,true,sub,1.8); }
 function updateDmg(dt){
   const w=window.innerWidth,h=window.innerHeight;
   for(let i=dmgLive.length-1;i>=0;i--){

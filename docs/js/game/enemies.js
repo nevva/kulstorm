@@ -175,7 +175,7 @@ function spawnEnemy(type,lane,z){
   e.g.position.set(x,0,z); e.g.scale.set(1,1,1); e.g.rotation.x=0; e.g.rotation.z=0; e.roam=false; e.g.visible=true; scene.add(e.g); enemies.push(e);
   if(type==='knight'){ e.shieldHp=e.maxHp*0.9; e.u.shield.visible=true; e.u.sbar.visible=true; e.u.sfg.scale.x=1; e.u.sfg.position.x=0; }
   if(def.boss) bossInit(e);
-  if(type==='necro'&&!necroSeen){ necroSeen=true; toast('Nekromantiker! Döda honom först'); }
+  if(type==='necro'&&!necroSeen){ necroSeen=true; sayAt(x,2.6,z,'Nekromantiker!','#b07cff','Döda honom först'); }
   return e;
 }
 function clampLane(e){
@@ -214,7 +214,7 @@ function killEnemy(e,byPlayer){
     }
   }
   if(e.type==='bomber') explodeAt(p.x,0.5,p.z,3,45*DIFF.hp,45*DIFF.hp,byPlayer,null,1);
-  if(e.isBoss){ boss=null; bossDefeated(); }
+  if(e.isBoss){ boss=null; bossDefeated(p); }
 }
 function flushDmg(t,x,y,z){
   if(t.accDmg<=0){ t.accT=-1; return; }

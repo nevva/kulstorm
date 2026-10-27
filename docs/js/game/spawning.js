@@ -57,7 +57,7 @@ function checkEvents(){
     toast(BOSS_NAMES[bt]+'!',true); sfx.boss(); shake(0.6);
   }
 }
-function bossDefeated(){
-  bossBar.hidden=true; clearBossFx(); spawnPause=Math.max(spawnPause,5); toast('Boss besegrad!'); shake(0.8); kills+=10;
+function bossDefeated(p){
+  bossBar.hidden=true; clearBossFx(); spawnPause=Math.max(spawnPause,5); sayAt(p.x,4,p.z,'Boss besegrad!','#ffd21f'); shake(0.8); kills+=10;
   setTimeout(()=>{ if(mode==='playing') spawnWalls([0,1,2],true); },300);
 }
