@@ -18,33 +18,70 @@ function buildGun(def,g){
   g.add(gun);
   return {gun,tip};
 }
+// Haircuts and hats. The head is a 0.46 box centred at y 1.45 (top 1.67); the face points to -z, so the camera sees the back (+z).
+const HAIR_M=['short','short','buzz','spiky','mohawk','afro','curly','bald','semibald','quiff'];
+const HAIR_F=['long','long','ponytail','buns','bob','braids','afro','pixie','curly'];
+const HAT_OK=new Set(['short','buzz','bald','semibald','long','ponytail','bob','braids','pixie']);
+const HATS=['bowler','cap','tophat','beanie','cowboy','beret','hardhat','fedora','party','viking'];
+const HAT_COL=[0x212121,0x37474f,0x5d4037,0xc62828,0x1565c0,0x2e7d32,0xf9a825,0x6a1b9a,0xfafafa];
+function buildHairHat(g,fem,hair,skin,leader){
+  let style=pick(fem?HAIR_F:HAIR_M);
+  const hat=!leader&&Math.random()<0.4?pick(HATS):null;
+  if(hat&&!HAT_OK.has(style)) style=fem?pick(['long','ponytail','bob']):pick(['short','buzz','bald']);
+  const top=()=>g.add(M(G.box,hair,[0.5,0.16,0.5],[0,1.72,0])),back=(h)=>g.add(M(G.box,hair,[0.5,h||0.22,0.1],[0,1.67-(h||0.22)/2,0.22],false));
+  const dome=()=>g.add(M(G.sph,skin,[0.235,0.1,0.235],[0,1.67,0]));
+  switch(style){
+    case 'short': top(); back(); break;
+    case 'pixie': top(); back(0.3); g.add(M(G.box,hair,[0.3,0.08,0.14],[-0.08,1.77,-0.18],false)); break;
+    case 'buzz': g.add(M(G.box,hair,[0.48,0.06,0.48],[0,1.69,0])); g.add(M(G.box,hair,[0.48,0.14,0.04],[0,1.6,0.235],false)); break;
+    case 'spiky': g.add(M(G.box,hair,[0.48,0.08,0.48],[0,1.7,0])); for(const [x,z] of [[-0.14,-0.12],[0.14,-0.12],[0,0],[-0.14,0.13],[0.14,0.13]]) g.add(M(G.cone4,hair,[0.1,0.24,0.1],[x,1.85,z],false)); back(0.18); break;
+    case 'mohawk': g.add(M(G.box,hair,[0.12,0.24,0.5],[0,1.78,0.01])); break;
+    case 'afro': g.add(M(G.sph,hair,[0.36,0.3,0.36],[0,1.72,0.05])); break;
+    case 'curly': top(); back(); for(const [x,z] of [[-0.15,-0.14],[0.15,-0.14],[0,-0.05],[-0.16,0.1],[0.16,0.1],[0,0.18]]) g.add(M(G.sph,hair,[0.11,0.1,0.11],[x,1.81,z],false)); break;
+    case 'bald': dome(); break;
+    case 'semibald': dome(); g.add(M(G.box,hair,[0.48,0.2,0.06],[0,1.52,0.235],false)); [-1,1].forEach(s=>g.add(M(G.box,hair,[0.05,0.2,0.3],[s*0.235,1.52,0.06],false))); break;
+    case 'quiff': top(); back(); { const q=M(G.box,hair,[0.42,0.14,0.18],[0,1.83,-0.15],false); q.rotation.x=0.35; g.add(q); } break;
+    case 'long': top(); g.add(M(G.box,hair,[0.52,0.62,0.12],[0,1.38,0.22],false)); [-1,1].forEach(s=>g.add(M(G.box,hair,[0.07,0.42,0.4],[s*0.255,1.5,0.03],false))); break;
+    case 'bob': top(); g.add(M(G.box,hair,[0.52,0.36,0.1],[0,1.5,0.22],false)); [-1,1].forEach(s=>g.add(M(G.box,hair,[0.07,0.34,0.44],[s*0.255,1.52,0.01],false))); break;
+    case 'ponytail': top(); back(); ponytailOn(g,hair); break;
+    case 'buns': top(); back(); [-1,1].forEach(s=>g.add(M(G.sph,hair,[0.13,0.13,0.13],[s*0.21,1.8,0.12],false))); break;
+    case 'braids': top(); back(); [-1,1].forEach(s=>{ g.add(M(G.box,hair,[0.1,0.5,0.1],[s*0.16,1.32,0.28],false)); g.add(M(G.box,mat(pick(HAT_COL),{r:0.4}),[0.12,0.05,0.12],[s*0.16,1.08,0.28],false)); }); break;
+  }
+  if(!hat) return style==='afro'?2.02:style==='spiky'||style==='mohawk'?1.97:1.84;
+  const c=mat(pick(HAT_COL),{r:0.4}),c2=mat(pick(HAT_COL),{r:0.4});
+  switch(hat){
+    case 'bowler': { const k=mat(0x1a1a1a,{r:0.35}); g.add(M(G.sph,k,[0.25,0.2,0.25],[0,1.78,0])); g.add(M(G.cyl,k,[0.33,0.03,0.33],[0,1.76,0],false)); g.add(M(G.cyl,c2,[0.252,0.04,0.252],[0,1.79,0],false)); return 1.98; }
+    case 'cap': { const back=Math.random()<0.4; g.add(M(G.sph,c,[0.26,0.13,0.26],[0,1.75,0])); g.add(M(G.box,c,[0.4,0.03,0.24],[0,1.73,back?0.33:-0.33],false)); g.add(M(G.sph,c2,[0.04,0.03,0.04],[0,1.88,0],false)); return 1.9; }
+    case 'tophat': { const k=mat(pick([0x1a1a1a,0x1a1a1a,0x4e342e,0x6a1b9a]),{r:0.35}); g.add(M(G.cyl,k,[0.34,0.03,0.34],[0,1.76,0])); g.add(M(G.cyl,k,[0.22,0.42,0.22],[0,1.98,0])); g.add(M(G.cyl,c2,[0.225,0.07,0.225],[0,1.82,0],false)); return 2.19; }
+    case 'beanie': g.add(M(G.sph,c,[0.27,0.22,0.27],[0,1.7,0])); g.add(M(G.cyl,c2,[0.275,0.09,0.275],[0,1.69,0],false)); g.add(M(G.sph,c2,[0.08,0.08,0.08],[0,1.94,0],false)); return 2.02;
+    case 'cowboy': { const k=mat(pick([0x8d6e63,0x5d4037,0xd7ccc8,0x212121]),{r:0.5}); const b=M(G.cyl,k,[0.46,0.03,0.46],[0,1.77,0]); g.add(b); g.add(M(G.cyl,k,[0.2,0.22,0.22],[0,1.89,0])); g.add(M(G.cyl,c2,[0.205,0.05,0.225],[0,1.81,0],false)); [-1,1].forEach(s=>{ const r=M(G.box,k,[0.16,0.03,0.6],[s*0.38,1.8,0],false); r.rotation.z=s*0.5; g.add(r); }); return 2.0; }
+    case 'beret': { const b=M(G.sph,c,[0.29,0.07,0.29],[0.04,1.8,0.02]); b.rotation.z=-0.25; g.add(b); g.add(M(G.cyl,c,[0.02,0.06,0.02],[0.04,1.88,0.02],false)); return 1.9; }
+    case 'hardhat': { const y=mat(pick([0xffc107,0xff9800,0xfafafa]),{r:0.3}); g.add(M(G.sph,y,[0.27,0.19,0.27],[0,1.72,0])); g.add(M(G.cyl,y,[0.31,0.025,0.33],[0,1.72,-0.02],false)); g.add(M(G.box,y,[0.06,0.05,0.5],[0,1.89,0],false)); return 1.94; }
+    case 'fedora': { const k=mat(pick([0x5d4037,0x455a64,0x8d6e63,0x212121]),{r:0.45}); g.add(M(G.cyl,k,[0.36,0.03,0.36],[0,1.76,0])); g.add(M(G.cyl,k,[0.22,0.2,0.22],[0,1.87,0])); g.add(M(G.cyl,c2,[0.225,0.05,0.225],[0,1.8,0],false)); g.add(M(G.box,k,[0.04,0.04,0.3],[0,1.97,0],false)); return 2.0; }
+    case 'party': { const p=M(G.cone,c,[0.17,0.38,0.17],[0,1.9,0]); g.add(p); g.add(M(G.sph,c2,[0.06,0.06,0.06],[0,2.1,0],false)); return 2.16; }
+    case 'viking': { const steel=mat(0x90a4ae,{r:0.3,m:0.5}),horn=mat(0xfff3d0,{r:0.35}); g.add(M(G.sph,steel,[0.27,0.2,0.27],[0,1.71,0])); g.add(M(G.cyl,mat(0x8d6e63,{r:0.4}),[0.28,0.05,0.28],[0,1.68,0],false)); [-1,1].forEach(s=>{ const h=M(G.cone,horn,[0.06,0.26,0.06],[s*0.3,1.86,0],false); h.rotation.z=-s*0.6; g.add(h); }); return 1.98; }
+  }
+  return 1.84;
+}
+function ponytailOn(g,hair){ g.add(M(G.box,hair,[0.14,0.1,0.1],[0,1.6,0.27],false)); const t=M(G.box,hair,[0.16,0.44,0.14],[0,1.42,0.36],false); t.rotation.x=-0.25; g.add(t); }
 function buildGubbe(def){
   const g=new THREE.Group();
   const ninja=def.id==='ninja',fem=Math.random()<0.5;
-  const skin=mat(0xffcc9c,{r:0.45}),shirt=mat(def.shirt,{r:0.28}),pants=ninja?mat(0x1c1c24,{r:0.5}):mat(0x3949ab,{r:0.4}),boots=mat(0x263238,{r:0.3}),hair=mat(pick([0x3e2723,0xffeb3b,0x212121,0xd84315,0xfafafa]),{r:0.5});
+  const skin=mat(0xffcc9c,{r:0.45}),shirt=mat(def.shirt,{r:0.28}),pants=ninja?mat(0x1c1c24,{r:0.5}):mat(0x3949ab,{r:0.4}),boots=mat(0x263238,{r:0.3}),hair=mat(pick([0x3e2723,0x6d4c41,0xffeb3b,0x212121,0xd84315,0xfafafa,0x9e9e9e]),{r:0.5});
   const legL=new THREE.Group(),legR=new THREE.Group();
   legL.position.set(-0.15,0.55,0); legR.position.set(0.15,0.55,0);
   [legL,legR].forEach(l=>{ l.add(M(G.box,pants,[0.22,0.45,0.22],[0,-0.22,0])); l.add(M(G.box,boots,[0.24,0.14,0.32],[0,-0.5,-0.04])); g.add(l); });
   g.add(M(G.box,shirt,[fem?0.56:0.62,0.62,0.38],[0,0.9,0]));
   g.add(M(G.box,skin,[0.46,0.44,0.46],[0,1.45,0]));
-  let band=null;
-  // Female gubbar (random, half of them) get one of three hairstyles; the face points to -z, so the back of the head is +z.
-  const ponytail=()=>{ g.add(M(G.box,hair,[0.14,0.1,0.1],[0,1.6,0.27],false)); const t=M(G.box,hair,[0.16,0.44,0.14],[0,1.42,0.36],false); t.rotation.x=-0.25; g.add(t); };
-  if(def.id==='tank'){ g.add(M(G.sph,mat(0x37474f,{r:0.3,m:0.3}),[0.3,0.26,0.3],[0,1.6,0])); if(fem) ponytail(); }
+  let band=null,hatTop=0;
+  if(def.id==='tank'){ g.add(M(G.sph,mat(0x37474f,{r:0.3,m:0.3}),[0.3,0.26,0.3],[0,1.6,0])); if(fem) ponytailOn(g,hair); }
   else if(ninja){
     const hood=mat(0x1c1c24,{r:0.5}),red=mat(0xe53935,{r:0.35});
     g.add(M(G.box,hood,[0.5,0.5,0.5],[0,1.47,0.01])); g.add(M(G.box,hood,[0.48,0.24,0.06],[0,1.36,-0.24],false));
     g.add(M(G.box,red,[0.52,0.09,0.52],[0,1.66,0]));
     band=new THREE.Group(); band.position.set(0,1.66,0.27); band.add(M(G.box,red,[0.06,0.06,0.42],[-0.06,0,0.2],false)); band.add(M(G.box,red,[0.06,0.06,0.36],[0.06,-0.03,0.17],false)); g.add(band);
   }
-  else if(fem){
-    g.add(M(G.box,hair,[0.5,0.16,0.5],[0,1.72,0]));
-    const style=ri(0,2);
-    if(style===0){ g.add(M(G.box,hair,[0.52,0.62,0.12],[0,1.38,0.22],false)); [-1,1].forEach(s=>g.add(M(G.box,hair,[0.07,0.42,0.4],[s*0.255,1.5,0.03],false))); }
-    else if(style===1){ g.add(M(G.box,hair,[0.5,0.22,0.1],[0,1.57,0.22],false)); ponytail(); }
-    else { g.add(M(G.box,hair,[0.5,0.22,0.1],[0,1.57,0.22],false)); [-1,1].forEach(s=>g.add(M(G.sph,hair,[0.13,0.13,0.13],[s*0.21,1.8,0.12],false))); }
-  }
-  else { g.add(M(G.box,hair,[0.5,0.16,0.5],[0,1.72,0])); g.add(M(G.box,hair,[0.5,0.22,0.1],[0,1.57,0.22],false)); }
+  else hatTop=buildHairHat(g,fem,hair,skin,def.id==='leader');
   if(def.id==='medic'){ const red=mat(0xff1744,{r:0.3}); g.add(M(G.box,red,[0.08,0.26,0.04],[0,0.95,-0.2],false)); g.add(M(G.box,red,[0.26,0.08,0.04],[0,0.95,-0.2],false)); }
   if(def.id==='leader'){ g.add(M(G.box,mat(0xffd21f,{r:0.3}),[0.54,0.1,0.54],[0,1.82,0],false)); }
   const w=mat(0xffffff,{r:0.2}),b=mat(0x111111,{r:0.2});
@@ -53,7 +90,7 @@ function buildGubbe(def){
   const ax=fem?0.37:0.4; armL.position.set(-ax,1.12,0); armR.position.set(ax,1.12,0);
   [armL,armR].forEach(a=>{ a.add(M(G.box,shirt,[0.18,0.5,0.18],[0,-0.25,0])); a.add(M(G.box,skin,[0.19,0.14,0.19],[0,-0.55,0])); a.rotation.x=1.35; g.add(a); });
   const {gun,tip}=buildGun(def,g);
-  const bar=new THREE.Group(); bar.position.set(0,2.12,0);
+  const bar=new THREE.Group(); bar.position.set(0,Math.max(2.12,hatTop+0.14),0);
   bar.add(M(G.box,barBg,[0.74,0.12,0.1],[0,0,0],false));
   const fg=M(G.box,barGreen,[0.7,0.09,0.14],[0,0,0],false); bar.add(fg);
   g.add(bar);
