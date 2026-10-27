@@ -15,7 +15,7 @@ function renderMain(){
   $('menuhero').textContent='Startgubbe: '+heroById(heroId).name+(OPT.heroprog?' · Hjältenivå '+HERO.lvl+(free>0?' · '+free+' poäng att fördela':''):'');
   $('open-heroprog').hidden=!OPT.heroprog; $('open-heroprog').textContent=free>0?'Hjälte ('+free+')':'Hjälte';
   $('open-shop').hidden=!OPT.coins;
-  if(mode==='menu'){ clearSquad(); S=freshState(); addMember(leaderDef(heroById(heroId))); }
+  if(mode==='menu'){ clearSquad(); S=freshState(); addMember(leaderDef(heroById(heroId))); startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD) addMember(companionDef(h)); }); }
 }
 function renderShop(){
   $('shopcoins').textContent=fmt(bank)+' mynt i banken';
@@ -31,7 +31,13 @@ function renderShop(){
     else if(own){ b.textContent='Välj'; b.className='own'; b.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); }
     else if(bank>=h.price){ b.textContent='Köp · '+fmt(h.price); b.addEventListener('click',()=>{ bank-=h.price; owned.push(h.id); heroId=h.id; saveBank(); sfx.init(); sfx.upgrade(); renderShop(); }); }
     else { b.textContent='Kostar '+fmt(h.price)+' · saknas '+fmt(h.price-bank); b.disabled=true; }
-    card.appendChild(b); box.appendChild(card);
+    card.appendChild(b);
+    if(own&&!sel&&h.price>0){
+      const lb=document.createElement('label'); lb.className='join'; const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=benched.indexOf(h.id)<0;
+      cb.addEventListener('change',()=>{ benched=benched.filter(x=>x!==h.id); if(!cb.checked) benched.push(h.id); saveBank(); sfx.init(); sfx.pickup(); });
+      lb.append(cb,document.createTextNode(' Med i startgruppen')); card.appendChild(lb);
+    }
+    box.appendChild(card);
   });
 }
 const lab={hero:'rookie',dist:0,counts:{},perks:{},off:{}};
@@ -180,5 +186,5 @@ $('reset-tut').addEventListener('click',()=>{
 $('reset-save').addEventListener('click',()=>{
   const b=$('reset-save');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent='Tryck igen för att nollställa'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='Nollställ mynt och köp'; },3000); return; }
-  bank=0; owned=['rookie']; heroId='rookie'; saveBank(); b.dataset.arm=''; b.textContent='Nollställt'; setTimeout(()=>{ b.textContent='Nollställ mynt och köp'; },1500);
+  bank=0; owned=['rookie']; heroId='rookie'; benched=[]; saveBank(); b.dataset.arm=''; b.textContent='Nollställt'; setTimeout(()=>{ b.textContent='Nollställ mynt och köp'; },1500);
 });

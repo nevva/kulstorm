@@ -20,4 +20,8 @@ function commitHeroXp(){
 let bank=load('kulstorm_coins',0),owned=load('kulstorm_owned',['rookie']),heroId=load('kulstorm_hero','rookie');
 if(owned.indexOf('rookie')<0) owned.push('rookie');
 if(owned.indexOf(heroId)<0) heroId='rookie';
-function saveBank(){ store('kulstorm_coins',Math.round(bank)); store('kulstorm_owned',owned); store('kulstorm_hero',heroId); }
+// Bought gubbar join the start group unless opted out (benched). The free Rookie never joins as an extra.
+let benched=load('kulstorm_bench',[]);
+function saveBank(){ store('kulstorm_coins',Math.round(bank)); store('kulstorm_owned',owned); store('kulstorm_hero',heroId); store('kulstorm_bench',benched); }
+const startCompanions=()=>HEROES.filter(h=>h.price>0&&h.id!==heroId&&owned.indexOf(h.id)>=0&&benched.indexOf(h.id)<0);
+function companionDef(h){ return {id:'hero_'+h.id,kind:'gubbe',name:h.name,short:h.name,desc:h.desc,weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt}; }
