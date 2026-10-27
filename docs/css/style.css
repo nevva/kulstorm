@@ -75,9 +75,10 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 .hud-bottom{display:flex;justify-content:center}
 #hint{font-size:13px;font-weight:800;color:var(--paper);background:rgba(13,16,48,.6);padding:8px 14px;border-radius:999px;opacity:0;transition:opacity .4s;text-align:center}
 #hint.show{opacity:1}
-#toast{position:absolute;left:0;right:0;top:34%;text-align:center;font-family:var(--font-display);font-size:clamp(24px,7vw,46px);color:#fff;
-  text-shadow:0 3px 0 var(--ink),0 10px 24px rgba(0,0,0,.45);opacity:0;transform:scale(.8) rotate(-2deg);transition:opacity .25s,transform .25s;padding:0 16px;text-wrap:balance}
-#toast.show{opacity:1;transform:scale(1) rotate(-2deg)}
+/* Same look as the big floating hit numbers (.dmg.big). */
+#toast{position:absolute;left:0;right:0;top:34%;text-align:center;font-family:var(--font-display);font-size:27px;color:#fff;
+  text-shadow:0 2px 0 var(--ink),0 0 6px rgba(0,0,0,.5);opacity:0;transform:scale(.8);transition:opacity .25s,transform .25s;padding:0 16px;text-wrap:balance}
+#toast.show{opacity:1;transform:scale(1)}
 #toast.boss{color:var(--coral)}
 #flash{position:fixed;inset:0;background:var(--coral);opacity:0;pointer-events:none;transition:opacity .4s}
 #flash.on{opacity:.45;transition:none}
