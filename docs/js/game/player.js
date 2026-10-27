@@ -147,7 +147,7 @@ function homingTarget(x,z){
 const HOMING_TURN=3;  // rad/s
 function updateBullets(dt){
   const al=bullets.alive; let n=0;
-  const A=S.A,minZ=(VIEW.spawn-8)*(isW('rain')?0.8:1),gutter=S.T.gutter,wind=W.wind*1.3,homing=S.combos.has('homing'),pinball=S.combos.has('pinball');
+  const tracer=tracerK>0.5,A=S.A,minZ=(VIEW.spawn-8)*(isW('rain')?0.8:1),gutter=S.T.gutter,wind=W.wind*1.3,homing=S.combos.has('homing'),pinball=S.combos.has('pinball');
   for(let k=0;k<al.length;k++){
     const i=al[k],d=bullets.d[i];
     if(homing&&!d.rocket){
@@ -202,9 +202,10 @@ function updateBullets(dt){
     if(dead){ bullets.kill(i); if(d.wid==='shuriken') starMesh.setMatrixAt(i,ZERO); continue; }
     al[n++]=i;
     if(d.wid==='shuriken'){ bullets.mesh.setMatrixAt(i,ZERO); tmpQ.setFromEuler(tmpE.set(0,time*22+i,0)); tmpM.compose(tmpV.set(d.x,d.y,d.z),tmpQ,tmpS.set(d.size,d.size,d.size)); starMesh.setMatrixAt(i,tmpM); }
+    else if(tracer&&!d.rocket) bullets.write(i,d.size*0.7,d.size*0.7,d.size*7,Math.atan2(d.vx,d.vz),d.crit?d.col:TRACER);
     else bullets.write(i,d.size,d.size,d.size*(d.rocket?1.6:2.4),Math.atan2(d.vx,d.vz));
   }
-  al.length=n; bullets.flush(); starMesh.instanceMatrix.needsUpdate=true;
+  al.length=n; bullets.flush(); updateTracers(dt); starMesh.instanceMatrix.needsUpdate=true;
 }
 function updateEnemyBullets(dt){
   const al=ebullets.alive; let n=0;
