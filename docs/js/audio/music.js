@@ -178,5 +178,9 @@ const music=(function(){
   const state=()=>({phase,genre:G.name,layers:MUSIC.layers.slice(0,layers),bpm:Math.round(30/STEP)});  // for debugging
   return {ensure,note,reset,state};
 })();
-window.addEventListener('pointerdown',()=>{ sfx.init(); sfx.resume(); music.ensure(); });
-window.addEventListener('keydown',()=>{ sfx.init(); sfx.resume(); music.ensure(); });
+const wakeAudio=()=>{ sfx.init(); sfx.resume(); music.ensure(); };
+['pointerdown','touchend','click','keydown'].forEach(ev=>window.addEventListener(ev,wakeAudio,true));
+// Suspend while the app is in the background and resume on return; the gesture listeners above retry if the browser refuses.
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) sfx.suspend(); else sfx.resume(); });
+window.addEventListener('pageshow',()=>sfx.resume());
+window.addEventListener('focus',()=>sfx.resume());

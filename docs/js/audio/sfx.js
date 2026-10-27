@@ -20,7 +20,9 @@ const sfx=(function(){
       const conv=ctx.createConvolver(); conv.buffer=ir; rvb=ctx.createGain(); rvb.gain.value=0.22; rvb.connect(conv); conv.connect(comp);
     }catch(e){ ctx=null; }
   }
-  function resume(){ if(ctx&&ctx.state==='suspended') ctx.resume(); }
+  // iOS leaves the context 'interrupted' (not 'suspended') after an app switch, so resume from any non-running state.
+  function resume(){ if(ctx&&ctx.state!=='running'&&ctx.state!=='closed'){ const p=ctx.resume(); if(p&&p.catch) p.catch(()=>{}); } }
+  function suspend(){ if(ctx&&ctx.state==='running'){ const p=ctx.suspend(); if(p&&p.catch) p.catch(()=>{}); } }
   const ok=()=>ctx&&enabled;
   function out(g,wet){ g.connect(bus); if(wet) { const s=ctx.createGain(); s.gain.value=wet; g.connect(s); s.connect(rvb); } }
   // pitch-dropping sine: the felt low end
@@ -48,7 +50,7 @@ const sfx=(function(){
   function ring(t,f,dur,vol,wet){ const o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.003); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g); out(g,wet); o.start(t); o.stop(t+dur+0.03); }
   const T=()=>ctx.currentTime;
   return {
-    init,resume,
+    init,resume,suspend,
     get ctx(){return ctx;},
     setVol(){ if(master) master.gain.value=0.55*VOL.sfx*VOL.master; },
     get enabled(){return enabled;}, set enabled(x){enabled=x;},
