@@ -172,7 +172,7 @@ function spawnEnemy(type,lane,z){
   e.r=def.r; e.speed=def.speed*DIFF.speed*(isW('rain')?rand(0.85,1.15):1)*(isW('heat')?1.15:1); e.dmg=def.dmg; e.maxHp=e.hp=def.hp*DIFF.hp*PF; e.lane=lane;
   const lim=Math.max(0,LANE_W/2-def.r-0.3);
   const x=def.boss?0:LANE_X[lane]+rand(-lim,lim);
-  e.g.position.set(x,0,z); e.g.scale.set(1,1,1); e.g.rotation.x=0; e.g.rotation.z=0; e.g.visible=true; scene.add(e.g); enemies.push(e);
+  e.g.position.set(x,0,z); e.g.scale.set(1,1,1); e.g.rotation.x=0; e.g.rotation.z=0; e.roam=false; e.g.visible=true; scene.add(e.g); enemies.push(e);
   if(type==='knight'){ e.shieldHp=e.maxHp*0.9; e.u.shield.visible=true; e.u.sbar.visible=true; e.u.sfg.scale.x=1; e.u.sfg.position.x=0; }
   if(def.boss) bossInit(e);
   if(type==='necro'&&!necroSeen){ necroSeen=true; toast('Nekromantiker! Döda honom först'); }
@@ -180,7 +180,7 @@ function spawnEnemy(type,lane,z){
 }
 function clampLane(e){
   const p=e.g.position;
-  if(e.isBoss){ p.x=clamp(p.x,-HALF+e.r*0.8,HALF-e.r*0.8); return; }
+  if(e.isBoss||e.roam){ p.x=clamp(p.x,-HALF+e.r*0.8,HALF-e.r*0.8); if(e.roam) e.lane=laneOf(p.x); return; }
   const lx=LANE_X[e.lane],lim=Math.max(0,LANE_W/2-e.r*0.8);
   p.x=clamp(p.x,lx-lim,lx+lim);
 }
@@ -382,7 +382,7 @@ function updateEnemies(dt){
       }
       // At the wall they shuffle sideways toward the squad, crossing lanes, and hit anyone within reach.
       const reach=1.4+e.r,gx=S.x-p.x;
-      if(playing&&!(e.stun>0)&&Math.abs(gx)>0.3){ p.x+=clamp(gx,-1,1)*2.6*dt/Math.max(0.6,e.r); e.lane=laneOf(p.x); clampLane(e); e.g.rotation.z=clamp(-gx*0.1,-0.3,0.3); }
+      if(playing&&!(e.stun>0)&&Math.abs(gx)>0.3){ e.roam=true; p.x+=clamp(gx,-1,1)*2.6*dt/Math.max(0.6,e.r); clampLane(e); e.g.rotation.z=clamp(-gx*0.1,-0.3,0.3); }
       else e.g.rotation.z*=Math.exp(-dt*6);
       let target=null,bd=1e9;
       if(playing) for(const m of squad){ const mp=m.g.position; if(laneOf(mp.x)!==e.lane&&Math.abs(mp.x-p.x)>reach) continue; const dx=mp.x-p.x,dz=mp.z-p.z,d2=dx*dx+dz*dz; if(d2<bd){ bd=d2; target=m; } }
