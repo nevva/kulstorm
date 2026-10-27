@@ -84,11 +84,13 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 .odbtn.ready{color:var(--ink);background:linear-gradient(90deg,#ffd21f,#fff6c8,#ffd21f);border-color:#fff6c8;text-shadow:none;box-shadow:0 3px 0 var(--ink),0 0 22px rgba(255,210,31,.9);animation:odpulse .8s ease-in-out infinite alternate}
 .odbtn.ready i{opacity:0}
 .odbtn.active{color:var(--ink);background:#fff6c8;text-shadow:none}
+.odbtn.active span{animation:odblink .5s steps(2,jump-none) infinite alternate}
+@keyframes odblink{from{opacity:1}to{opacity:.25}}
 .odbtn:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
 @keyframes odpulse{from{transform:skewX(-12deg) scale(1)}to{transform:skewX(-12deg) scale(1.06)}}
 #odglow{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .25s;box-shadow:inset 0 0 140px 46px rgba(255,190,30,.9),inset 0 0 0 6px rgba(255,236,150,.9)}
 body.od-on #odglow{opacity:1}
-@media (prefers-reduced-motion:reduce){ .odbtn.ready{animation:none} }
+@media (prefers-reduced-motion:reduce){ .odbtn.ready,.odbtn.active span{animation:none} }
 .chip.uni{font-size:11px;padding:4px 9px;color:var(--ink);background:linear-gradient(90deg,#ff8a8a,#ffd36b,#9dffb0,#8fd3ff,#d7a6ff)}
 .chip.flow{position:relative;overflow:hidden;background:linear-gradient(90deg,#ffd21f,#ff8a3d);box-shadow:0 0 14px rgba(255,190,60,.7)}
 #flowbar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--ink);opacity:.55}
