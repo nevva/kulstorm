@@ -43,7 +43,10 @@ function startGame(cfg){
     const extra=P('reinf')>=6?2:P('reinf')>=3?1:0;
     for(let i=0;i<extra;i++){ const pool=UPGRADES.filter(u=>u.kind==='gubbe'&&!(u.unique&&hasPart(u.id))); if(squad.length<MAX_SQUAD) addMember(pick(pool)); }
   }
-  if(!labRun) startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD){ const m=addMember(companionDef(h)); m.charges=h.shield||0; } });
+  if(!labRun){
+    startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD){ const m=addMember(companionDef(h)); m.charges=h.shield||0; } });
+    squad.forEach(rollForm); toast('Dagsform: '+formText(L));
+  }
   (hero.extras||[]).concat(cfg.extras||[]).forEach(id=>{ const d=defById(id); if(d&&squad.length<MAX_SQUAD) addMember(d); });
   (cfg.perks||[]).forEach(id=>{ const d=defById(id); if(!d) return; if(d.kind==='pet'){ if(OPT.unicorns) addUnicorn(); } else applyTeamPerk(d); });
   camK=OPT.dyncam?0.78+0.065*(squad.length-1):1;

@@ -92,7 +92,7 @@ function updateFire(dt){
   for(const m of squad){
     const w=WEAPONS[m.def.weapon||'pistol'];
     if(w.laser){ laserMember(m,w,A,dt); continue; }
-    const rate=w.rate*A.rate*flowK()*odRate();
+    const rate=w.rate*A.rate*formRate(m)*flowK()*odRate();
     m.cd-=dt;
     if(m.cd<=0){ m.cd+=1/rate; fireFrom(m,w,A); }
   }
@@ -104,7 +104,7 @@ function laserMember(m,w,A,dt){
   m.laserTick-=dt;
   if(m.laserTick<=0){
     m.laserTick=0.1;
-    const base=w.dps*A.dmg*A.rate*0.1*memberMult(m)*flowK()*flowK()*odK()*odRate(),burn=S.combos.has('burn');
+    const base=w.dps*A.dmg*A.rate*formRate(m)*0.1*memberMult(m)*flowK()*flowK()*odK()*odRate(),burn=S.combos.has('burn');
     m.beams.forEach(b=>{
       if(!b.visible) return; const bx=b.position.x;
       for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position; if(p.z<0.5&&Math.abs(p.x-bx)<e.r+0.15){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitEnemy(e,dv,crit,tier,m,true); fxDamage(bx,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(burn&&!e.dead){ e.burn=3; e.burnDps=base*4; e.burnOwner=m; e.burnSrc='c:burn'; } if(crit&&S.combos.has('chain')&&!e.dead) chainFrom(e,dv,m); } }

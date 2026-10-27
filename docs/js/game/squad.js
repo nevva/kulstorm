@@ -148,9 +148,17 @@ function recomputeAuras(){
   S.boosts=runBoosts(A); if(mode==='playing') S.combos.forEach(c=>RUN.combos.add(c));
   if(mode==='playing') for(const c of COMBOS) if(S.combos.has(c.id)&&!prev.has(c.id)){ toast('KOMBO: '+c.name+'!'); sfx.combo(); }
 }
+// Dagsform: the start group's HP, damage and fire rate are rolled within ±15 % each run (not in the lab). Run levels stack on top.
+function rollForm(m){
+  const r=()=>Math.round(rand(0.85,1.15)*100)/100;
+  m.form={hp:r(),dmg:r(),rate:r()};
+  m.maxHp=Math.round(m.maxHp*m.form.hp); m.hp=m.maxHp;
+}
+const formRate=m=>m.form?m.form.rate:1;
+function formText(m){ if(!m.form) return ''; const f=k=>(k>=1?'+':'−')+Math.round(Math.abs(k-1)*100)+' %'; return 'HP '+f(m.form.hp)+' · Skada '+f(m.form.dmg)+' · Eldhastighet '+f(m.form.rate); }
 // Per-member damage multiplier: the Veteran snowballs with damage dealt, the Glass Cannon scales with his own health.
 function memberMult(m){
-  let k=1;
+  let k=m.form?m.form.dmg:1;
   if(m.def.id==='veteran') k*=Math.min(10,1+m.dealt/1500);
   if(m.def.id==='glass') k*=0.5+2*clamp(m.hp/m.maxHp,0,1);
   if(m.def.id==='banker') k*=Math.min(4,1+coinsRun*0.01);
@@ -169,7 +177,7 @@ function memberDps(m,A,combos,ricochet){
     if(w.rocket) dps*=1.8;
     if(ricochet) dps*=1.5;
   }
-  return dps*memberMult(m)*(1+0.12*combos);
+  return dps*memberMult(m)*formRate(m)*(1+0.12*combos);
 }
 function squadPower(){
   if(!S.A||!squad.length) return 1;

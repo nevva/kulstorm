@@ -13,7 +13,7 @@ function pauseGame(){
     el.addEventListener('click',()=>{ ps.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel')); el.classList.add('sel'); pd.textContent=name+(desc?' – '+desc:''); });
     ps.appendChild(el); return el; };
   const hero=heroById(lastCfg&&lastCfg.hero);
-  squad.forEach(m=>{ const lead=m.def.id==='leader'; chip('sq'+(OPT.front&&m===S.frontM?' front':''),chipText(m),lead?'Du ('+hero.name+')':m.def.name,lead?hero.desc:m.def.desc).style.borderColor=hexCss(m.def.shirt); });
+  squad.forEach(m=>{ const lead=m.def.id==='leader'; chip('sq'+(OPT.front&&m===S.frontM?' front':''),chipText(m),lead?'Du ('+hero.name+')':m.def.name,(lead?hero.desc:m.def.desc)+(m.form?'. Dagsform: '+formText(m):'')).style.borderColor=hexCss(m.def.shirt); });
   S.perks.forEach(p=>chip('tp',p.short,p.name,p.desc));
   { const u=UPGRADES.find(x=>x.id==='unicorn'); unicorns.forEach(()=>chip('uni',u.short,u.name,u.desc)); }
   COMBOS.forEach(c=>{ if(S.combos.has(c.id)) chip('combo',c.name,'Kombo: '+c.name,c.desc); });
