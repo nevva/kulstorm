@@ -68,7 +68,6 @@ function setZone(i,instant){
   tgt.sky=RAW(z.sky); tgt.fog=RAW(z.fog); tgt.ground=C(z.ground); tgt.road=C(z.road); tgt.road2=C(z.road2); tgt.stripe=C(z.stripe); tgt.curb=C(z.curb);
   tgt.hemiSky=C(z.sky); tgt.hemiGround=C(z.ground); tgt.glow=z.dark?0.9:0;
   if(instant) updateColors(100);
-  zoneEl.textContent=z.name;
 }
 const wSky=new THREE.Color(),wFog=new THREE.Color(),wGround=new THREE.Color(),wTint=new THREE.Color(),wTintL=new THREE.Color();
 const LIGHT0={sun:1.05,hemi:0.8,fill:0.35};
@@ -107,7 +106,6 @@ function updateColors(dt){
   envAmb.intensity=0.01*(0.1+0.9*DN.dayF)*Math.max(0.35,lv);
   lampPoolMat.opacity=0.28*DN.glowF;
 }
-let hudTime='';
 function updateSky(dt){
   const u=cycU(); DN.u=u;
   DN.dayF=smooth(0.02,0.11,u)*(1-smooth(0.45,0.55,u));
@@ -139,9 +137,6 @@ function updateSky(dt){
   const auroraOn=ZONES[zoneIdx].props==='ice'?1:0;
   auroraU.a.value=lerp(auroraU.a.value,auroraOn*starVis*1.1,1-Math.exp(-dt*0.8)); auroraU.time.value=time;
   auroras.forEach(r=>{ r.visible=auroraU.a.value>0.01; });
-  // HUD label
-  const lbl=!OPT.daynight?'':(u<0.1||u>0.97)?'Gryning':u<0.44?'Dag':u<0.56?'Skymning':'Natt · '+MOON_NAMES[pi];
-  if(lbl!==hudTime){ hudTime=lbl; const el=$('timechip'); if(el){ el.textContent=lbl; el.hidden=!lbl; } }
 }
 const tiles=[];
 (function makeTiles(){

@@ -6,7 +6,7 @@
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.27-2023">
+<link rel="stylesheet" href="css/style.css?v=2026.10.27-2038">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -24,19 +24,17 @@
         <button id="pausebtn" type="button" aria-label="Pausa"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></button>
         <button id="mute" type="button" aria-label="Ljud av/på"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path id="spk1" d="M16 9a4 4 0 0 1 0 6"/><path id="spk2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path id="spkx" d="M16 9l5 6M21 9l-5 6" hidden/></svg></button>
         </div>
-        <div class="zone" id="zone">Staden</div>
       </div>
     </div>
-    <div class="hud-row">
+    <div class="bars">
       <div class="hpwrap"><div class="hp" id="hp"></div><span id="hptext">100</span></div>
-      <div class="chip" id="kills">0 fiender</div>
-      <div class="chip weather" id="weatherchip">Klart</div>
-      <div class="chip timec" id="timechip">Dag</div>
+      <div class="xpwrap" id="xprow" hidden><div class="xp" id="xpbar"></div><span id="xplvl">Nv 1</span></div>
+    </div>
+    <div class="hud-row">
       <div class="chip coin" id="coinchip">0</div>
       <div class="chip shield" id="shieldchip" hidden>Sköld 3</div>
       <div class="chip flow" id="flowchip" hidden><span id="flowtxt">FLOW ×1</span><i id="flowbar"></i></div>
     </div>
-    <div class="xprow" id="xprow" hidden><span class="xplvl" id="xplvl">Nv 1</span><div class="xpwrap"><div class="xp" id="xpbar"></div></div></div>
     <div class="hud-row squad" id="squadchips"></div>
     <div id="bossbar" hidden><span id="bossname">BOSS</span><div class="bar"><div id="bosshp"></div></div></div>
   </div>
@@ -186,8 +184,8 @@
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.27-2023"></script>
+<script src="js/version.js?v=2026.10.27-2038"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.27-2023"></script>
+<script src="js/main.js?v=2026.10.27-2038"></script>
 </body>
 </html>

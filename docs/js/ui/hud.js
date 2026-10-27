@@ -6,12 +6,11 @@ let toastT=null;
 function toast(txt,isBoss){ toastEl.textContent=txt; toastEl.classList.toggle('boss',!!isBoss); toastEl.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>toastEl.classList.remove('show'),1800); }
 let hintT=null;
 function showHint(txt){ hintEl.textContent=txt; hintEl.classList.add('show'); clearTimeout(hintT); hintT=setTimeout(()=>hintEl.classList.remove('show'),3800); }
-let hudDist=-1,hudHp=-1,hudKills=-1,hudShield=-1,hudCoins=-1;
+let hudDist=-1,hudHp=-1,hudShield=-1,hudCoins=-1;
 function updateHUD(){
   const d=Math.floor(dist); if(d!==hudDist){ hudDist=d; distEl.textContent=fmt(d); }
   const L=squad[0];
   if(L){ const hp=Math.ceil(L.hp); if(hp!==hudHp){ hudHp=hp; hpEl.style.width=(100*L.hp/L.maxHp)+'%'; hpEl.classList.toggle('low',L.hp/L.maxHp<0.3); hpTextEl.textContent=hp+' / '+L.maxHp; } }
-  if(kills!==hudKills){ hudKills=kills; killsEl.textContent=fmt(kills)+' fiender'; }
   const cr=Math.round(coinsRun); if(cr!==hudCoins){ hudCoins=cr; coinEl.textContent=fmt(cr); coinEl.hidden=!OPT.coins; }
   const sh=totalShield(); if(sh!==hudShield){ hudShield=sh; shieldEl.hidden=sh<=0; shieldEl.textContent='Sköld '+sh; }
   for(const m of squad){ if(!m.chip) continue; const t=chipText(m); if(t!==m.chipTxt){ m.chipTxt=t; m.chip.textContent=t; } }

@@ -23,15 +23,14 @@ function startGame(cfg){
   pauseEl.hidden=true;
   clearRun();
   S=freshState(); runReset(); dist=cfg.dist||0; kills=0; coinsRun=0; spawnT=1.8; bossNo=Math.floor(dist/600); nextBossAt=(bossNo+1)*600; nextUpgradeAt=dist+100; upgradeStep=160; if(cfg.bossNow) nextBossAt=dist+3; bossForce=cfg.bossType||null; lastBoss=null; zoneDistNext=Math.floor(dist/400+1)*400; deadT=0; overShown=false; shakeAmt=0;
-  hudDist=hudHp=hudKills=hudShield=hudCoins=-1;
+  hudDist=hudHp=hudShield=hudCoins=-1;
   VIEW.scale=1; VIEW.fogNear=44; VIEW.fogFar=96; VIEW.spawn=-78; resize();
   applyCurve();
   setZone(dist>0?ri(0,ZONES.length-1):0,true); rebuildTiles(); updateDifficulty();
   LABOFF=new Set(cfg.off||[]); necroSeen=false; waveClock=0; spawnPause=0; pendSpawn.length=0; DEATHS.length=0;
-  CYC.start=dist; CYC.off=cfg.tod!=null?cfg.tod:0.12; CYC.moon0=cfg.moon!=null?cfg.moon:ri(0,7); hudTime=''; updateSky(0); updateColors(100);
+  CYC.start=dist; CYC.off=cfg.tod!=null?cfg.tod:0.12; CYC.moon0=cfg.moon!=null?cfg.moon:ri(0,7); updateSky(0); updateColors(100);
   W.fixed=cfg.weather&&OPT.weather?cfg.weather:null; W.next=Math.floor(dist/300+1)*300; W.id='clear'; W.wind=0; W.mix=1;
   if(W.fixed) setWeather(W.fixed,true); else if(dist>0) rollWeather();
-  updateWeatherChip();
   const hero=heroById(cfg.hero);
   S.T.speed=hero.speed||1; S.T.coinMult=hero.coinMult||1; if(hero.T) for(const k in hero.T) S.T[k]*=hero.T[k];
   const L=addMember(leaderDef(hero)); L.charges=hero.shield||0;

@@ -1,6 +1,6 @@
 'use strict';
 // ---------- weather runtime: precipitation, hail, lightning, wind debris, heat shimmer
-const weatherEl=$('weatherchip'),flash2=$('flash2');
+const flash2=$('flash2');
 const PRECIP_N=260,RAIN_COL=C(0xbfdfff);
 const precipMat=new THREE.MeshBasicMaterial({color:C(0xbfdfff)});
 const precip=new THREE.InstancedMesh(G.box,precipMat,PRECIP_N); precip.frustumCulled=false; precip.castShadow=false;
@@ -67,14 +67,8 @@ function setWeather(id,quiet){
   if(W.id===id) return;
   W.id=id; W.mix=0; W.hailT=2; W.boltT=3;
   W.wind=id==='storm'?(Math.random()<0.5?-1:1)*rand(4,6):0;
-  updateWeatherChip();
   if(!quiet&&id!=='clear'){ toast('Väder: '+WEATHER[id].name); sfx.zone(); }
   else if(!quiet) toast('Väder: Klart');
-}
-function updateWeatherChip(){
-  if(!weatherEl) return;
-  weatherEl.hidden=!OPT.weather;
-  weatherEl.textContent=WEATHER[W.id].name+(W.id==='storm'?(W.wind>0?' →':' ←'):'');
 }
 function rollWeather(){
   if(W.fixed){ setWeather(W.fixed); return; }
