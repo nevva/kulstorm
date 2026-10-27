@@ -8,8 +8,9 @@ function pauseGame(){
   $('pdist').textContent=fmt(dist); $('pkills').textContent=fmt(kills); $('pcoins').textContent=fmt(coinsRun);
   $('ppower').textContent='Fiender på skärmen: '+aliveCount()+' / '+enemyCap()+' · Truppstyrka ×'+squadPower().toFixed(1)+' · Fiende-HP ×'+(DIFF.hp*PF).toFixed(1)+' · Fiendeskada ×'+DIFF.dmg.toFixed(1);
   const ps=$('psquad'); ps.innerHTML='';
-  squad.forEach(m=>{ const el=document.createElement('span'); el.className='chip sq'; el.style.borderColor=hexCss(m.def.shirt); el.textContent=chipText(m); ps.appendChild(el); });
+  squad.forEach(m=>{ const el=document.createElement('span'); el.className='chip sq'+(OPT.front&&m===S.frontM?' front':''); el.style.borderColor=hexCss(m.def.shirt); el.textContent=chipText(m); ps.appendChild(el); });
   S.perks.forEach(p=>{ const el=document.createElement('span'); el.className='chip tp'; el.textContent=p.short; ps.appendChild(el); });
+  unicorns.forEach(()=>{ const el=document.createElement('span'); el.className='chip uni'; el.textContent='Enhörning'; ps.appendChild(el); });
   COMBOS.forEach(c=>{ if(!S.combos.has(c.id)) return; const el=document.createElement('span'); el.className='chip combo'; el.textContent=c.name; ps.appendChild(el); });
   $('pause-main').hidden=false; $('pause-opts').hidden=true;
   pauseEl.hidden=false; $('p-resume').focus({preventScroll:true});
@@ -17,7 +18,7 @@ function pauseGame(){
 function resumeGame(){
   if(mode!=='paused') return;
   pauseEl.hidden=true; mode='playing'; last=performance.now(); sfx.resume();
-  rebuildChips(); updateHUD();
+  updateHUD();
 }
 $('pausebtn').addEventListener('click',pauseGame);
 $('odbtn').addEventListener('click',e=>{ e.stopPropagation(); triggerOD(); });

@@ -35,13 +35,6 @@ canvas.addEventListener('pointerup',e=>{
   if(drag&&!drag.moved&&mode==='playing'&&e.pointerType==='mouse'&&OPT.mouse) squadJump();
   drag=null;
 });
-// Tap a squad chip in the HUD to put that gubbe in front.
-chipsEl.addEventListener('click',e=>{
-  return;
-  const el=e.target.closest('.chip.sq'); if(!el||mode!=='playing'||!OPT.front) return;
-  const m=squad.find(x=>x.chip===el); if(!m) return;
-  S.frontM=m; layoutSquad(); hudFront=null; toast(m.def.name+' i front'); sfx.zone();
-});
 canvas.addEventListener('pointercancel',()=>{ drag=null; });
 window.addEventListener('keydown',e=>{
   if(mode==='shop'){

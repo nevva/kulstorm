@@ -6,7 +6,7 @@
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.27-2038">
+<link rel="stylesheet" href="css/style.css?v=2026.10.27-2042">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -26,16 +26,14 @@
         </div>
       </div>
     </div>
-    <div class="bars">
-      <div class="hpwrap"><div class="hp" id="hp"></div><span id="hptext">100</span></div>
-      <div class="xpwrap" id="xprow" hidden><div class="xp" id="xpbar"></div><span id="xplvl">Nv 1</span></div>
+    <div class="hud-row vitalrow">
+      <div class="vitals"><div class="vhp"><div class="hp" id="hp"></div><span id="hptext">100</span></div><div class="vxp" id="xprow" hidden><div class="xp" id="xpbar"></div><span id="xplvl">Nv 1</span></div></div>
+      <div class="chip coin" id="coinchip">0</div>
     </div>
     <div class="hud-row">
-      <div class="chip coin" id="coinchip">0</div>
       <div class="chip shield" id="shieldchip" hidden>Sköld 3</div>
       <div class="chip flow" id="flowchip" hidden><span id="flowtxt">FLOW ×1</span><i id="flowbar"></i></div>
     </div>
-    <div class="hud-row squad" id="squadchips"></div>
     <div id="bossbar" hidden><span id="bossname">BOSS</span><div class="bar"><div id="bosshp"></div></div></div>
   </div>
   <div class="hud-bottom"><div class="hb-col"><div id="hint"></div><button id="odbtn" class="odbtn" type="button" hidden><span id="odtxt">OVERDRIVE</span><i id="odfill"></i></button></div></div>
@@ -184,8 +182,8 @@
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.27-2038"></script>
+<script src="js/version.js?v=2026.10.27-2042"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.27-2038"></script>
+<script src="js/main.js?v=2026.10.27-2042"></script>
 </body>
 </html>

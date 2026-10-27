@@ -25,7 +25,7 @@ function addUnicorn(){
   const g=buildUnicorn(),side=unicorns.length?-unicorns[0].side:(Math.random()<0.5?-1:1);
   g.position.set(side*(HALF+1.1),0,-2); scene.add(g);
   unicorns.push({g,side,cd:unicorns.length?6:3,rear:0,phase:rand(0,6)});
-  fxSparkle(g.position.x,1.5,g.position.z,pick(RAINBOW)); sfx.whinny(); rebuildChips();
+  fxSparkle(g.position.x,1.5,g.position.z,pick(RAINBOW)); sfx.whinny();
 }
 function fireRainbow(u){
   let best=laneOf(S.x),bs=-1;

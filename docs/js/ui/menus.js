@@ -96,7 +96,7 @@ function labEstimate(){
     recomputeAuras();
     const p=squadPower(),d=lab.dist/100,dh=1+d*0.32+Math.pow(d,1.35)*0.03;
     return 'Truppstyrka ×'+p.toFixed(1)+' · Fiende-HP vid start ×'+(dh*Math.pow(p,0.8)).toFixed(1);
-  }finally{ S=saveS; squad=saveSquad; mode=saveMode; rebuildChips(); }
+  }finally{ S=saveS; squad=saveSquad; mode=saveMode; }
 }
 const VOL_UI=[['master','Huvudvolym'],['music','Musik'],['sfx','Effekter'],['drums','Trummor'],['melody','Melodi'],['chords','Ackord och bas'],['crackle','Vinylknaster']];
 function renderOpts(boxId){
@@ -123,7 +123,7 @@ function renderOpts(boxId){
   OPT_DEFS.forEach(o=>{
     const l=document.createElement('label'); l.className='tog';
     const i=document.createElement('input'); i.type='checkbox'; i.id=(boxId||'opts')+'-'+o[0]; i.checked=OPT[o[0]];
-    i.addEventListener('change',()=>{ OPT[o[0]]=i.checked; saveOpts(); if(S&&S.A&&o[0]==='combos') recomputeAuras(); if(o[0]==='front'||o[0]==='snake') layoutSquad(); if(o[0]==='planet') applyCurve(); if(o[0]==='weather'){ if(!OPT.weather){ W.fixed=null; setWeather('clear',true); } } hudCoins=-1; hudFront=null; });
+    i.addEventListener('change',()=>{ OPT[o[0]]=i.checked; saveOpts(); if(S&&S.A&&o[0]==='combos') recomputeAuras(); if(o[0]==='front'||o[0]==='snake') layoutSquad(); if(o[0]==='planet') applyCurve(); if(o[0]==='weather'){ if(!OPT.weather){ W.fixed=null; setWeather('clear',true); } } hudCoins=-1; });
     const s=document.createElement('span'); s.textContent=o[1]; const sm=document.createElement('small'); sm.textContent=o[2]; s.appendChild(sm);
     l.append(i,s); box.appendChild(l);
   });

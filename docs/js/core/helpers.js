@@ -2,7 +2,7 @@
 // DOM elements used across the game
 const $=id=>document.getElementById(id);
 const menuEl=$('menu'),hudEl=$('hud'),overEl=$('over'),flashEl=$('flash'),toastEl=$('toast'),hintEl=$('hint');
-const distEl=$('dist'),hpEl=$('hp'),hpTextEl=$('hptext'),coinEl=$('coinchip'),shieldEl=$('shieldchip'),bossBar=$('bossbar'),bossHpEl=$('bosshp'),bossNameEl=$('bossname'),chipsEl=$('squadchips');
+const distEl=$('dist'),hpEl=$('hp'),hpTextEl=$('hptext'),coinEl=$('coinchip'),shieldEl=$('shieldchip'),bossBar=$('bossbar'),bossHpEl=$('bosshp'),bossNameEl=$('bossname');
 
 
 // ---------- helpers

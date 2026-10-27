@@ -67,15 +67,15 @@ function cycleFront(dir){ return;
   if(mode!=='playing'||!squad.length||!OPT.front) return;
   const n=squad.length,idx=squad.indexOf(S.frontM);
   const next=idx<0?(dir>0?0:n-1):(idx+dir+n)%n;
-  S.frontM=squad[next]; layoutSquad(); hudFront=null;
+  S.frontM=squad[next]; layoutSquad();
   toast(S.frontM.def.name+' i front'); sfx.zone();
 }
 function addMember(def){
   const g=buildGubbe(def); scene.add(g);
   const hp=(def.hp||60)+(def.id==='leader'?0:S.T.hpBonus);
-  const m={def,g,hp,maxHp:hp,cd:rand(0,0.3),phase:rand(0,6.3),recoil:0,beams:[],laserTick:rand(0,0.1),invuln:0,charges:def.id==='shield'?3:0,rt:0,hurtT:0,slot:FORM[0],dead:false,chip:null,chipTxt:'',dealt:0,lvl:1,jumpT:0,duckT:0,jumpDelay:-1,duckDelay:-1,jy:0,vy:0,dbUsed:false,flip:0};
+  const m={def,g,hp,maxHp:hp,cd:rand(0,0.3),phase:rand(0,6.3),recoil:0,beams:[],laserTick:rand(0,0.1),invuln:0,charges:def.id==='shield'?3:0,rt:0,hurtT:0,slot:FORM[0],dead:false,dealt:0,lvl:1,jumpT:0,duckT:0,jumpDelay:-1,duckDelay:-1,jy:0,vy:0,dbUsed:false,flip:0};
   squad.push(m); runAddMember(m);
-  if(def.id==='tank'&&OPT.front){ S.frontM=m; hudFront=null; }
+  if(def.id==='tank'&&OPT.front){ S.frontM=m; }
   layoutSquad();
   const last=squad.length>1?squad[squad.length-2].g.position:null;
   if(OPT.snake&&last) g.position.set(last.x,0,last.z+0.78); else g.position.set(S.x+m.slot[0],0,m.slot[1]);
@@ -101,7 +101,6 @@ function recomputeAuras(){
   if(S.combos.has('hawk')) A.crit=Math.min(0.75,A.crit+0.1);
   S.boosts=runBoosts(A); if(mode==='playing') S.combos.forEach(c=>RUN.combos.add(c));
   if(mode==='playing') for(const c of COMBOS) if(S.combos.has(c.id)&&!prev.has(c.id)){ toast('KOMBO: '+c.name+'!'); sfx.combo(); }
-  rebuildChips();
 }
 // Per-member damage multiplier: the Veteran snowballs with damage dealt, the Glass Cannon scales with his own health.
 function memberMult(m){
@@ -137,17 +136,6 @@ function updatePower(dt,instant){
   PF=instant?PFraw:PF+(PFraw-PF)*(1-Math.exp(-dt*0.8));
 }
 function chipText(m){ const k=memberMult(m); return m.def.short+((m.lvl||1)>1?' nv'+m.lvl:'')+' '+Math.ceil(m.hp)+(Math.abs(k-1)>0.05?' ×'+k.toFixed(1):''); }
-function rebuildChips(){
-  chipsEl.innerHTML='';
-  squad.forEach(m=>{
-    const el=document.createElement('span'); el.className='chip sq'; el.style.borderColor=hexCss(m.def.shirt);
-    m.chip=el; m.chipTxt=chipText(m); el.textContent=m.chipTxt; chipsEl.appendChild(el);
-  });
-  S.perks.forEach(p=>{ const el=document.createElement('span'); el.className='chip tp'; el.textContent=p.short; chipsEl.appendChild(el); });
-  unicorns.forEach(()=>{ const el=document.createElement('span'); el.className='chip uni'; el.textContent='Enhörning'; chipsEl.appendChild(el); });
-  COMBOS.forEach(c=>{ if(!S.combos.has(c.id)) return; const el=document.createElement('span'); el.className='chip combo'; el.textContent=c.name; chipsEl.appendChild(el); });
-  hudFront=null;
-}
 function applyTeamPerk(u){
   S.perks.push(u);
   switch(u.id){
@@ -172,7 +160,6 @@ function ensureBeams(m,n){
 }
 const shieldRing=M(G.ring,mat(0xffd21f,{e:0.6,r:0.3}),[1,1,1],[0,0.9,0],false); shieldRing.rotation.x=Math.PI/2; shieldRing.visible=false; scene.add(shieldRing);
 const frontMarker=M(G.cone,mat(0xffd21f,{e:0.7,r:0.3}),[0.22,0.4,0.22],[0,2.9,0],false); frontMarker.rotation.x=Math.PI; frontMarker.visible=false; scene.add(frontMarker);
-let hudFront=null;
 function totalShield(){ let n=0; for(const m of squad) n+=m.charges; return n; }
 function hurtMember(m,d,force){
   if(mode!=='playing'||m.dead) return;
@@ -199,6 +186,6 @@ function killMember(m){
   fxExplosion(p.x,1,p.z,1.1,C(m.def.shirt));
   scene.remove(m.g); m.beams.forEach(b=>scene.remove(b));
   if(m===squad[0]){ die(); return; }
-  squad=squad.filter(x=>x!==m); if(S.frontM===m){ S.frontM=null; hudFront=null; } layoutSquad(); recomputeAuras();
+  squad=squad.filter(x=>x!==m); if(S.frontM===m){ S.frontM=null; } layoutSquad(); recomputeAuras();
   toast(m.def.name+' stupade!'); sfx.explode(1.2);
 }

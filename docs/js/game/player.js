@@ -12,12 +12,12 @@ function updatePlayer(dt){
   S.frontT-=dt; S.frontHold-=dt;
   if(S.frontT<=0){
     S.frontT=1;
-    if(!OPT.front){ if(S.frontM){ S.frontM=null; layoutSquad(); hudFront=null; } }
+    if(!OPT.front){ if(S.frontM){ S.frontM=null; layoutSquad(); } }
     else if(squad.length>1){
       const tough=m=>m.hp+25*m.charges;
       let best=squad[0]; for(const m of squad) if(tough(m)>tough(best)) best=m;
       const cur=headMember();
-      if(best!==cur&&S.frontHold<=0&&tough(best)>tough(cur)*1.1){ S.frontM=best; S.frontHold=2; layoutSquad(); hudFront=null; toast(best.def.name+' tar fronten'); }
+      if(best!==cur&&S.frontHold<=0&&tough(best)>tough(cur)*1.1){ S.frontM=best; S.frontHold=2; layoutSquad(); toast(best.def.name+' tar fronten'); }
     }
   }
   const recharge=S.combos.has('recharge');

@@ -89,7 +89,7 @@ function buyOffer(o){
   if(o.type==='lvl'){ const m=o.m; m.lvl++; m.maxHp=Math.round(m.maxHp*1.2); m.hp=m.maxHp; fxSparkle(m.g.position.x,1.4,m.g.position.z,C(m.def.shirt)); }
   else if(o.type==='heal'){ squad.forEach(m=>{ m.hp=m.maxHp; }); }
   else { addMember(defById('banker')); }
-  sfx.buy(); rebuildChips(); updatePower(0,true); renderBuy();
+  sfx.buy(); updatePower(0,true); renderBuy();
   return true;
 }
 let shopRelock=false;

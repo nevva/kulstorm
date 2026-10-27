@@ -13,8 +13,6 @@ function updateHUD(){
   if(L){ const hp=Math.ceil(L.hp); if(hp!==hudHp){ hudHp=hp; hpEl.style.width=(100*L.hp/L.maxHp)+'%'; hpEl.classList.toggle('low',L.hp/L.maxHp<0.3); hpTextEl.textContent=hp+' / '+L.maxHp; } }
   const cr=Math.round(coinsRun); if(cr!==hudCoins){ hudCoins=cr; coinEl.textContent=fmt(cr); coinEl.hidden=!OPT.coins; }
   const sh=totalShield(); if(sh!==hudShield){ hudShield=sh; shieldEl.hidden=sh<=0; shieldEl.textContent='Sköld '+sh; }
-  for(const m of squad){ if(!m.chip) continue; const t=chipText(m); if(t!==m.chipTxt){ m.chipTxt=t; m.chip.textContent=t; } }
-  if(hudFront!==S.frontM){ hudFront=S.frontM; for(const m of squad){ if(m.chip) m.chip.classList.toggle('front',OPT.front&&m===S.frontM); } }
   if(boss) bossHpEl.style.width=(100*Math.max(0,boss.hp)/boss.maxHp)+'%';
   const ob=$('odbtn'); ob.hidden=!OPT.overdrive; if(OPT.overdrive){ const act=S.odT>0,rdy=!act&&S.od>=1; ob.classList.toggle('ready',rdy); ob.classList.toggle('active',act); $('odfill').style.width=(act?100*S.odT/OD_T:100*S.od).toFixed(0)+'%'; $('odtxt').textContent=act?'OVERDRIVE '+S.odT.toFixed(1)+' s':rdy?'OVERDRIVE · E':S.odLock>0?'Laddar om…':'OVERDRIVE '+Math.floor(S.od*100)+' %'+(S.odUsed?'':' · nöd redo'); }
   const fc=$('flowchip'); if(S.flowT>0){ if(hudFlow!==S.flow){ hudFlow=S.flow; fc.hidden=false; $('flowtxt').textContent='FLOW ×'+S.flow+' · +'+(15*S.flow)+' %'; } $('flowbar').style.width=(100*S.flowT/4).toFixed(0)+'%'; } else if(!fc.hidden){ fc.hidden=true; hudFlow=-1; }
