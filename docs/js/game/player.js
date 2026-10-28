@@ -23,7 +23,7 @@ function updatePlayer(dt){
   const recharge=S.combos.has('recharge');
   for(const m of squad){
     if(m.jumpDelay>=0){ m.jumpDelay-=dt; if(m.jumpDelay<0) doJump(m); }
-    if(m.duckDelay>=0){ m.duckDelay-=dt; if(m.duckDelay<0){ m.duckT=DUCK_T; if((m.jy||0)>0.05&&!m.pound){ m.pound=true; m.poundSpin=POUND_SPIN; m.flip=1; m.flipSpd=1/POUND_SPIN; m.vy=0; } } }
+    if(m.duckDelay>=0){ m.duckDelay-=dt; if(m.duckDelay<0){ m.duckT=DUCK_T; if((m.jy||0)>0.05&&!m.pound&&hasAbility('pound')){ m.pound=true; m.poundSpin=POUND_SPIN; m.flip=1; m.flipSpd=1/POUND_SPIN; m.vy=0; } } }
     if(m.poundSpin>0){ m.poundSpin-=dt; m.vy=m.poundSpin>0?0:POUND_V; } else m.vy=(m.vy||0)-GRAV*dt;
     m.jy=(m.jy||0)+m.vy*dt; if(m.jy<=0){ m.jy=0; m.vy=0; m.dbUsed=false; if(m.pound){ m.pound=false; groundPound(m); } }
     if(m.duckT>0) m.duckT=Math.max(0,m.duckT-dt);

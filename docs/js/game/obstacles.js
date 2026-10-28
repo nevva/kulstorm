@@ -3,7 +3,7 @@
 const JUMP_T=0.75,DUCK_T=0.85,GRAV=21.3,JUMP_V=8,DJUMP_V=10;
 // Jump is real vertical motion now: first press jumps, a second press in the air double-jumps (once).
 function doJump(m){
-  if((m.jy||0)>0.05){ if(OPT.dbljump&&!m.dbUsed){ m.vy=DJUMP_V; m.dbUsed=true; const p=m.g.position,ninj=hasPart('ninja'); for(let i=0;i<(ninj?14:6);i++) blobs.spawn(p.x+rand(-0.3,0.3),p.y,p.z+rand(-0.2,0.2),rand(-1,1),rand(-1,0),rand(-1,1),ninj?0.8:0.45,ninj?0.3:0.22,ninj?0.6:0.05,ninj?C(0x757575):WHITE,ninj?C(0x424242):C(0xe0e0e0),C(0x9e9e9e),-1,1.5,false,ninj?2:0); } }
+  if((m.jy||0)>0.05){ if(hasAbility('dbljump')&&!m.dbUsed){ m.vy=DJUMP_V; m.dbUsed=true; const p=m.g.position,ninj=hasPart('ninja'); for(let i=0;i<(ninj?14:6);i++) blobs.spawn(p.x+rand(-0.3,0.3),p.y,p.z+rand(-0.2,0.2),rand(-1,1),rand(-1,0),rand(-1,1),ninj?0.8:0.45,ninj?0.3:0.22,ninj?0.6:0.05,ninj?C(0x757575):WHITE,ninj?C(0x424242):C(0xe0e0e0),C(0x9e9e9e),-1,1.5,false,ninj?2:0); } }
   else { m.vy=JUMP_V; m.dbUsed=false; m.duckT=0; }
 }
 function squadWave(kind){
@@ -14,7 +14,7 @@ function squadWave(kind){
     if(kind==='jump'){ m.jumpDelay=d; m.duckDelay=-1; }
     else { m.duckDelay=d; m.jumpDelay=-1; }
   }
-  if(kind==='jump'){ if((headMember().jy||0)>0.05&&OPT.dbljump) sfx.jump2(); else sfx.jump(); if(S.pwNade>0) throwNade(); } else sfx.duck();
+  if(kind==='jump'){ if((headMember().jy||0)>0.05&&hasAbility('dbljump')) sfx.jump2(); else sfx.jump(); if(S.pwNade>0) throwNade(); } else sfx.duck();
   tutAct(kind);
 }
 const squadJump=()=>squadWave('jump'),squadDuck=()=>squadWave('duck');
@@ -83,7 +83,7 @@ function spawnObstacleSet(){
   for(const wl of walls) if(wl.g.position.z<VIEW.spawn+14){ nextObsAt+=20; return; }
   for(const c of chests) if(c.g.position.z<VIEW.spawn+10){ nextObsAt+=20; return; }
   const big=Math.min(0.35,0.1+dist/6000),r=Math.random();
-  const n=r<big?3:r<big+0.35?2:1,s=ri(0,LANES-n),tr=Math.random(),type=(OPT.dbljump&&dist>600&&tr<0.22)?'tall':(tr<0.61?'low':'high');
+  const n=r<big?3:r<big+0.35?2:1,s=ri(0,LANES-n),tr=Math.random(),type=(hasAbility('dbljump')&&dist>600&&tr<0.22)?'tall':(tr<0.61?'low':'high');
   spawnObstacle(type,s,n,VIEW.spawn);
   if(dist>800&&Math.random()<Math.min(0.45,dist/4000)) spawnObstacle(type==='high'?'low':'high',s,n,VIEW.spawn-8);
 }
@@ -115,9 +115,9 @@ const FLOW_COL=C(0xffc23d),OD_COL=C(0xfff6c8);
 function addFlow(n){ if(mode!=='playing') return; S.flow=Math.min(3,S.flow+n); S.flowT=4; hudFlow=-1; sfx.flow(); addOD(0.025*n); }
 // OVERDRIVE: a meter charged by kills, obstacle clears, Flow and walls; trigger for 6 s of ×3 damage, ×2 fire rate, piercing shots and invulnerability.
 const OD_T=6;
-function addOD(x){ if(!OPT.overdrive||mode!=='playing'||S.odT>0||S.odLock>0) return; const was=S.od; S.od=Math.min(1,S.od+x); if(was<1&&S.od>=1){ toast(tl('OVERDRIVE ready! Press E')); sfx.combo(); } }
+function addOD(x){ if(!hasAbility('overdrive')||mode!=='playing'||S.odT>0||S.odLock>0) return; const was=S.od; S.od=Math.min(1,S.od+x); if(was<1&&S.od>=1){ toast(tl('OVERDRIVE ready! Press E')); sfx.combo(); } }
 function triggerOD(force){
-  if(!OPT.overdrive||mode!=='playing'||S.odT>0||(S.od<1&&!force)) return;
+  if(!hasAbility('overdrive')||mode!=='playing'||S.odT>0||(S.od<1&&!force)) return;
   S.od=0; S.odT=OD_T; S.odUsed=true; tutAct('od'); sfx.odStart(); shake(1.2);
   if(S.divine>0) startDivine();
   for(const e of enemies){ if(e.dead||e.isBoss||e.under) continue; if(e.g.position.z>-22){ e.kb=Math.min(4,(e.kb||0)+2.6); e.stun=1; e.sq=1; } }

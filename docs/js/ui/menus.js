@@ -45,15 +45,16 @@ function renderShop(){
   });
 }
 // Armory: every item chests and walls can give. Unlocking one adds it to what can drop.
-function armoryItems(){ return POWERUPS.concat(UPGRADES).filter(u=>(OPT.team||u.kind!=='team')&&(OPT.unicorns||u.kind!=='pet')&&powerOn(u)); }
+function armoryItems(){ return ABILITIES.filter(u=>u.id==='pound'?OPT.obstacles:OPT[u.id]).concat(POWERUPS,UPGRADES).filter(u=>(OPT.team||u.kind!=='team')&&(OPT.unicorns||u.kind!=='pet')&&powerOn(u)); }
 const lockedItems=()=>armoryItems().filter(u=>unlocked.indexOf(u.id)<0).sort((a,b)=>itemPrice(a)-itemPrice(b));
 const affordableUnlocks=()=>lockedItems().filter(u=>bank>=itemPrice(u)).length;
-const KIND_NAME={power:'Power-up',gubbe:'Squad member',team:'Team perk',pet:'Helper'};
+const KIND_NAME={ability:'Ability',power:'Power-up',gubbe:'Squad member',team:'Team perk',pet:'Helper'};
 function renderArmory(){
   $('armorycoins').textContent=tl('{0} coins in the bank',fmt(bank));
   const all=armoryItems(),have=all.filter(u=>unlocked.indexOf(u.id)>=0).length;
   $('armorycount').textContent=tl('{0} of {1} items unlocked',have,all.length);
-  [['ar-power',['power']],['ar-gubbe',['gubbe']],['ar-team',['team','pet']]].forEach(([id,kinds])=>{
+  $('armorystack').textContent=stackMax()<5?tl('Enemies drop coins in stacks of up to {0}. The stacks grow the more runs you play.',stackMax()):tl('Enemies drop coins in full stacks of up to 5.');
+  [['ar-ability',['ability']],['ar-power',['power']],['ar-gubbe',['gubbe']],['ar-team',['team','pet']]].forEach(([id,kinds])=>{
     const box=$(id); box.innerHTML='';
     all.filter(u=>kinds.indexOf(u.kind)>=0).sort((a,b)=>itemPrice(a)-itemPrice(b)).forEach(u=>{
       const own=unlocked.indexOf(u.id)>=0,price=itemPrice(u);
@@ -63,7 +64,7 @@ function renderArmory(){
       const r=document.createElement('span'); r.className='rar'; r.textContent=RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
       const p=document.createElement('p'); p.textContent=u.desc; card.appendChild(p);
       const b=document.createElement('button'); b.type='button';
-      if(own){ b.textContent='✓ '+tl('In the chests'); b.disabled=true; }
+      if(own){ b.textContent='✓ '+tl(u.kind==='ability'?'Unlocked':'In the chests'); b.disabled=true; }
       else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); saveBank(); sfx.init(); sfx.upgrade(); renderArmory(); }); }
       else { b.textContent=tl('Costs {0} · {1} short',fmt(price),fmt(price-bank)); b.disabled=true; }
       card.appendChild(b); box.appendChild(card);

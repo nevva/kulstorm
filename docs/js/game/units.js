@@ -25,6 +25,9 @@ let benched=load('kulstorm_bench',[]);
 // Items unlocked in the Armory: only these come out of chests and walls. Lab runs, and play without coins, have everything.
 let unlocked=load('kulstorm_unlocked',STARTER_ITEMS.slice()),runsDone=load('kulstorm_runs',0);
 const isUnlocked=id=>labRun||!OPT.coins||unlocked.indexOf(id)>=0;
+// An ability works when its setting is on and it is unlocked.
+const hasAbility=id=>(id==='pound'?OPT.obstacles:OPT[id])&&isUnlocked(id);
+const stackMax=()=>labRun||!OPT.coins?5:coinStackMax(runsDone);
 function saveBank(){ store('kulstorm_coins',Math.round(bank)); store('kulstorm_owned',owned); store('kulstorm_hero',heroId); store('kulstorm_bench',benched); store('kulstorm_unlocked',unlocked); store('kulstorm_runs',runsDone); }
 // End of a real run: bank its coins and count it (the first runs are played at an easier pace, see easeK).
 function bankRun(){ if(labRun) return; if(OPT.coins&&coinsRun>0) bank+=coinsRun; runsDone++; saveBank(); }

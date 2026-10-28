@@ -227,7 +227,7 @@ function hurtMember(m,d,force){
   if(m.safeT>0){ d*=0.5; fxSparkle(p.x,1.2,p.z,pick(RAINBOW)); }
   m.hp-=d; m.hurtT=0.3;
   // Emergency OVERDRIVE: once per run, if you never fired it yourself, it saves you at 10 % HP (even from a lethal hit).
-  if(m===squad[0]&&OPT.overdrive&&!S.odUsed&&S.odT<=0&&m.hp<=m.maxHp*0.1){ m.hp=Math.max(m.hp,m.maxHp*0.25); triggerOD(true); sfx.heartbeat(); flashEl.classList.add('on'); setTimeout(()=>flashEl.classList.remove('on'),120); }
+  if(m===squad[0]&&hasAbility('overdrive')&&!S.odUsed&&S.odT<=0&&m.hp<=m.maxHp*0.1){ m.hp=Math.max(m.hp,m.maxHp*0.25); triggerOD(true); sfx.heartbeat(); flashEl.classList.add('on'); setTimeout(()=>flashEl.classList.remove('on'),120); }
   pushDmg(p.x,2.5,p.z,'-'+Math.round(d),'#ff5c7a',false);
   if(m===squad[0]){ flash(); shake(0.6); sfx.hurt(); } else { shake(0.2); sfx.hit(); }
   if(m.hp<=0){ m.hp=0; killMember(m); }

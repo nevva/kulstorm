@@ -53,9 +53,9 @@ function startGame(cfg){
   bossBar.hidden=true; $('newbest').hidden=true;
   mode='playing'; menuEl.hidden=true; overEl.hidden=true; hudEl.hidden=false;
   recomputeAuras(); updatePower(0,true); updateDifficulty(); updateHUD();
-  nextObsAt=dist+150; nextChestAt=dist+(easeK()>0?40:80); obsHinted={low:false,high:false,tall:false}; refreshKioskSign(); if(cfg.odFull&&OPT.overdrive) S.od=1;
+  nextObsAt=dist+150; nextChestAt=dist+(easeK()>0?40:80); obsHinted={low:false,high:false,tall:false}; refreshKioskSign(); if(cfg.odFull&&hasAbility('overdrive')) S.od=1;
   tutStart();
-  if(!tutWants('steer')) showHint(OPT.obstacles?tl('Drag sideways to steer · swipe up = jump, down = duck, down in the air = ground pound · run into a wall to headbutt it'):tl('Drag sideways to steer · run into a wall to headbutt it'));
+  if(!tutWants('steer')) showHint(OPT.obstacles?(hasAbility('pound')?tl('Drag sideways to steer · swipe up = jump, down = duck, down in the air = ground pound · run into a wall to headbutt it'):tl('Drag sideways to steer · swipe up = jump, down = duck · run into a wall to headbutt it')):tl('Drag sideways to steer · run into a wall to headbutt it'));
 }
 let last=performance.now();
 function frame(now){

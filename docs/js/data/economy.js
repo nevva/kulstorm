@@ -20,11 +20,21 @@ const POWERUPS=[
   {id:'divine',kind:'power',rarity:'epic',name:'Divine Touch',desc:'Your next Overdrive stops time: tap enemies to make them vanish. Bosses only get hurt, so tap them again and again',color:0xfff3a0},
   {id:'jackpot',kind:'power',rarity:'epic',name:'Jackpot',desc:'A rain of 60 coins',color:0xffd21f},
 ];
+// Abilities: permanent moves bought once in the Armory, priced as the first things a new player saves up for.
+// Each also needs its setting on. They never come out of chests.
+const ABILITIES=[
+  {id:'dbljump',kind:'ability',rarity:'common',name:'Double Jump',desc:'Jump again in the air. Tall spike barricades need it',color:0x8fd3ff},
+  {id:'pound',kind:'ability',rarity:'common',name:'Ground Pound',desc:'Duck in the air to slam down, hurting and knocking back enemies near the front',color:0xfff3c4},
+  {id:'overdrive',kind:'ability',rarity:'common',name:'Overdrive',desc:'Charge a meter and unleash 6 seconds of super mode. Saves you once at 10% health',color:0xffe066},
+];
+// Coin drops grow with experience: in the first runs every coin drops on its own, and the biggest stack an enemy can drop
+// grows by one every two runs, up to 5. Bosses drop four of the biggest stacks. Chest coins come in the same stacks.
+const coinStackMax=runs=>Math.min(5,1+Math.floor(runs/2));
 // Armory: what a new player has in the chests from the start, and the coin price to unlock the rest.
 // Unlocking buys a chance: the item can then come out of chests and walls.
 const STARTER_ITEMS=['cash','patch'];
 const RARITY_PRICE={common:60,rare:150,epic:320};
-const ITEM_PRICE={frenzy:25,recruit:30,power:35,steel:40,medic:45,fastload:45,bubble:80,bomb:90,battery:110,line:70,slowmo:100,nade:120,divine:300,jackpot:220};
+const ITEM_PRICE={dbljump:15,pound:20,overdrive:30,frenzy:25,recruit:30,power:35,steel:40,medic:45,fastload:45,bubble:80,bomb:90,battery:110,line:70,slowmo:100,nade:120,divine:300,jackpot:220};
 const itemPrice=u=>ITEM_PRICE[u.id]||RARITY_PRICE[u.rarity];
 // Coins a chest pays out instead when it rolls an item you have not unlocked.
 const LOCKED_COINS={common:5,rare:9,epic:16};

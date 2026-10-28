@@ -209,7 +209,7 @@ function killEnemy(e,byPlayer){
     if(xpOn()){ const v=(XP_VAL[e.isBoss?'boss':e.type]||1)*(DN.full&&DN.nightF>0.5?1.5:1); if((e.type!=='swarm'&&e.type!=='bats')||Math.random()<0.5) spawnXp(p.x+rand(-0.5,0.5),p.z+rand(-0.5,0.5),v); }
     if(OPT.coins){
       // Bosses and big enemies drop fixed amounts; small ones sometimes drop a stack worth 1-5.
-      const n=e.isBoss?20:e.type==='tank'?5:(e.type==='knight'||e.type==='necro'||e.type==='charger'||e.type==='bloater')?ri(2,4):(Math.random()<0.35*dropK?rollCoinStack():0);
+      const sm=stackMax(),n=e.isBoss?4*sm:e.type==='tank'?sm:(e.type==='knight'||e.type==='necro'||e.type==='charger'||e.type==='bloater')?Math.min(sm,ri(2,4)):(Math.random()<0.35*dropK?rollCoinStack():0);
       if(n) spawnCoins(p.x,p.z,n*(S.combos.has('goldrush')?2:1));
     }
   }

@@ -11,7 +11,7 @@ document.documentElement.lang=LANG;
 if(LANG==='sv'){
   const each=(list,...keys)=>list.forEach(o=>keys.forEach(k=>{ if(typeof o[k]==='string') o[k]=tl(o[k]); }));
   const all=o=>{ for(const k in o) o[k]=tl(o[k]); };
-  each(Object.values(WEAPONS),'name'); each(UPGRADES,'name','short','desc'); each(POWERUPS,'name','desc'); each(COMBOS,'name','desc'); each(HEROES,'name','desc'); each(TALENTS,'name','desc');
+  each(Object.values(WEAPONS),'name'); each(UPGRADES,'name','short','desc'); each(POWERUPS,'name','desc'); each(ABILITIES,'name','desc'); each(COMBOS,'name','desc'); each(HEROES,'name','desc'); each(TALENTS,'name','desc');
   each(OPT_DEFS,1,2); each(Object.values(TUTORIAL),'title','how','text'); each(ZONES,'name'); each(Object.values(WEATHER),'name');
   all(RARITY); all(ENEMY_NAMES); all(BOSS_NAMES);
   const walk=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);

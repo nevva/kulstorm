@@ -38,13 +38,13 @@ function tutCheck(){
       if(o.type==='high'&&tutWants('duck')&&dz<sp*0.3+0.3) return tutShow('duck');
       if(o.type==='tall'&&tutWants('tall')&&dz<sp*0.75) return tutShow('tall');
     }
-    if(tutSeen.jump&&tutWants('pound')&&dist>tutD0+40&&!obstacles.some(o=>o.z>hp.z-14&&o.z<hp.z+1)){
+    if(tutSeen.jump&&hasAbility('pound')&&tutWants('pound')&&dist>tutD0+40&&!obstacles.some(o=>o.z>hp.z-14&&o.z<hp.z+1)){
       for(const e of enemies){ if(e.dead||e.under||e.isBoss) continue; const q=e.g.position; if(q.z<hp.z&&Math.hypot(q.x-hp.x,q.z-hp.z)<POUND_R+1) return tutShow('pound'); }
     }
   }
   if(tutWants('chest')&&chests.some(c=>c.openT<0&&c.g.position.z>-22)) return tutShow('chest');
   if(tutWants('wall')&&walls.some(w=>!w.dead&&w.g.position.z>-22)) return tutShow('wall');
-  if(OPT.overdrive&&tutWants('od')&&S.od>=1&&!(S.odT>0)) return tutShow('od');
+  if(hasAbility('overdrive')&&tutWants('od')&&S.od>=1&&!(S.odT>0)) return tutShow('od');
 }
 // Tapping the card does what it asks, so it can never get stuck.
 tutEl.addEventListener('click',()=>{ if(!tutCur) return; const d=TUTORIAL[tutCur].do; if(d==='jump') squadJump(); else if(d==='duck') squadDuck(); else if(d==='od') triggerOD(); else tutHide(); });

@@ -36,7 +36,7 @@ function buildCoin(){
   const pile=[]; for(let i=0;i<5;i++){ const c=M(G.coin,coinMat,[0.24,0.06,0.24],[rand(-0.04,0.04),-0.2+i*0.075,rand(-0.04,0.04)],false); g.add(c); pile.push(c); }
   g.userData={one,pile}; return g;
 }
-function rollCoinStack(){ const r=Math.random(); return r<0.45?1:r<0.7?2:r<0.85?3:r<0.95?4:5; }
+function rollCoinStack(){ const r=Math.random(); return Math.min(stackMax(),r<0.45?1:r<0.7?2:r<0.85?3:r<0.95?4:5); }
 function spawnCoin(x,z,val){
   val=clamp(Math.round(val||1),1,5);
   const g=coinPool.pop()||buildCoin(),u=g.userData;
@@ -45,10 +45,10 @@ function spawnCoin(x,z,val){
   g.position.set(clamp(x,-HALF+0.3,HALF-0.3),0.55,z); g.rotation.set(0,rand(0,6),0); g.visible=true; scene.add(g);
   coins.push({g,val,t:rand(0,6),vz:rand(-1,1),vx:rand(-1,1),dead:false});
 }
-// Drop `total` coins as stacks of up to 5.
+// Drop `total` coins as stacks of up to stackMax().
 function spawnCoins(x,z,total,spread){
   spread=spread||0.8;
-  while(total>0){ const v=Math.min(5,total); spawnCoin(x+rand(-spread,spread),z+rand(-spread,spread),v); total-=v; }
+  while(total>0){ const v=Math.min(stackMax(),total); spawnCoin(x+rand(-spread,spread),z+rand(-spread,spread),v); total-=v; }
 }
 function updateCoins(dt){
   for(const c of coins){

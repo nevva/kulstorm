@@ -39,6 +39,8 @@ function hitChest(c,dmg,x,y,z){
 }
 // Power-ups that need an option that is off (Overdrive, jumping and rolling) never drop and are hidden in the Armory.
 const powerOn=u=>(OPT.overdrive||(u.id!=='battery'&&u.id!=='divine'))&&(OPT.obstacles||(u.id!=='nade'&&u.id!=='slowmo'));
+// Battery and Divine Touch only drop for real once Overdrive is unlocked; until then they are coin teasers like any locked item.
+const powerUsable=u=>hasAbility('overdrive')||(u.id!=='battery'&&u.id!=='divine');
 function chestPool(){
   return UPGRADES.filter(upgradeFits).concat(POWERUPS.filter(u=>(OPT.coins||(u.id!=='cash'&&u.id!=='jackpot'))&&powerOn(u)));
 }
@@ -57,7 +59,7 @@ function openChest(c){
   if(c.gold) grantItem(rollChest(true),p,true);
 }
 function grantItem(u,p,gold){
-  if(!isUnlocked(u.id)){
+  if(!isUnlocked(u.id)||(u.kind==='power'&&!powerUsable(u))){
     const n=Math.round(LOCKED_COINS[u.rarity]*(gold?3:1)*(1+dist/1500));
     spawnCoins(p.x,p.z,n,1.2);
     sayAt(p.x,2.6,p.z,u.name,'#b9bde0',tl('Locked · unlock it in the Armory'));
