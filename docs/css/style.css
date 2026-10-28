@@ -34,9 +34,10 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 .dist small{font-size:.42em;margin-left:5px;color:var(--paper);text-shadow:0 2px 0 rgba(0,0,0,.4)}
 .topright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .hudbtns{display:flex;gap:8px}
-#mute,#pausebtn{pointer-events:auto;width:42px;height:42px;border-radius:50%;border:0;background:rgba(13,16,48,.6);color:var(--paper);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+#mute,#pausebtn,#speedbtn{pointer-events:auto;width:42px;height:42px;border-radius:50%;border:0;background:rgba(13,16,48,.6);color:var(--paper);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+#speedbtn{font-family:var(--font-display);font-size:11px;font-variant-numeric:tabular-nums}
 #mute svg,#pausebtn svg{width:22px;height:22px}
-#pausebtn:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+#pausebtn:focus-visible,#speedbtn:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
 .btn.wide{width:100%;max-width:320px}
 .pinfo{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .pinfo .chip{font-size:11px;padding:4px 9px;font-family:inherit;cursor:pointer;border:2px solid transparent}

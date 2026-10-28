@@ -61,6 +61,7 @@ let last=performance.now();
 function frame(now){
   requestAnimationFrame(frame);
   let dt=(now-last)/1000; last=now; if(dt>0.05) dt=0.05;
+  if(mode==='playing'||mode==='divine') dt*=playSpeed();
   if(mode==='divine'){ updateDivine(dt); renderer.render(scene,camera); updateDmg(dt); return; }
   dt*=slowK();
   if(mode==='playing') tutCheck();

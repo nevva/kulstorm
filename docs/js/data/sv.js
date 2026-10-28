@@ -499,4 +499,6 @@ const SV={
   'Enemies drop coins in stacks of up to {0}. The stacks grow the more runs you play.':'Fiender tappar mynt i högar om upp till {0}. Högarna växer ju fler rundor du spelar.',
   'Enemies drop coins in full stacks of up to 5.':'Fiender tappar mynt i fulla högar om upp till 5.',
   'Drag sideways to steer · swipe up = jump, down = duck · run into a wall to headbutt it':'Dra åt sidan för att styra · svep upp = hopp, ner = ducka · spring in i en vägg för att skalla den',
+  'Game speed':'Spelhastighet',
+  'Game speed: {0}×. Press to change.':'Spelhastighet: {0}×. Tryck för att ändra.',
 };

@@ -7,6 +7,17 @@ function toast(txt,isBoss){ toastEl.textContent=txt; toastEl.classList.toggle('b
 let hintT=null;
 function showHint(txt){ hintEl.textContent=txt; hintEl.classList.add('show'); clearTimeout(hintT); hintT=setTimeout(()=>hintEl.classList.remove('show'),3800); }
 let hudDist=-1,hudHp=-1,hudShield=-1,hudCoins=-1;
+const speedBtn=$('speedbtn');
+function updateSpeedButton(){
+  const value=gameSpeed.toLocaleString(LANG==='sv'?'sv-SE':'en-US'),label=tl('Game speed: {0}×. Press to change.',value);
+  speedBtn.textContent=value+'×'; speedBtn.setAttribute('aria-label',label); speedBtn.title=label;
+}
+speedBtn.addEventListener('click',e=>{
+  gameSpeed=GAME_SPEEDS[(GAME_SPEEDS.indexOf(gameSpeed)+1)%GAME_SPEEDS.length];
+  store('kulstorm_speed',gameSpeed); updateSpeedButton();
+  if(e.detail>0) speedBtn.blur();
+});
+updateSpeedButton();
 function updateHUD(){
   const d=Math.floor(dist); if(d!==hudDist){ hudDist=d; distEl.textContent=fmt(d); }
   const L=squad[0];

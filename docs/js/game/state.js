@@ -8,6 +8,8 @@ function freshState(){ return {x:0,targetX:0,A:null,T:{dmg:1,rate:1,speed:1,hpBo
 S=freshState();
 // A new player's first runs are slower: the road scrolls slower, enemies come less often and toughen more gently. Gone after four runs.
 const easeK=()=>labRun?0:clamp(1-runsDone/4,0,1);
+// Every regular run eases into full pace over the first 300 m; Lab starts at the selected speed.
+const playSpeed=()=>gameSpeed*(labRun?1:0.65+0.35*clamp(dist/300,0,1));
 function updateDifficulty(){
   const e=easeK(),d=dist/100*(1-0.35*e);
   DIFF.hp=1+d*0.32+Math.pow(d,1.35)*0.03;
