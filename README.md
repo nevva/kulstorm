@@ -23,7 +23,7 @@ Run the development environment on your own computer with Docker and VS Code. Th
    code .
    ```
 
-3. Run **Dev Containers: Reopen in Container** from the command palette. Docker downloads the [Node 24 development image](https://github.com/devcontainers/images/tree/main/src/javascript-node) the first time; Node and Git are included, and no dependency installation is needed.
+3. Run **Dev Containers: Reopen in Container** from the command palette. Docker builds on the [Node 24 development image](https://github.com/devcontainers/images/tree/main/src/javascript-node) the first time and installs Codex CLI, Claude Code, and GitHub CLI (`gh`). Node and Git are included; the game needs no dependency installation.
 4. Open a terminal inside VS Code and run:
 
    ```sh
@@ -33,6 +33,32 @@ Run the development environment on your own computer with Docker and VS Code. Th
 VS Code forwards port 8000 and opens the game in your browser. If it does not open automatically, use http://localhost:8000 or the address in VS Code's **Ports** tab. Your edits stay in your local checkout, and changes under `docs/` reload the game automatically.
 
 Press **Ctrl+C** in the terminal to stop the server. Run `node dev.js` again after reopening the container. If you change `.devcontainer/devcontainer.json`, run **Dev Containers: Rebuild Container** to apply it. See the [VS Code devcontainer guide](https://code.visualstudio.com/docs/devcontainers/create-dev-container) for more details.
+
+### Coding assistants and GitHub login
+
+The container includes the `codex`, `claude`, and `gh` commands, plus the Codex and Claude Code VS Code extensions. If you already have the older container, run **Dev Containers: Rebuild Container** first.
+
+Run these sign-in commands one at a time from a terminal inside the container:
+
+```sh
+codex login --device-auth
+claude auth login
+gh auth login --hostname github.com --git-protocol https --web --insecure-storage
+```
+
+Follow each command's browser instructions. Codex device login must be enabled in your ChatGPT account or workspace settings. If unavailable, run `codex login` instead; port 1455 is forwarded for its browser callback. For Claude, copy the displayed login URL into your browser and paste the resulting code into the terminal if the browser cannot return to the container. The GitHub login uses file storage so it survives rebuilding; Git is already configured to use `gh` for HTTPS credentials on github.com.
+
+Three Docker named volumes keep the login state and settings outside the repository:
+
+| Tool | Persistent directory | Volume name |
+| --- | --- | --- |
+| Codex | `/home/node/.codex` | `kulstorm-codex-<devcontainerId>` |
+| Claude Code | `/home/node/.claude` | `kulstorm-claude-<devcontainerId>` |
+| GitHub CLI | `/home/node/.config/gh` | `kulstorm-gh-<devcontainerId>` |
+
+Codex uses file-based credential storage. `CLAUDE_CONFIG_DIR` keeps Claude's separate `.claude.json` state inside its volume too. Rebuilds reuse these volumes for the same local checkout. Deleting the volumes or moving to a different checkout/computer requires signing in again; expired or revoked sessions may also need a new login. The volumes contain credentials, including plain text tokens, so keep them private. Existing host logins are not copied into them automatically.
+
+See the official [Codex authentication](https://developers.openai.com/codex/auth), [Claude devcontainer persistence](https://code.claude.com/docs/en/devcontainer#persist-authentication-and-settings-across-rebuilds), and [GitHub CLI login](https://cli.github.com/manual/gh_auth_login) documentation.
 
 ## Release
 

@@ -1,12 +1,37 @@
 {
   "name": "Kulstorm",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:24-bookworm",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
   "remoteUser": "node",
-  "forwardPorts": [8000],
+  "containerEnv": {
+    "CODEX_HOME": "/home/node/.codex",
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+    "GH_CONFIG_DIR": "/home/node/.config/gh"
+  },
+  "mounts": [
+    "source=kulstorm-codex-${devcontainerId},target=/home/node/.codex,type=volume",
+    "source=kulstorm-claude-${devcontainerId},target=/home/node/.claude,type=volume",
+    "source=kulstorm-gh-${devcontainerId},target=/home/node/.config/gh,type=volume"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": ["openai.chatgpt", "anthropic.claude-code"]
+    }
+  },
+  "forwardPorts": [8000, 1455],
   "portsAttributes": {
     "8000": {
       "label": "Kulstorm dev server",
       "onAutoForward": "openBrowser"
+    },
+    "1455": {
+      "label": "Codex sign-in",
+      "onAutoForward": "silent",
+      "requireLocalPort": true
     }
   }
 }
