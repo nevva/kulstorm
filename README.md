@@ -10,6 +10,30 @@ node dev.js          # or node dev.js 3000
 
 Then open http://localhost:8000 (in a Codespace, use the forwarded port). The page reloads whenever a file under `docs/` changes, and nothing is cached. Without Node, `python3 -m http.server 8000 -d docs` serves the same files without the reload.
 
+### Local devcontainer
+
+Run the development environment on your own computer with Docker and VS Code. The container runs locally, so Codespaces idle timeouts and usage limits do not apply.
+
+1. Install and start [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine on Linux), then install [VS Code](https://code.visualstudio.com/) and its [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+2. Clone the repository onto your computer and open it in VS Code:
+
+   ```sh
+   git clone https://github.com/nevva/kulstorm.git
+   cd kulstorm
+   code .
+   ```
+
+3. Run **Dev Containers: Reopen in Container** from the command palette. Docker downloads the [Node 24 development image](https://github.com/devcontainers/images/tree/main/src/javascript-node) the first time; Node and Git are included, and no dependency installation is needed.
+4. Open a terminal inside VS Code and run:
+
+   ```sh
+   node dev.js
+   ```
+
+VS Code forwards port 8000 and opens the game in your browser. If it does not open automatically, use http://localhost:8000 or the address in VS Code's **Ports** tab. Your edits stay in your local checkout, and changes under `docs/` reload the game automatically.
+
+Press **Ctrl+C** in the terminal to stop the server. Run `node dev.js` again after reopening the container. If you change `.devcontainer/devcontainer.json`, run **Dev Containers: Rebuild Container** to apply it. See the [VS Code devcontainer guide](https://code.visualstudio.com/docs/devcontainers/create-dev-container) for more details.
+
 ## Release
 
 ```

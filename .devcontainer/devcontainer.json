@@ -1,0 +1,12 @@
+{
+  "name": "Kulstorm",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24-bookworm",
+  "remoteUser": "node",
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "Kulstorm dev server",
+      "onAutoForward": "openBrowser"
+    }
+  }
+}
