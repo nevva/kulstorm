@@ -1,6 +1,6 @@
 # kulstorm
 
-A lane-runner shooter built with three.js, served from `docs/` by GitHub Pages. There is no build step.
+An experimental lane-runner shooter built with three.js. For now, it is served from `docs/` by GitHub Pages. There is no build step.
 
 ## Run locally
 
