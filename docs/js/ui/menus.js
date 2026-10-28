@@ -2,7 +2,7 @@
 // ---------- menu, shop, lab, options
 const PANELS=['main','shop','armory','lab','opts','heroprog'];
 function showMenu(which){
-  if(mode==='menu') menuSky=true;
+  if(mode==='menu'){ menuSky=true; labRun=false; }
   PANELS.forEach(p=>{ $('menu-'+p).hidden=p!==which; });
   menuEl.hidden=false; menuEl.scrollTop=0;
   if(which==='main') renderMain(); if(which==='shop') renderShop(); if(which==='armory') renderArmory(); if(which==='lab') renderLab(); if(which==='opts') renderOpts(); if(which==='heroprog') renderHeroProg();
@@ -26,7 +26,7 @@ function renderShop(){
     const card=document.createElement('div'); card.className='hero'+(sel?' sel':'');
     const sw=document.createElement('div'); sw.className='sw'; sw.style.background=hexCss(h.shirt); card.appendChild(sw);
     const t=document.createElement('h4'); t.textContent=h.name; card.appendChild(t);
-    const p=document.createElement('p'); p.textContent=h.desc; card.appendChild(p);
+    const p=document.createElement('p'); p.textContent=h.desc+' · '+tl('Base health: {0} HP',memberBaseHealth(leaderDef(h))); card.appendChild(p);
     const b=document.createElement('button'); b.type='button';
     const joins=own&&!sel&&h.price>0;
     if(sel){ b.textContent=tl('Selected'); b.disabled=true; }
@@ -62,7 +62,7 @@ function renderArmory(){
       const sw=document.createElement('div'); sw.className='sw'; sw.style.background=WALL_CSS[u.rarity]; card.appendChild(sw);
       const t=document.createElement('h4'); t.textContent=u.name; card.appendChild(t);
       const r=document.createElement('span'); r.className='rar'; r.textContent=(u.id==='payback'&&!own?tl('First upgrade')+' · ':'')+RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
-      const p=document.createElement('p'); p.textContent=u.desc; card.appendChild(p);
+      const p=document.createElement('p'); p.textContent=u.desc+(u.kind==='gubbe'?' · '+tl('Base health: {0} HP',memberBaseHealth(u)):''); card.appendChild(p);
       const b=document.createElement('button'); b.type='button';
       if(own){ b.textContent='✓ '+tl(u.kind==='ability'?'Unlocked':'In the chests'); b.disabled=true; }
       else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); saveBank(); sfx.init(); sfx.upgrade(); renderArmory(); }); }

@@ -11,6 +11,7 @@ const WEAPONS={
   shuriken:{id:'shuriken',name:'Shuriken',rate:2.4,dmg:13,bullets:3,spread:0.3,jitter:0.03,speed:24,size:1.1,color:0xcfd8dc,shuriken:true},
 };
 const STARTING_FIRE_RATE_MULTIPLIER=0.5;
+const STARTING_HEALTH_MULTIPLIER=0.5;
 // kind 'gubbe': a wall adds this squad member; kind 'team': a wall grants the whole squad a permanent perk.
 const UPGRADES=[
   {id:'smg',kind:'gubbe',weapon:'smg',rarity:'common',name:'SMG Gunner',short:'SMG',desc:'Fires fast with light bullets',shirt:0x80deea},
@@ -28,8 +29,8 @@ const UPGRADES=[
   {id:'bounce',kind:'gubbe',rarity:'epic',name:'Bouncer',short:'Bounce',desc:'Everyone\'s bullets bounce off the road edges',shirt:0x8cff3a,unique:true},
   {id:'shield',kind:'gubbe',rarity:'rare',name:'Shield Bearer',short:'Shield',desc:'Blocks the next three hits on the squad',shirt:0x49c3ff},
   {id:'medic',kind:'gubbe',rarity:'common',name:'Field Medic',short:'Medic',desc:'Heals everyone 30 now and 1 HP/s while he lives',shirt:0xffffff},
-  {id:'tank',kind:'gubbe',rarity:'rare',name:'The Tank',short:'Tank',desc:'200 HP and takes the front',shirt:0x546e7a,hp:200},
-  {id:'recruit',kind:'gubbe',rarity:'common',name:'Recruit',short:'Recruit',desc:'A plain extra squad member with a pistol, 80 HP',shirt:0x7cb342,hp:80},
+  {id:'tank',kind:'gubbe',rarity:'rare',name:'The Tank',short:'Tank',desc:'Extra health and takes the front',shirt:0x546e7a,hp:200},
+  {id:'recruit',kind:'gubbe',rarity:'common',name:'Recruit',short:'Recruit',desc:'A plain extra squad member with a pistol',shirt:0x7cb342,hp:80},
   {id:'bigbullets',kind:'gubbe',rarity:'common',name:'Cannoneer',short:'Cannon',desc:'+30% bigger bullets for everyone',shirt:0xef5350},
   {id:'veteran',kind:'gubbe',rarity:'epic',name:'The Veteran',short:'Veteran',desc:'His damage grows with the damage he deals: +100% per 1500 damage',shirt:0xff7a00},
   {id:'ninja',kind:'gubbe',weapon:'shuriken',rarity:'epic',name:'The Ninja',short:'Ninja',desc:'Throws shuriken that pass through enemies. Takes no damage when he headbutts walls',shirt:0x1c1c24,unique:true},
@@ -67,10 +68,10 @@ const COMBOS=[
   {id:'hawk',name:'Hawk Eye',a:'eagle',b:'crit',desc:'+10% critical hit chance for everyone'},
 ];
 const HEROES=[
-  {id:'rookie',name:'Rookie',price:0,desc:'100 HP and a pistol. The standard hero.',shirt:0xff5c7a,hp:100,weapon:'pistol'},
-  {id:'wall',name:'The Juggernaut',price:150,desc:'170 HP, but 15% slower sideways.',shirt:0x546e7a,hp:170,weapon:'pistol',speed:0.85},
-  {id:'gunner',name:'The Gunner',price:250,desc:'90 HP, starts with an SMG and +15% fire rate.',shirt:0x80deea,hp:90,weapon:'smg',T:{rate:1.15}},
-  {id:'twin',name:'The Twin',price:350,desc:'Starts with a Recruit (80 HP) in the squad.',shirt:0x7cb342,hp:100,weapon:'pistol',extras:['recruit']},
+  {id:'rookie',name:'Rookie',price:0,desc:'A pistol. The standard hero.',shirt:0xff5c7a,hp:100,weapon:'pistol'},
+  {id:'wall',name:'The Juggernaut',price:150,desc:'Extra health, but 15% slower sideways.',shirt:0x546e7a,hp:170,weapon:'pistol',speed:0.85},
+  {id:'gunner',name:'The Gunner',price:250,desc:'Starts with an SMG and +15% fire rate.',shirt:0x80deea,hp:90,weapon:'smg',T:{rate:1.15}},
+  {id:'twin',name:'The Twin',price:350,desc:'Starts with a Recruit in the squad.',shirt:0x7cb342,hp:100,weapon:'pistol',extras:['recruit']},
   {id:'mogul',name:'The Mogul',price:500,desc:'+50% coins and a Magnet Man from the start.',shirt:0xffd21f,hp:100,weapon:'pistol',coinMult:1.5,extras:['magnet']},
   {id:'legend',name:'The Legend',price:1200,desc:'Shotgun, 3 shield charges and +20% damage from the start.',shirt:0xb07cff,hp:110,weapon:'shotgun',shield:3,T:{dmg:1.2}},
 ];

@@ -118,7 +118,7 @@ function cycleFront(dir){ return;
 }
 function addMember(def){
   const g=buildGubbe(def); scene.add(g);
-  const hp=(def.hp||60)+(def.id==='leader'?0:S.T.hpBonus);
+  const hp=memberBaseHealth(def)+(def.id==='leader'?0:S.T.hpBonus);
   const m={def,g,hp,maxHp:hp,cd:rand(0,0.3),phase:rand(0,6.3),recoil:0,beams:[],laserTick:rand(0,0.1),invuln:0,charges:def.id==='shield'?3:0,rt:0,hurtT:0,slot:FORM[0],dead:false,dealt:0,lvl:1,jumpT:0,duckT:0,jumpDelay:-1,duckDelay:-1,jy:0,vy:0,dbUsed:false,flip:0};
   squad.push(m); runAddMember(m);
   if(def.id==='tank'&&OPT.front){ S.frontM=m; }
