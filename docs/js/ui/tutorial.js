@@ -1,7 +1,7 @@
 'use strict';
 // ---------- tutorial: each ability gets a card the first time it is useful, timed so that doing it right then works.
 // The game freezes (the music keeps going) until the player does what the card asks; the action then lands at that moment.
-// Seen cards are saved; "Visa guiden igen" in the settings clears them. The texts live in js/data/tutorial.js.
+// Seen cards are saved; "Show tutorial again" in the settings clears them. The texts live in js/data/tutorial.js.
 const tutEl=$('tut');
 let tutSeen=load('kulstorm_tut',{}),tutCur=null,tutNext=null,tutNextT=0,tutD0=0;
 const tutOn=()=>!!tutCur;
@@ -9,7 +9,7 @@ const tutWants=id=>OPT.tutorial&&!tutSeen[id];
 function tutShow(id){
   const c=TUTORIAL[id]; tutCur=id; tutSeen[id]=true; store('kulstorm_tut',tutSeen); tutNext=null;
   $('tut-title').textContent=c.title; $('tut-how').textContent=c.how; $('tut-text').textContent=c.text;
-  $('tut-foot').textContent=c.do==='ok'?'Tryck för att fortsätta':'Spelet väntar tills du gör det';
+  $('tut-foot').textContent=c.do==='ok'?tl('Tap to continue'):tl('The game waits until you do it');
   keys.l=keys.r=false; if(c.do==='steer') S.targetX=S.x; tutEl.hidden=false; sfx.zone();
 }
 function tutHide(){

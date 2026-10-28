@@ -2,7 +2,7 @@
 // Loads the game. Every file is a classic script sharing one global scope, so ORDER MATTERS:
 // a file may use anything defined in the files before it at load time, and anything at all inside functions.
 //   data/   pure data tables, portable to any engine
-//   core/   small helpers, DOM lookups, saved settings
+//   core/   language, small helpers, DOM lookups, saved settings
 //   render/ three.js: renderer, materials, sky, world, particles, projectiles
 //   audio/  WebAudio sound effects and generated music
 //   game/   game rules and entities (still drawn with three.js objects)
@@ -16,6 +16,8 @@ const FILES=[
   'data/economy.js',
   'data/music.js',
   'data/tutorial.js',
+  'data/sv.js',
+  'core/i18n.js',
   'core/helpers.js',
   'core/options.js',
   'render/materials.js',
@@ -49,7 +51,8 @@ const FILES=[
   'game/run.js',
 ];
 if(!window.THREE){
-  document.getElementById('menu-msg').textContent='3D-motorn kunde inte laddas. Kontrollera nätet och ladda om sidan.';
+  let sv=false; try{ sv=JSON.parse(localStorage.getItem('kulstorm_lang'))==='sv'; }catch(e){}
+  document.getElementById('menu-msg').textContent=sv?'3D-motorn kunde inte laddas. Kontrollera nätet och ladda om sidan.':'The 3D engine could not load. Check your connection and reload the page.';
   document.getElementById('play').disabled=true;
 } else {
   for(const f of FILES){

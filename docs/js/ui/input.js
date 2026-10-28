@@ -11,7 +11,7 @@ document.addEventListener('pointerlockchange',()=>{ if(!locked()&&mode==='playin
 document.addEventListener('mousemove',e=>{ if(locked()&&mode==='playing') S.targetX=clamp(S.targetX+e.movementX*0.012*mouseSens,-HALF+0.5,HALF-0.5); });
 document.addEventListener('mousedown',e=>{ if(locked()&&mode==='playing'){ e.preventDefault(); mouseButton(e.button); } });
 canvas.addEventListener('contextmenu',e=>{ if(mode==='playing') e.preventDefault(); });
-canvas.addEventListener('mousemove',()=>{ if(OPT.mouse&&mode==='playing'&&!locked()&&!mouseHinted){ mouseHinted=true; showHint('Klicka för att ta muskontroll · Esc släpper'); } });
+canvas.addEventListener('mousemove',()=>{ if(OPT.mouse&&mode==='playing'&&!locked()&&!mouseHinted){ mouseHinted=true; showHint(tl('Click to take mouse control · Esc releases')); } });
 canvas.addEventListener('pointerdown',e=>{
   if(mode!=='playing') return;
   if(e.pointerType==='mouse'&&OPT.mouse){

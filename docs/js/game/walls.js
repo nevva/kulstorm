@@ -29,7 +29,7 @@ function signTexture(u,boss){
   if(boss){ x.strokeStyle='#ffc83d'; x.lineWidth=14; x.strokeRect(7,7,498,370); }
   x.textAlign='center'; x.textBaseline='middle';
   x.fillStyle='#0d1030'; x.font='800 30px Nunito, sans-serif';
-  x.fillText((boss?'BOSSBELÖNING · ':u.kind==='team'?'FÖR ALLA · ':u.kind==='pet'?'HJÄLPREDA · ':'NY GUBBE · ')+RARITY[u.rarity].toUpperCase(),256,38);
+  x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
   let fs=54; x.font=fs+'px Bungee, Impact, sans-serif';
   while(x.measureText(u.name).width>470&&fs>28){ fs-=4; x.font=fs+'px Bungee, Impact, sans-serif'; }
   x.fillStyle=u.kind==='gubbe'?hexCss(u.shirt):'#0d1030';
@@ -63,8 +63,8 @@ function spawnWalls(lanes,boss){
     const g=buildWall(u,boss); g.position.set(LANE_X[lane],0,VIEW.spawn); scene.add(g);
     walls.push({u,g,lane,hp,maxHp:hp,dead:false,flash:0,sq:0,colL:g.userData.m.color,accDmg:0,accTier:0,accT:-1,boss:!!boss,gid});
   });
-  if(boss){ toast('Bossbelöning! Välj en'); sfx.combo(); }
-  else { toast(picks.length>1?'Uppgraderingar!':'Uppgradering!'); sfx.zone(); }
+  if(boss){ toast(tl('Boss reward! Pick one')); sfx.combo(); }
+  else { toast(picks.length>1?tl('Upgrades!'):tl('Upgrade!')); sfx.zone(); }
 }
 function spawnRandomWalls(){
   const a=ri(0,LANES-1);
@@ -90,8 +90,8 @@ function breakWall(w){
   removeWall(w);
   if(w.gid) for(const o of walls){ if(o!==w&&!o.dead&&o.gid===w.gid){ o.dead=true; fxShatter(o.g.position.x,o.g.position.z,wallPieceMat(o),o.boss?wallGoldMat:wallPostMat,0.7); removeWall(o); } }
   if(OPT.coins) spawnCoin(p.x+rand(-0.5,0.5),p.z,3);
-  if(w.u.kind==='pet'){ addUnicorn(); toast('En enhörning ansluter!'); }
-  else if(w.u.kind==='gubbe'){ const m=addMember(w.u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(w.u.shirt)); toast(w.u.name+' ansluter!'); }
+  if(w.u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }
+  else if(w.u.kind==='gubbe'){ const m=addMember(w.u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(w.u.shirt)); toast(tl('{0} joins!',w.u.name)); }
   else { applyTeamPerk(w.u); toast(w.u.name+'!'); }
   sfx.upgrade();
 }
@@ -115,7 +115,7 @@ function updateWalls(dt){
         h.stars=1.2;
         breakWall(w);
         for(let i=0;i<14;i++){ const a=rand(-1.2,1.2),sp=rand(4,9); chunks.spawn(p.x+rand(-1.5,1.5),rand(0.4,2.2),p.z,Math.sin(a)*sp,rand(2,6),-Math.cos(a)*sp*0.6-2,rand(0.8,1.4),0.34,0.18,w.colL,w.colL,SMOKE2,16,0.4,true,rand(4,12)); }
-        if(h.def.id!=='ninja') pushDmg(hp.x,3.2,hp.z,'HIYAA','#ffd21f',true,true,'SKALLA STJÄRNA');
+        if(h.def.id!=='ninja') pushDmg(hp.x,3.2,hp.z,'HIYAA','#ffd21f',true,true,tl('HEADBUTT STAR'));
         shake(1.0); sfx.smack();
         if(h.def.id==='ninja'){ h.flip=1; for(let i=0;i<12;i++) blobs.spawn(hp.x+rand(-0.5,0.5),rand(0.3,1.8),hp.z+rand(-0.5,0.5),rand(-1.5,1.5),rand(0.5,1.5),rand(-1.5,1.5),rand(0.6,0.9),0.3,0.7,C(0x9e9e9e),C(0x616161),C(0x424242),-1,2,false,rand(1,3)); pushDmg(hp.x,2.6,hp.z,'NINJA!','#e53935',true,true); }
         else hurtMember(h,d,true);

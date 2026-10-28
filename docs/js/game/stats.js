@@ -40,14 +40,14 @@ function creditDamage(dmg,owner){
 // Rows for the summary, biggest damage first. Sources without damage (Magnet, Sköld…) come last with their description.
 function runSummary(){
   const rows=[],src=RUN.src,dmgOf=k=>src[k]||0;
-  for(const m of RUN.members) rows.push({name:m.def.id==='leader'?'Du · '+WEAPONS[m.def.weapon||'pistol'].name:m.def.name,kind:'Gubbe'+(m.dead&&m.def.id!=='leader'?' · stupade':''),dmg:dmgOf('m:'+m.uid),desc:m.def.desc});
+  for(const m of RUN.members) rows.push({name:m.def.id==='leader'?tl('You')+' · '+WEAPONS[m.def.weapon||'pistol'].name:m.def.name,kind:tl('Squad member')+(m.dead&&m.def.id!=='leader'?' · '+tl('fallen'):''),dmg:dmgOf('m:'+m.uid),desc:m.def.desc});
   const perks={}; S.perks.forEach(p=>{ perks[p.id]=perks[p.id]||{p,n:0}; perks[p.id].n++; });
-  for(const id in perks){ const {p,n}=perks[id]; rows.push({name:p.name+(n>1?' ×'+n:''),kind:'Lagvinst',dmg:dmgOf('p:'+id),desc:p.desc}); }
-  for(const c of COMBOS) if(RUN.combos.has(c.id)) rows.push({name:c.name,kind:'Kombo',dmg:dmgOf('c:'+c.id),desc:c.desc});
-  if(src['a:od']) rows.push({name:'Overdrive',kind:'Förmåga',dmg:src['a:od']});
-  if(src['a:flow']) rows.push({name:'Flow',kind:'Förmåga',dmg:src['a:flow']});
-  if(src['a:pound']) rows.push({name:'Markstöt',kind:'Förmåga',dmg:src['a:pound']});
-  if(src['x:weather']) rows.push({name:'Åska och väder',kind:'Väder',dmg:src['x:weather']});
+  for(const id in perks){ const {p,n}=perks[id]; rows.push({name:p.name+(n>1?' ×'+n:''),kind:tl('Team perk'),dmg:dmgOf('p:'+id),desc:p.desc}); }
+  for(const c of COMBOS) if(RUN.combos.has(c.id)) rows.push({name:c.name,kind:tl('Combo'),dmg:dmgOf('c:'+c.id),desc:c.desc});
+  if(src['a:od']) rows.push({name:'Overdrive',kind:tl('Ability'),dmg:src['a:od']});
+  if(src['a:flow']) rows.push({name:'Flow',kind:tl('Ability'),dmg:src['a:flow']});
+  if(src['a:pound']) rows.push({name:tl('Ground pound'),kind:tl('Ability'),dmg:src['a:pound']});
+  if(src['x:weather']) rows.push({name:tl('Thunder and weather'),kind:tl('Weather'),dmg:src['x:weather']});
   rows.sort((a,b)=>b.dmg-a.dmg);
   return rows;
 }

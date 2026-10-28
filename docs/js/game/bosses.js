@@ -154,7 +154,7 @@ const BOSS_AI={
       if(b.st_t<=0){ b.st='strike'; b.st_t=0.6; b.hit=false; sfx.jump(); }
     } else if(b.st==='strike'){
       b.st_t-=dt; const k=Math.sin(Math.PI*clamp(1-b.st_t/0.6,0,1)); b.lunge=k*8; u.head.rotation.x=0.2; u.jaw.rotation.x=0.7*k;
-      if(!b.hit&&b.st_t<0.3){ b.hit=true; laneHit(b.lane,24,'BETT!',VENOM); spawnPuddle(b.lane,LANE_X[b.lane],-3); }
+      if(!b.hit&&b.st_t<0.3){ b.hit=true; laneHit(b.lane,24,tl('BITE!'),VENOM); spawnPuddle(b.lane,LANE_X[b.lane],-3); }
       if(b.st_t<=0){ b.st='idle'; b.lunge=0; b.cd=1.4; b.wt=Math.asin(clamp(p.x/4.1,-1,1))/0.9; }
     } else {
       b.wt=(b.wt||0)+dt; const tx=e.hold?X(b.wt):0; p.x+=(tx-p.x)*(1-Math.exp(-dt*4));
@@ -179,7 +179,7 @@ const BOSS_AI={
     while(b.heads>want){
       const alive=hs.filter((h,i)=>!h.dead&&i!==1),h=alive.length?pick(alive):hs[1]; h.dead=true; b.heads--;
       const q=headPos(e,h); fxExplosion(q[0],q[1],q[2],1.6,FIREB); sfx.explode(2); shake(0.8);
-      h.grp.visible=false; h.neck.forEach(n=>n.visible=false); sayAt(q[0],q[1]+1,q[2],b.heads===2?'Ett huvud föll!':'Bara ett huvud kvar!','#ff5c7a',b.heads===2?'Draken blir rasande':'');
+      h.grp.visible=false; h.neck.forEach(n=>n.visible=false); sayAt(q[0],q[1]+1,q[2],b.heads===2?tl('A head fell!'):tl('Only one head left!'),'#ff5c7a',b.heads===2?tl('The dragon is enraged'):'');
     }
     const rage=1+(3-b.heads)*0.35;
     hs.forEach((h,i)=>{
@@ -208,7 +208,7 @@ const BOSS_AI={
     } else { // fire rains on lanes, one more lane per lost head
       const lanes=shuffle([0,1,2]).slice(0,Math.min(2,4-b.heads));
       if(lanes.indexOf(laneOf(S.x))<0) lanes[0]=laneOf(S.x);
-      lanes.forEach(l=>{ laneWarn(l,1.3,0xff8a1f); b.q.push({t:1.3,fn:()=>{ laneHit(l,22,'ELD!',FIREB); for(let z=-6;z<3;z+=1.5) fxFlame(LANE_X[l]+rand(-1.4,1.4),0.4,z); }}); });
+      lanes.forEach(l=>{ laneWarn(l,1.3,0xff8a1f); b.q.push({t:1.3,fn:()=>{ laneHit(l,22,tl('FIRE!'),FIREB); for(let z=-6;z<3;z+=1.5) fxFlame(LANE_X[l]+rand(-1.4,1.4),0.4,z); }}); });
       b.cd=2.6/rage;
     }
   },
@@ -236,7 +236,7 @@ const BOSS_AI={
       const n=Math.max(0,Math.min(e.hp<e.maxHp*0.5?6:4,14-alive));
       for(let i=0;i<n;i++){ const l=i%LANES; pendSpawn.push({t:i*0.12,type:'spiderling',lane:l,x:LANE_X[l]+rand(-1,1),z:p.z+1.5}); }
       for(let i=0;i<10;i++) blobs.spawn(p.x+rand(-1,1),1.5,p.z-1.6,rand(-2,2),rand(1,3),rand(0,2),0.6,0.3,0.05,WHITE,C(0xce93d8),C(0x4a2a6a),-1,1,false,0);
-      if(n>0) sayAt(p.x,3.4,p.z,'Spindelungar!','#ce93d8'); b.cd=2.2;
+      if(n>0) sayAt(p.x,3.4,p.z,tl('Spiderlings!'),'#ce93d8'); b.cd=2.2;
     } else { // leap to a new spot and land with a web burst
       b.st='leap'; b.st_t=0.8; b.x0=p.x; b.tx=clamp(S.x+rand(-2,2),-3.6,3.6); sfx.jump(); b.cd=99;
     }
@@ -249,14 +249,14 @@ const BOSS_AI={
     b.arm+=((b.st==='wind'?1:0)-b.arm)*(1-Math.exp(-dt*(b.st==='wind'?3:14)));
     u.arms.forEach((a,i)=>{ a.rotation.x=-b.arm*2.6+Math.sin(e.t*2+i*3)*0.15; a.rotation.z=(i?-1:1)*b.arm*0.3; });
     u.body.rotation.x=-b.arm*0.15;
-    if(b.st==='wind'){ b.st_t-=dt; if(b.st_t<=0){ b.st='idle'; b.cd=1.5; b.lanes.forEach(l=>laneHit(l,26,'KROSS!',ROCK)); sfx.explode(2); } return; }
+    if(b.st==='wind'){ b.st_t-=dt; if(b.st_t<=0){ b.st='idle'; b.cd=1.5; b.lanes.forEach(l=>laneHit(l,26,tl('CRUSH!'),ROCK)); sfx.explode(2); } return; }
     if(!act) return;
     b.cd-=dt; if(b.cd>0) return;
     b.n++;
     const angry=e.hp<e.maxHp*0.5;
     if(b.n%2===1){ // slam one lane (two when angry), or quake all but one lane
       let lanes=[laneOf(S.x)];
-      if(angry&&b.n%4===3){ const safe=ri(0,2); lanes=[0,1,2].filter(l=>l!==safe); sayAt(e.g.position.x,4.6,e.g.position.z,'Jordbävning!','#ff5c7a','Hitta den säkra filen'); }
+      if(angry&&b.n%4===3){ const safe=ri(0,2); lanes=[0,1,2].filter(l=>l!==safe); sayAt(e.g.position.x,4.6,e.g.position.z,tl('Earthquake!'),'#ff5c7a',tl('Find the safe lane')); }
       else if(angry){ const o=ri(0,1); lanes.push([0,1,2].filter(l=>l!==lanes[0])[o]); }
       b.st='wind'; b.st_t=1.4; b.lanes=lanes; lanes.forEach(l=>laneWarn(l,1.4,0xffb74d)); sfx.boss();
     } else { // hurl a burst of rocks

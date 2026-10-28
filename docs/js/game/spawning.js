@@ -29,7 +29,7 @@ function spawner(dt){
   if(dist>1500&&!LABOFF.has('shambler')&&Math.random()<0.025){
     const lane=ri(0,LANES-1),n=ri(6,9);
     for(let i=0;i<n;i++){ const e=spawnEnemy(Math.random()<0.2&&!LABOFF.has('crawler')?'crawler':'shambler',lane,sz-Math.floor(i/3)*1.3); e.g.position.x=LANE_X[lane]+((i%3)-1)*1.15; clampLane(e); }
-    toast('Zombiehorde!'); sfx.zone(); return;
+    toast(tl('Zombie horde!')); sfx.zone(); return;
   }
   const type=pickType(); if(!type) return;
   const def=ENEMY[type],lane=ri(0,LANES-1);
@@ -44,7 +44,7 @@ function checkEvents(){
   if(dist>=zoneDistNext){
     zoneDistNext+=400;
     let i; do{ i=ri(0,ZONES.length-1); }while(i===zoneIdx);
-    setZone(i,false); toast('Zon: '+ZONES[i].name+(OPT.music&&MUSIC.zones[ZONES[i].props]?' · '+GENRES[MUSIC.zones[ZONES[i].props].genre].name:'')); sfx.zone();
+    setZone(i,false); toast(tl('Zone')+': '+ZONES[i].name+(OPT.music&&MUSIC.zones[ZONES[i].props]?' · '+GENRES[MUSIC.zones[ZONES[i].props].genre].name:'')); sfx.zone();
     weatherZoneCheck();
   }
   if(OPT.weather&&dist>=W.next){ W.next+=300; rollWeather(); }
@@ -58,6 +58,6 @@ function checkEvents(){
   }
 }
 function bossDefeated(p){
-  bossBar.hidden=true; clearBossFx(); spawnPause=Math.max(spawnPause,5); sayAt(p.x,4,p.z,'Boss besegrad!','#ffd21f'); shake(0.8); kills+=10;
+  bossBar.hidden=true; clearBossFx(); spawnPause=Math.max(spawnPause,5); sayAt(p.x,4,p.z,tl('Boss defeated!'),'#ffd21f'); shake(0.8); kills+=10;
   setTimeout(()=>{ if(mode==='playing') spawnWalls([0,1,2],true); },300);
 }

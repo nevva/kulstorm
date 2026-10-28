@@ -92,7 +92,7 @@ function updateObstacles(dt){
   for(const o of obstacles){
     o.z+=(scroll+(o.roll?2.5:0))*dt; o.g.position.z=o.z;
     if(o.roll) o.g.userData.roll.rotation.x-=dt*6;
-    if(playing&&!obsHinted[o.type]&&o.z>-16){ obsHinted[o.type]=true; if(!tutWants(o.type==='low'?'jump':o.type==='high'?'duck':'tall')) showHint(o.type==='low'?'Hoppa! Svep upp, W, Space eller pil upp':o.type==='tall'?'Dubbelhopp! Hoppa och hoppa igen i luften':'Ducka! Svep ner, S, pil ner eller Shift'); }
+    if(playing&&!obsHinted[o.type]&&o.z>-16){ obsHinted[o.type]=true; if(!tutWants(o.type==='low'?'jump':o.type==='high'?'duck':'tall')) showHint(o.type==='low'?tl('Jump! Swipe up, W, Space or arrow up'):o.type==='tall'?tl('Double jump! Jump, then jump again in the air'):tl('Duck! Swipe down, S, arrow down or Shift')); }
     if(playing) for(const m of squad.slice()){
       if(o.hit.has(m)) continue;
       const p=m.g.position;
@@ -103,7 +103,7 @@ function updateObstacles(dt){
         else { o.cleared++; healMember(m,Math.max(3,Math.round(m.maxHp*0.03))); }
       }
     }
-    if(playing&&!o.judged&&o.cleared>0&&squad.length){ let back=-1e9; for(const m of squad) back=Math.max(back,m.g.position.z); if(o.z>back+0.6){ o.judged=true; if(!o.failed){ for(const m of squad) healMember(m,5); toast('Perfekt!'); sfx.clear(); } addFlow(o.failed?1:2); addOD(o.failed?0.04:0.07); } }
+    if(playing&&!o.judged&&o.cleared>0&&squad.length){ let back=-1e9; for(const m of squad) back=Math.max(back,m.g.position.z); if(o.z>back+0.6){ o.judged=true; if(!o.failed){ for(const m of squad) healMember(m,5); toast(tl('Perfect!')); sfx.clear(); } addFlow(o.failed?1:2); addOD(o.failed?0.04:0.07); } }
     if(o.z>9){ o.dead=true; scene.remove(o.g); }
   }
   obstacles=obstacles.filter(o=>!o.dead);
@@ -114,7 +114,7 @@ const FLOW_COL=C(0xffc23d),OD_COL=C(0xfff6c8);
 function addFlow(n){ if(mode!=='playing') return; S.flow=Math.min(3,S.flow+n); S.flowT=4; hudFlow=-1; sfx.flow(); addOD(0.025*n); }
 // OVERDRIVE: a meter charged by kills, obstacle clears, Flow and walls; trigger for 6 s of ×3 damage, ×2 fire rate, piercing shots and invulnerability.
 const OD_T=6;
-function addOD(x){ if(!OPT.overdrive||mode!=='playing'||S.odT>0||S.odLock>0) return; const was=S.od; S.od=Math.min(1,S.od+x); if(was<1&&S.od>=1){ toast('OVERDRIVE redo! Tryck E'); sfx.combo(); } }
+function addOD(x){ if(!OPT.overdrive||mode!=='playing'||S.odT>0||S.odLock>0) return; const was=S.od; S.od=Math.min(1,S.od+x); if(was<1&&S.od>=1){ toast(tl('OVERDRIVE ready! Press E')); sfx.combo(); } }
 function triggerOD(force){
   if(!OPT.overdrive||mode!=='playing'||S.odT>0||(S.od<1&&!force)) return;
   S.od=0; S.odT=OD_T; S.odUsed=true; tutAct('od'); sfx.odStart(); shake(1.2);

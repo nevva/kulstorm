@@ -45,7 +45,7 @@ function startGame(cfg){
   }
   if(!labRun){
     startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD){ const m=addMember(companionDef(h)); m.charges=h.shield||0; } });
-    squad.forEach(rollForm); toast('Dagsform: '+formText(L));
+    squad.forEach(rollForm); toast(tl('Daily form')+': '+formText(L));
   }
   (hero.extras||[]).concat(cfg.extras||[]).forEach(id=>{ const d=defById(id); if(d&&squad.length<MAX_SQUAD) addMember(d); });
   (cfg.perks||[]).forEach(id=>{ const d=defById(id); if(!d) return; if(d.kind==='pet'){ if(OPT.unicorns) addUnicorn(); } else applyTeamPerk(d); });
@@ -55,7 +55,7 @@ function startGame(cfg){
   recomputeAuras(); updatePower(0,true); updateDifficulty(); updateHUD();
   nextObsAt=dist+150; obsHinted={low:false,high:false,tall:false}; refreshKioskSign(); if(cfg.odFull&&OPT.overdrive) S.od=1;
   tutStart();
-  if(!tutWants('steer')) showHint(OPT.obstacles?'Dra åt sidan för att styra · svep upp = hopp, ner = ducka, ner i luften = markstöt · spring in i en vägg för att skalla den':'Dra åt sidan för att styra · spring in i en vägg för att skalla den');
+  if(!tutWants('steer')) showHint(OPT.obstacles?tl('Drag sideways to steer · swipe up = jump, down = duck, down in the air = ground pound · run into a wall to headbutt it'):tl('Drag sideways to steer · run into a wall to headbutt it'));
 }
 let last=performance.now();
 function frame(now){

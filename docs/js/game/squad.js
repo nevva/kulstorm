@@ -114,7 +114,7 @@ function cycleFront(dir){ return;
   const n=squad.length,idx=squad.indexOf(S.frontM);
   const next=idx<0?(dir>0?0:n-1):(idx+dir+n)%n;
   S.frontM=squad[next]; layoutSquad();
-  toast(S.frontM.def.name+' i front'); sfx.zone();
+  toast(tl('{0} at the front',S.frontM.def.name)); sfx.zone();
 }
 function addMember(def){
   const g=buildGubbe(def); scene.add(g);
@@ -146,7 +146,7 @@ function recomputeAuras(){
   if(S.combos.has('fieldhosp')) A.regen+=2*squad.filter(m=>m.def.id==='medic').length;
   if(S.combos.has('hawk')) A.crit=Math.min(0.75,A.crit+0.1);
   S.boosts=runBoosts(A); if(mode==='playing') S.combos.forEach(c=>RUN.combos.add(c));
-  if(mode==='playing') for(const c of COMBOS) if(S.combos.has(c.id)&&!prev.has(c.id)){ toast('KOMBO: '+c.name+'!'); sfx.combo(); }
+  if(mode==='playing') for(const c of COMBOS) if(S.combos.has(c.id)&&!prev.has(c.id)){ toast(tl('COMBO: {0}!',c.name)); sfx.combo(); }
 }
 // Dagsform: the start group's HP, damage and fire rate are rolled within ±15 % each run (not in the lab). Run levels stack on top.
 function rollForm(m){
@@ -155,7 +155,7 @@ function rollForm(m){
   m.maxHp=Math.round(m.maxHp*m.form.hp); m.hp=m.maxHp;
 }
 const formRate=m=>m.form?m.form.rate:1;
-function formText(m){ if(!m.form) return ''; const f=k=>(k>=1?'+':'−')+Math.round(Math.abs(k-1)*100)+' %'; return 'HP '+f(m.form.hp)+' · Skada '+f(m.form.dmg)+' · Eldhastighet '+f(m.form.rate); }
+function formText(m){ if(!m.form) return ''; const f=k=>(k>=1?'+':'−')+Math.round(Math.abs(k-1)*100)+PCT; return 'HP '+f(m.form.hp)+' · '+tl('Damage')+' '+f(m.form.dmg)+' · '+tl('Fire rate')+' '+f(m.form.rate); }
 // Per-member damage multiplier: the Veteran snowballs with damage dealt, the Glass Cannon scales with his own health.
 function memberMult(m){
   let k=m.form?m.form.dmg:1;
@@ -189,7 +189,7 @@ function updatePower(dt,instant){
   pfT-=dt; if(pfT<=0||instant){ pfT=0.5; PFraw=Math.pow(squadPower(),0.8); }
   PF=instant?PFraw:PF+(PFraw-PF)*(1-Math.exp(-dt*0.8));
 }
-function chipText(m){ const k=memberMult(m); return m.def.short+((m.lvl||1)>1?' nv'+m.lvl:'')+' '+Math.ceil(m.hp)+(Math.abs(k-1)>0.05?' ×'+k.toFixed(1):''); }
+function chipText(m){ const k=memberMult(m); return m.def.short+((m.lvl||1)>1?' '+tl('lv {0}',m.lvl):'')+' '+Math.ceil(m.hp)+(Math.abs(k-1)>0.05?' ×'+k.toFixed(1):''); }
 function applyTeamPerk(u){
   S.perks.push(u);
   switch(u.id){
@@ -241,5 +241,5 @@ function killMember(m){
   scene.remove(m.g); m.beams.forEach(b=>scene.remove(b));
   if(m===squad[0]){ die(); return; }
   squad=squad.filter(x=>x!==m); if(S.frontM===m){ S.frontM=null; } layoutSquad(); recomputeAuras();
-  toast(m.def.name+' stupade!'); sfx.explode(1.2);
+  toast(tl('{0} has fallen!',m.def.name)); sfx.explode(1.2);
 }

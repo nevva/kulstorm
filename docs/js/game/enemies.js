@@ -175,7 +175,7 @@ function spawnEnemy(type,lane,z){
   e.g.position.set(x,0,z); e.g.scale.set(1,1,1); e.g.rotation.x=0; e.g.rotation.z=0; e.roam=false; e.g.visible=true; scene.add(e.g); enemies.push(e);
   if(type==='knight'){ e.shieldHp=e.maxHp*0.9; e.u.shield.visible=true; e.u.sbar.visible=true; e.u.sfg.scale.x=1; e.u.sfg.position.x=0; }
   if(def.boss) bossInit(e);
-  if(type==='necro'&&!necroSeen){ necroSeen=true; sayAt(x,2.6,z,'Nekromantiker!','#b07cff','Döda honom först'); }
+  if(type==='necro'&&!necroSeen){ necroSeen=true; sayAt(x,2.6,z,tl('Necromancer!'),'#b07cff',tl('Kill him first')); }
   return e;
 }
 function clampLane(e){
@@ -225,7 +225,7 @@ function flushEnemyDmg(e){ const p=e.g.position; flushDmg(e,p.x,p.y+e.r*1.7+0.5,
 function breakShield(e){
   const p=e.g.position; e.u.shield.visible=false; e.u.sbar.visible=false; e.shieldHp=0;
   for(let i=0;i<10;i++){ const a=rand(-1,1),sp=rand(2,6); chunks.spawn(p.x+rand(-0.4,0.4),rand(0.6,1.5),p.z+0.5,Math.sin(a)*sp,rand(2,5),rand(1,4),rand(0.6,1.1),0.22,0.12,C(0x1e88e5),C(0x1e88e5),C(0x0d47a1),16,0.5,true,rand(4,10)); }
-  sfx.shield(); pushDmg(p.x,2.6,p.z,'SKÖLD SÖNDER','#49c3ff',true,true);
+  sfx.shield(); pushDmg(p.x,2.6,p.z,tl('SHIELD BROKEN'),'#49c3ff',true,true);
 }
 function hitEnemy(e,dmg,crit,tier,owner,heavy){
   if(e.dead||e.under) return;

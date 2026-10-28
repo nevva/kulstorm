@@ -4,7 +4,7 @@
 const CYC={start:0,off:0.12,moon0:4,len:900};
 let menuSky=true;
 const DN={u:0.25,dayF:1,nightF:0,twi:0,glowF:0,phase:0.5,phaseIdx:4,moonB:1,full:false,sunUp:true,moonUp:false};
-const MOON_NAMES=['Nymåne','Växande skära','Halvmåne','Växande måne','Fullmåne','Avtagande måne','Halvmåne','Avtagande skära'];
+const MOON_NAMES=['New moon','Waxing crescent','Half moon','Waxing gibbous','Full moon','Waning gibbous','Half moon','Waning crescent'].map(n=>tl(n));
 function cycU(){
   if(!OPT.daynight) return 0.25;
   if(menuSky) return (0.4+time*0.006)%1;

@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="sv">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.27-2137">
+<link rel="stylesheet" href="css/style.css?v=2026.10.28-0849">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -21,172 +21,173 @@
       <div class="dist"><span id="dist">0</span><small>m</small></div>
       <div class="topright">
         <div class="hudbtns">
-        <button id="pausebtn" type="button" aria-label="Pausa"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></button>
-        <button id="mute" type="button" aria-label="Ljud av/på"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path id="spk1" d="M16 9a4 4 0 0 1 0 6"/><path id="spk2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path id="spkx" d="M16 9l5 6M21 9l-5 6" hidden/></svg></button>
+        <button id="pausebtn" type="button" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg></button>
+        <button id="mute" type="button" aria-label="Sound on/off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path id="spk1" d="M16 9a4 4 0 0 1 0 6"/><path id="spk2" d="M18.5 6.5a8 8 0 0 1 0 11"/><path id="spkx" d="M16 9l5 6M21 9l-5 6" hidden/></svg></button>
         </div>
       </div>
     </div>
     <div class="hud-row vitalrow">
-      <div class="vitals"><div class="vhp"><div class="hp" id="hp"></div><span id="hptext">100</span></div><div class="vxp" id="xprow" hidden><div class="xp" id="xpbar"></div><span id="xplvl">Nv 1</span></div></div>
+      <div class="vitals"><div class="vhp"><div class="hp" id="hp"></div><span id="hptext">100</span></div><div class="vxp" id="xprow" hidden><div class="xp" id="xpbar"></div><span id="xplvl">Lv 1</span></div></div>
       <div class="chip coin" id="coinchip">0</div>
     </div>
     <div class="hud-row">
-      <div class="chip shield" id="shieldchip" hidden>Sköld 3</div>
+      <div class="chip shield" id="shieldchip" hidden>Shield 3</div>
       <div class="chip flow" id="flowchip" hidden><span id="flowtxt">FLOW ×1</span><i id="flowbar"></i></div>
     </div>
     <div id="bossbar" hidden><span id="bossname">BOSS</span><div class="bar"><div id="bosshp"></div></div></div>
   </div>
   <div class="hud-bottom"><div class="hb-col"><div id="hint"></div><button id="odbtn" class="odbtn" type="button" hidden><span id="odtxt">OVERDRIVE</span><i id="odfill"></i></button></div></div>
   <div id="toast"></div>
-  <div id="tut" hidden><b id="tut-title"></b><span id="tut-how"></span><p id="tut-text"></p><small id="tut-foot"></small><button id="tut-off" type="button">Stäng av guiden</button></div>
+  <div id="tut" hidden><b id="tut-title"></b><span id="tut-how"></span><p id="tut-text"></p><small id="tut-foot"></small><button id="tut-off" type="button">Turn off tutorial</button></div>
 </div>
 
 <div id="menu" class="screen">
   <div class="panel" id="menu-main">
     <h1 class="title">Kulstorm</h1>
-    <p class="tag">Spring. Skjut. Överlev.</p>
-    <p class="sub">Fienderna kommer i tre filer och klumpar ihop sig vid fronten. Dra åt sidan för att styra, svep upp för att hoppa och ner för att ducka. Den tåligaste gubben går först, och springer du rakt in i en vägg skallar han sönder den. Skjut sönder väggarna: varje vägg ger en ny gubbe med egen förmåga och egen hälsa, eller en vinst för hela truppen.</p>
+    <p class="tag">Run. Shoot. Survive.</p>
+    <p class="sub">Enemies come in three lanes and bunch up at the front. Drag sideways to steer, swipe up to jump and down to duck. Your toughest squad member leads, and if you run straight into a wall they headbutt it apart. Shoot the walls to pieces: each wall gives a new squad member with their own ability and health, or a perk for the whole squad.</p>
     <p class="best" id="menubest"></p>
     <p class="coins" id="menucoins"></p>
     <p class="sub" id="menuhero"></p>
     <p class="sub" id="menu-msg"></p>
-    <button class="btn" id="play" type="button">Spela</button>
+    <button class="btn" id="play" type="button">Play</button>
     <div class="btnrow">
-      <button class="btn small ghost" id="open-shop" type="button">Gubbshop</button>
-      <button class="btn small ghost" id="open-lab" type="button">Labb</button>
-      <button class="btn small ghost" id="open-heroprog" type="button">Hjälte</button>
-      <button class="btn small ghost" id="open-opts" type="button">Inställningar</button>
+      <button class="btn small ghost" id="open-shop" type="button">Hero Shop</button>
+      <button class="btn small ghost" id="open-lab" type="button">Lab</button>
+      <button class="btn small ghost" id="open-heroprog" type="button">Hero</button>
+      <button class="btn small ghost" id="open-opts" type="button">Settings</button>
     </div>
+    <div class="btnrow langrow" role="group" aria-label="Language"><button class="btn small ghost" id="lang-en" type="button" lang="en">English</button><button class="btn small ghost" id="lang-sv" type="button" lang="sv">Svenska</button></div>
     <p class="ver" id="menu-ver"></p>
   </div>
 
   <div class="panel" id="menu-shop" hidden>
-    <h2 class="ph">Gubbshop</h2>
+    <h2 class="ph">Hero Shop</h2>
     <p class="coins" id="shopcoins"></p>
-    <p class="sub">Mynt du samlar i rundorna sparas här. Köp en gubbe och välj den som din startgubbe. Köpta gubbar följer med i startgruppen, om du inte bockar ur dem.</p>
+    <p class="sub">Coins you collect in runs are saved here. Buy a hero and pick them as your starting hero. Heroes you have bought join the starting group unless you leave them out.</p>
     <div class="heroes" id="heroes"></div>
-    <button class="btn small ghost" id="close-shop" type="button">Tillbaka</button>
+    <button class="btn small ghost" id="close-shop" type="button">Back</button>
   </div>
 
   <div class="panel" id="menu-lab" hidden>
-    <h2 class="ph">Testlabb</h2>
-    <p class="sub">Sätt ihop en trupp och testa kombinationer. Labbrundor räknas inte som rekord och ger inga mynt.</p>
+    <h2 class="ph">Test Lab</h2>
+    <p class="sub">Put a squad together and test combinations. Lab runs don't count as records and give no coins.</p>
     <div class="selrow">
-      <label>Startgubbe<select id="lab-hero"></select></label>
-      <label>Väder<select id="lab-weather"><option value="">Slumpat</option><option value="clear">Klart</option><option value="rain">Regn</option><option value="fog">Dimma</option><option value="storm">Storm</option><option value="snow">Snö</option><option value="thunder">Åska</option><option value="heat">Hetta</option></select></label>
-      <label>Tid på dygnet<select id="lab-tod"><option value="">Morgon</option><option value="0.04">Gryning</option><option value="0.25">Mitt på dagen</option><option value="0.47">Skymning</option><option value="0.7">Natt</option></select></label>
-      <label>Månfas<select id="lab-moon"><option value="">Slumpad</option><option value="0">Nymåne</option><option value="1">Växande skära</option><option value="2">Halvmåne (växande)</option><option value="3">Växande måne</option><option value="4">Fullmåne</option><option value="5">Avtagande måne</option><option value="6">Halvmåne (avtagande)</option><option value="7">Avtagande skära</option></select></label>
-      <label>Startavstånd<select id="lab-dist"><option value="0">0 m</option><option value="500">500 m</option><option value="1000">1 000 m</option><option value="2000">2 000 m</option><option value="4000">4 000 m</option></select></label>
+      <label>Starting hero<select id="lab-hero"></select></label>
+      <label>Weather<select id="lab-weather"><option value="">Any</option><option value="clear">Clear</option><option value="rain">Rain</option><option value="fog">Fog</option><option value="storm">Storm</option><option value="snow">Snow</option><option value="thunder">Thunder</option><option value="heat">Heat</option></select></label>
+      <label>Time of day<select id="lab-tod"><option value="">Morning</option><option value="0.04">Dawn</option><option value="0.25">Midday</option><option value="0.47">Dusk</option><option value="0.7">Night</option></select></label>
+      <label>Moon phase<select id="lab-moon"><option value="">Random</option><option value="0">New moon</option><option value="1">Waxing crescent</option><option value="2">First quarter</option><option value="3">Waxing gibbous</option><option value="4">Full moon</option><option value="5">Waning gibbous</option><option value="6">Last quarter</option><option value="7">Waning crescent</option></select></label>
+      <label>Start distance<select id="lab-dist"><option value="0">0 m</option><option value="500">500 m</option><option value="1000">1 000 m</option><option value="2000">2 000 m</option><option value="4000">4 000 m</option></select></label>
     </div>
-    <h3 class="sh">Gubbar i truppen (max 8 extra)</h3>
+    <h3 class="sh">Squad members (max 8 extra)</h3>
     <div class="list" id="lab-gubbar"></div>
-    <h3 class="sh">Lagvinster</h3>
+    <h3 class="sh">Team perks</h3>
     <div class="list" id="lab-perks"></div>
-    <label class="tog"><input type="checkbox" id="lab-odfull"><span>Starta med full Overdrive<small>För att testa superläget direkt</small></span></label>
-    <h3 class="sh">Fiender (bocka ur för att stänga av)</h3>
-    <div class="selrow"><label>Boss<select id="lab-bosstype"><option value="">Slumpad</option><option value="boss">Trollkungen</option><option value="snake">Jätteormen</option><option value="hydra">Trehövdade draken</option><option value="spider">Spindeldrottningen</option><option value="golem">Stengolemen</option></select></label></div>
-    <button class="btn small ghost" id="lab-boss" type="button" style="align-self:flex-start">Testa boss nu</button>
+    <label class="tog"><input type="checkbox" id="lab-odfull"><span>Start with full Overdrive<small>To test super mode right away</small></span></label>
+    <h3 class="sh">Enemies (untick to turn off)</h3>
+    <div class="selrow"><label>Boss<select id="lab-bosstype"><option value="">Random</option><option value="boss">The Troll King</option><option value="snake">The Giant Serpent</option><option value="hydra">The Three-Headed Dragon</option><option value="spider">The Spider Queen</option><option value="golem">The Stone Golem</option></select></label></div>
+    <button class="btn small ghost" id="lab-boss" type="button" style="align-self:flex-start">Test boss now</button>
     <div class="list" id="lab-enemies"></div>
     <p class="best" id="lab-power"></p>
-    <h3 class="sh">Kombos (lyser när din trupp aktiverar dem)</h3>
+    <h3 class="sh">Combos (light up when your squad activates them)</h3>
     <div class="list" id="lab-combos"></div>
     <div class="btnrow">
-      <button class="btn small" id="lab-start" type="button">Starta labb</button>
-      <button class="btn small ghost" id="lab-clear" type="button">Rensa</button>
-      <button class="btn small ghost" id="close-lab" type="button">Tillbaka</button>
+      <button class="btn small" id="lab-start" type="button">Start lab</button>
+      <button class="btn small ghost" id="lab-clear" type="button">Clear all</button>
+      <button class="btn small ghost" id="close-lab" type="button">Back</button>
     </div>
   </div>
 
   <div class="panel" id="menu-heroprog" hidden>
-    <h2 class="ph">Hjälte</h2>
+    <h2 class="ph">Hero</h2>
     <p class="best" id="hp-level"></p>
     <div class="xprow" style="width:100%;max-width:360px"><div class="xpwrap"><div class="xp" id="hp-xpbar"></div></div></div>
     <p class="sub" id="hp-info"></p>
     <div class="list" id="hp-talents"></div>
     <div class="btnrow">
-      <button class="btn small ghost" id="hp-reset" type="button">Flytta tillbaka alla poäng</button>
-      <button class="btn small ghost" id="close-heroprog" type="button">Tillbaka</button>
+      <button class="btn small ghost" id="hp-reset" type="button">Refund all points</button>
+      <button class="btn small ghost" id="close-heroprog" type="button">Back</button>
     </div>
   </div>
 
   <div class="panel" id="menu-opts" hidden>
-    <h2 class="ph">Inställningar</h2>
-    <p class="sub">Allt är på från början. Stäng av det du inte vill ha.</p>
+    <h2 class="ph">Settings</h2>
+    <p class="sub">Everything starts on. Turn off what you don't want.</p>
     <div class="list" id="opts"></div>
     <div class="btnrow">
-      <button class="btn small ghost" id="reset-tut" type="button">Visa guiden igen</button>
-      <button class="btn small ghost" id="reset-save" type="button">Nollställ mynt och köp</button>
-      <button class="btn small ghost" id="close-opts" type="button">Tillbaka</button>
+      <button class="btn small ghost" id="reset-tut" type="button">Show tutorial again</button>
+      <button class="btn small ghost" id="reset-save" type="button">Reset coins and purchases</button>
+      <button class="btn small ghost" id="close-opts" type="button">Back</button>
     </div>
   </div>
 </div>
 
 <div id="shop" class="screen" hidden>
   <div class="panel">
-    <h2 class="ph" id="shoptitle">Nivå 2!</h2>
+    <h2 class="ph" id="shoptitle">Level 2!</h2>
     <p class="coins" id="shopwallet"></p>
     <div class="offers" id="shopcards"></div>
     <div class="btnrow">
-      <button class="btn small ghost" id="shop-reroll" type="button">Nya erbjudanden · 5</button>
-      <button class="btn small" id="shop-done" type="button">Fortsätt</button>
+      <button class="btn small ghost" id="shop-reroll" type="button">New offers · 5</button>
+      <button class="btn small" id="shop-done" type="button">Continue</button>
     </div>
-    <p class="sub">Tryck på ett erbjudande för att köpa och fortsätta. Tangentbord: A/D eller ←/→ väljer, Space köper och fortsätter, Esc fortsätter utan att köpa, R ger nya erbjudanden.</p>
+    <p class="sub">Tap an offer to buy it and continue. Keyboard: A/D or ←/→ selects, Space buys and continues, Esc continues without buying, R rerolls the offers.</p>
   </div>
 </div>
 
 <div id="pause" class="screen" hidden>
   <div class="panel" id="pause-main">
-    <h2 class="ph">Paus</h2>
+    <h2 class="ph">Paused</h2>
     <div class="stats">
-      <div class="stat"><b id="pdist">0</b><span>meter</span></div>
-      <div class="stat"><b id="pkills">0</b><span>fiender</span></div>
-      <div class="stat"><b id="pcoins">0</b><span>mynt</span></div>
+      <div class="stat"><b id="pdist">0</b><span>meters</span></div>
+      <div class="stat"><b id="pkills">0</b><span>enemies</span></div>
+      <div class="stat"><b id="pcoins">0</b><span>coins</span></div>
     </div>
     <p class="sub" id="ppower"></p>
     <div class="pinfo" id="psquad"></div>
     <p class="sub" id="pdesc" aria-live="polite"></p>
-    <h3 class="effh" id="peffects-h" hidden>Samlade effekter</h3>
+    <h3 class="effh" id="peffects-h" hidden>Combined effects</h3>
     <div class="effects" id="peffects"></div>
-    <button class="btn wide" id="p-resume" type="button">Fortsätt</button>
-    <button class="btn small ghost wide" id="p-restart" type="button">Starta om</button>
-    <button class="btn small ghost wide" id="p-opts" type="button">Inställningar</button>
-    <button class="btn small ghost wide" id="p-menu" type="button">Till menyn</button>
+    <button class="btn wide" id="p-resume" type="button">Continue</button>
+    <button class="btn small ghost wide" id="p-restart" type="button">Restart</button>
+    <button class="btn small ghost wide" id="p-opts" type="button">Settings</button>
+    <button class="btn small ghost wide" id="p-menu" type="button">Main menu</button>
   </div>
   <div class="panel" id="pause-opts" hidden>
-    <h2 class="ph">Inställningar</h2>
+    <h2 class="ph">Settings</h2>
     <div class="list" id="popts"></div>
-    <button class="btn small ghost" id="p-opts-back" type="button">Tillbaka</button>
+    <button class="btn small ghost" id="p-opts-back" type="button">Back</button>
   </div>
 </div>
 
 <div id="over" class="screen" hidden>
   <div class="panel">
-    <h2 class="ph">Du dog!</h2>
+    <h2 class="ph">You died!</h2>
     <div class="stats">
-      <div class="stat"><b id="odist">0</b><span>meter</span></div>
-      <div class="stat"><b id="okills">0</b><span>fiender</span></div>
-      <div class="stat"><b id="obest">0</b><span>rekord</span></div>
+      <div class="stat"><b id="odist">0</b><span>meters</span></div>
+      <div class="stat"><b id="okills">0</b><span>enemies</span></div>
+      <div class="stat"><b id="obest">0</b><span>best</span></div>
     </div>
-    <p id="newbest" hidden>Nytt rekord!</p>
+    <p id="newbest" hidden>New record!</p>
     <p class="coins" id="ocoins"></p>
     <p class="best" id="oherox" hidden></p>
     <div class="btnrow">
-      <button class="btn" id="again" type="button">Igen!</button>
-      <button class="btn small ghost" id="to-menu" type="button">Meny</button>
+      <button class="btn" id="again" type="button">Again!</button>
+      <button class="btn small ghost" id="to-menu" type="button">Menu</button>
     </div>
-    <h3 class="sh">Rundans kraft</h3>
+    <h3 class="sh">Run breakdown</h3>
     <p class="sub sumtotal" id="o-total"></p>
     <div class="list" id="o-summary"></div>
     <div class="list" id="o-up">
-      <h3 class="sh">Uppgradera hjälten</h3>
+      <h3 class="sh">Upgrade your hero</h3>
       <p class="sub" id="o-up-info"></p>
       <div class="list" id="o-talents"></div>
     </div>
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.27-2137"></script>
+<script src="js/version.js?v=2026.10.28-0849"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.27-2137"></script>
+<script src="js/main.js?v=2026.10.28-0849"></script>
 </body>
 </html>

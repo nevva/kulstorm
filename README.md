@@ -26,13 +26,15 @@ docs/
   css/style.css
   js/version.js     version number and update check
   js/main.js        loads the files below, in order
-  js/data/          pure data: weapons, upgrades, combos, heroes, enemy stats, zones, weather, options, music genres, tutorial texts
-  js/core/          helpers, DOM lookups, saved settings
+  js/data/          pure data: weapons, upgrades, combos, heroes, enemy stats, zones, weather, options, music genres, tutorial texts, Swedish texts (sv.js)
+  js/core/          language (i18n.js), helpers, DOM lookups, saved settings
   js/render/        three.js: renderer, materials, sky, world, particles, projectiles
   js/audio/         WebAudio sound effects and generated music
   js/game/          game rules and entities
   js/ui/            HUD, input, menus, pause
 ```
+
+The game is written in English. Swedish can be picked on the start menu: `js/data/sv.js` maps each English text to its Swedish one, and code builds visible strings with `tl('Shield {0}',n)` so they translate. Add a new text to `sv.js` when you add it to the game.
 
 The files are plain scripts that share one global scope, loaded in the order listed in `js/main.js`. A file can use anything from earlier files when it loads, and anything at all inside functions. To add a file, put it in that list.
 

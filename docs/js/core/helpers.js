@@ -15,7 +15,7 @@ const C=h=>new THREE.Color(h).convertSRGBToLinear();          // linear (materia
 const RAW=h=>new THREE.Color(h);                               // sRGB as-is (background, fog)
 const CV=(h,dh,dl)=>new THREE.Color(h).offsetHSL(rand(-dh,dh),0,rand(-dl,dl)).convertSRGBToLinear();
 const hexCss=h=>'#'+h.toString(16).padStart(6,'0');
-const fmt=n=>Math.round(n).toLocaleString('sv-SE');
+const fmt=n=>Math.round(n).toLocaleString(LANG==='sv'?'sv-SE':'en-US');
 const ZERO=new THREE.Matrix4().makeScale(0,0,0);
 const WHITE=C(0xffffff);
 function store(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }

@@ -17,7 +17,7 @@ function updatePlayer(dt){
       const tough=m=>m.hp+25*m.charges;
       let best=squad[0]; for(const m of squad) if(tough(m)>tough(best)) best=m;
       const cur=headMember();
-      if(best!==cur&&S.frontHold<=0&&tough(best)>tough(cur)*1.1){ S.frontM=best; S.frontHold=2; layoutSquad(); toast(best.def.name+' tar fronten'); }
+      if(best!==cur&&S.frontHold<=0&&tough(best)>tough(cur)*1.1){ S.frontM=best; S.frontHold=2; layoutSquad(); toast(tl('{0} takes the front',best.def.name)); }
     }
   }
   const recharge=S.combos.has('recharge');
@@ -241,22 +241,22 @@ function showOver(){
   unlockMouse();
   overShown=true; hudEl.hidden=true;
   $('odist').textContent=fmt(dist); $('okills').textContent=fmt(kills); $('obest').textContent=fmt(best);
-  const hx=$('oherox'); hx.hidden=!(OPT.heroprog&&lastHeroGain.gain>0); hx.textContent='+'+fmt(lastHeroGain.gain)+' hjälte-XP'+(lastHeroGain.ups?' · Hjältenivå '+HERO.lvl+'! +'+lastHeroGain.ups+' talangpoäng':'');
-  $('ocoins').textContent=labRun?'Labbrunda – inga mynt eller rekord':(OPT.coins?'+'+fmt(coinsRun)+' mynt · totalt '+fmt(bank):'');
+  const hx=$('oherox'); hx.hidden=!(OPT.heroprog&&lastHeroGain.gain>0); hx.textContent=tl('+{0} hero XP',fmt(lastHeroGain.gain))+(lastHeroGain.ups?' · '+tl('Hero level {0}! +{1} talent points',HERO.lvl,lastHeroGain.ups):'');
+  $('ocoins').textContent=labRun?tl('Lab run – no coins or records'):(OPT.coins?tl('+{0} coins · {1} total',fmt(coinsRun),fmt(bank)):'');
   renderRunSummary(); renderOverUpgrades();
   overEl.hidden=false; overEl.scrollTop=0;
 }
 // Game over: damage per gubbe, team perk, combo and ability this run, biggest first, with a bar for each one's share.
 function renderRunSummary(){
   const rows=runSummary(),total=rows.reduce((a,r)=>a+r.dmg,0),box=$('o-summary'); box.innerHTML='';
-  $('o-total').textContent='Total skada '+fmt(total);
+  $('o-total').textContent=tl('Total damage {0}',fmt(total));
   rows.forEach(r=>{
     const row=document.createElement('div'); row.className='row sum';
     const nm=document.createElement('div'); nm.className='nm'; nm.textContent=r.name;
     const sm=document.createElement('small'); sm.textContent=r.kind+(r.dmg<1&&r.desc?' · '+r.desc:''); nm.appendChild(sm);
     const v=document.createElement('div'); v.className='dmgv';
     const b=document.createElement('b'); b.textContent=r.dmg>=1?fmt(r.dmg):'–';
-    const pc=document.createElement('small'); pc.textContent=r.dmg>=1&&total>0?Math.round(100*r.dmg/total)+' %':'';
+    const pc=document.createElement('small'); pc.textContent=r.dmg>=1&&total>0?Math.round(100*r.dmg/total)+PCT:'';
     v.append(b,pc);
     const bar=document.createElement('i'); bar.style.width=(total>0?100*r.dmg/total:0).toFixed(1)+'%';
     row.append(nm,v,bar); box.appendChild(row);
@@ -266,6 +266,6 @@ function renderRunSummary(){
 function renderOverUpgrades(){
   const on=OPT.heroprog; $('o-up').hidden=!on; if(!on) return;
   const free=heroFree();
-  $('o-up-info').textContent=free>0?free+' talangpoäng att fördela. Det gäller från nästa runda.':OPT.coins?'Köp talangpoäng med mynt. Nästa kostar '+fmt(TALENT_COST(HERO.bought||0))+' · du har '+fmt(bank)+'.':'Du får talangpoäng när hjälten går upp i nivå.';
+  $('o-up-info').textContent=free>0?tl('{0} talent points to spend. They apply from the next run.',free):OPT.coins?tl('Buy talent points with coins. The next one costs {0} · you have {1}.',fmt(TALENT_COST(HERO.bought||0)),fmt(bank)):tl('You earn talent points when your hero levels up.');
   renderTalents($('o-talents'),renderOverUpgrades);
 }

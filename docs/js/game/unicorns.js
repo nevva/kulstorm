@@ -69,7 +69,7 @@ function startWildUnicorn(){
   if(!wildUni.g) wildUni.g=buildUnicorn();
   wildUni.active=true; wildUni.dir=Math.random()<0.5?1:-1; wildUni.dropped=false;
   wildUni.g.position.set(-wildUni.dir*(HALF+4),0,-22); wildUni.g.rotation.y=wildUni.dir*Math.PI/2; scene.add(wildUni.g);
-  toast('En vild enhörning!'); sfx.whinny();
+  toast(tl('A wild unicorn!')); sfx.whinny();
 }
 function updateWildUnicorn(dt){
   if(wildUni.active){
@@ -86,5 +86,5 @@ function updateWildUnicorn(dt){
     if(sg.position.z>5){ uniStar.active=false; sg.visible=false; }
   }
 }
-function collectStar(){ if(!uniStar.active) return; uniStar.active=false; uniStar.g.visible=false; fxSparkle(uniStar.g.position.x,1.2,uniStar.g.position.z,RAINBOW[2]); if(unicorns.length<2) addUnicorn(); toast('Enhörningen ansluter!'); }
+function collectStar(){ if(!uniStar.active) return; uniStar.active=false; uniStar.g.visible=false; fxSparkle(uniStar.g.position.x,1.2,uniStar.g.position.z,RAINBOW[2]); if(unicorns.length<2) addUnicorn(); toast(tl('The unicorn joins!')); }
 function clearUnicorns(){ unicorns.forEach(u=>scene.remove(u.g)); unicorns=[]; roads.forEach(r=>scene.remove(r.g)); roads=[]; if(wildUni.g) scene.remove(wildUni.g); wildUni.active=false; uniStar.active=false; uniStar.g.visible=false; }
