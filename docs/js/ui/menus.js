@@ -1,11 +1,11 @@
 'use strict';
 // ---------- menu, shop, lab, options
-const PANELS=['main','shop','lab','opts','heroprog'];
+const PANELS=['main','shop','armory','lab','opts','heroprog'];
 function showMenu(which){
   if(mode==='menu') menuSky=true;
   PANELS.forEach(p=>{ $('menu-'+p).hidden=p!==which; });
   menuEl.hidden=false; menuEl.scrollTop=0;
-  if(which==='main') renderMain(); if(which==='shop') renderShop(); if(which==='lab') renderLab(); if(which==='opts') renderOpts(); if(which==='heroprog') renderHeroProg();
+  if(which==='main') renderMain(); if(which==='shop') renderShop(); if(which==='armory') renderArmory(); if(which==='lab') renderLab(); if(which==='opts') renderOpts(); if(which==='heroprog') renderHeroProg();
 }
 function leaderDef(h){ return {id:'leader',kind:'gubbe',name:tl('You'),short:tl('You'),weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt}; }
 function renderMain(){
@@ -15,6 +15,7 @@ function renderMain(){
   $('menuhero').textContent=tl('Starting hero: {0}',heroById(heroId).name)+(OPT.heroprog?' · '+tl('Hero level {0}',HERO.lvl)+(free>0?' · '+tl('{0} points to spend',free):''):'');
   $('open-heroprog').hidden=!OPT.heroprog; $('open-heroprog').textContent=free>0?tl('Hero')+' ('+free+')':tl('Hero');
   $('open-shop').hidden=!OPT.coins;
+  const n=affordableUnlocks(); $('open-armory').hidden=!OPT.coins; $('open-armory').textContent=tl('Armory')+(n>0?' ('+n+')':'');
   if(mode==='menu'){ clearSquad(); S=freshState(); addMember(leaderDef(heroById(heroId))); startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD) addMember(companionDef(h)); }); }
 }
 function renderShop(){
@@ -41,6 +42,32 @@ function renderShop(){
     card.appendChild(b);
     if(joins){ const l=document.createElement('button'); l.type='button'; l.className='lead'; l.textContent=tl('Make starting hero'); l.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); card.appendChild(l); }
     box.appendChild(card);
+  });
+}
+// Armory: every item chests and walls can give. Unlocking one adds it to what can drop.
+function armoryItems(){ return POWERUPS.concat(UPGRADES).filter(u=>(OPT.team||u.kind!=='team')&&(OPT.unicorns||u.kind!=='pet')&&powerOn(u)); }
+const lockedItems=()=>armoryItems().filter(u=>unlocked.indexOf(u.id)<0).sort((a,b)=>itemPrice(a)-itemPrice(b));
+const affordableUnlocks=()=>lockedItems().filter(u=>bank>=itemPrice(u)).length;
+const KIND_NAME={power:'Power-up',gubbe:'Squad member',team:'Team perk',pet:'Helper'};
+function renderArmory(){
+  $('armorycoins').textContent=tl('{0} coins in the bank',fmt(bank));
+  const all=armoryItems(),have=all.filter(u=>unlocked.indexOf(u.id)>=0).length;
+  $('armorycount').textContent=tl('{0} of {1} items unlocked',have,all.length);
+  [['ar-power',['power']],['ar-gubbe',['gubbe']],['ar-team',['team','pet']]].forEach(([id,kinds])=>{
+    const box=$(id); box.innerHTML='';
+    all.filter(u=>kinds.indexOf(u.kind)>=0).sort((a,b)=>itemPrice(a)-itemPrice(b)).forEach(u=>{
+      const own=unlocked.indexOf(u.id)>=0,price=itemPrice(u);
+      const card=document.createElement('div'); card.className='hero'+(own?' own':'');
+      const sw=document.createElement('div'); sw.className='sw'; sw.style.background=WALL_CSS[u.rarity]; card.appendChild(sw);
+      const t=document.createElement('h4'); t.textContent=u.name; card.appendChild(t);
+      const r=document.createElement('span'); r.className='rar'; r.textContent=RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
+      const p=document.createElement('p'); p.textContent=u.desc; card.appendChild(p);
+      const b=document.createElement('button'); b.type='button';
+      if(own){ b.textContent='✓ '+tl('In the chests'); b.disabled=true; }
+      else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); saveBank(); sfx.init(); sfx.upgrade(); renderArmory(); }); }
+      else { b.textContent=tl('Costs {0} · {1} short',fmt(price),fmt(price-bank)); b.disabled=true; }
+      card.appendChild(b); box.appendChild(card);
+    });
   });
 }
 const lab={hero:'rookie',dist:0,counts:{},perks:{},off:{}};
@@ -140,6 +167,8 @@ function renderOpts(boxId){
 // Language: the current one is the filled button; picking the other reloads the page in that language.
 ['en','sv'].forEach(l=>{ const b=$('lang-'+l); b.classList.toggle('ghost',l!==LANG); b.setAttribute('aria-pressed',String(l===LANG)); b.addEventListener('click',()=>{ if(l!==LANG) setLang(l); }); });
 $('open-shop').addEventListener('click',()=>showMenu('shop'));
+$('open-armory').addEventListener('click',()=>showMenu('armory'));
+$('close-armory').addEventListener('click',()=>showMenu('main'));
 $('open-lab').addEventListener('click',()=>showMenu('lab'));
 $('open-opts').addEventListener('click',()=>showMenu('opts'));
 $('open-heroprog').addEventListener('click',()=>showMenu('heroprog'));
@@ -191,5 +220,5 @@ $('reset-tut').addEventListener('click',()=>{
 $('reset-save').addEventListener('click',()=>{
   const b=$('reset-save');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to reset'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset coins and purchases'); },3000); return; }
-  bank=0; owned=['rookie']; heroId='rookie'; benched=[]; saveBank(); b.dataset.arm=''; b.textContent=tl('Reset done'); setTimeout(()=>{ b.textContent=tl('Reset coins and purchases'); },1500);
+  bank=0; owned=['rookie']; heroId='rookie'; benched=[]; unlocked=STARTER_ITEMS.slice(); runsDone=0; saveBank(); b.dataset.arm=''; b.textContent=tl('Reset done'); setTimeout(()=>{ b.textContent=tl('Reset coins and purchases'); },1500);
 });

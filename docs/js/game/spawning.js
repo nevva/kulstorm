@@ -48,6 +48,7 @@ function checkEvents(){
     weatherZoneCheck();
   }
   if(OPT.weather&&dist>=W.next){ W.next+=300; rollWeather(); }
+  if(dist>=nextChestAt) spawnChest(false);
   if(dist>=nextUpgradeAt){ nextUpgradeAt+=upgradeStep; upgradeStep+=25; spawnRandomWalls(); }
   if(dist>=nextBossAt&&!boss){
     nextBossAt+=600; bossNo++;
@@ -59,5 +60,5 @@ function checkEvents(){
 }
 function bossDefeated(p){
   bossBar.hidden=true; clearBossFx(); spawnPause=Math.max(spawnPause,5); sayAt(p.x,4,p.z,tl('Boss defeated!'),'#ffd21f'); shake(0.8); kills+=10;
-  setTimeout(()=>{ if(mode==='playing') spawnWalls([0,1,2],true); },300);
+  setTimeout(()=>{ if(mode==='playing'&&!spawnWalls([0,1,2],true)) spawnChest(true); },300);
 }

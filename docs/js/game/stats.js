@@ -32,6 +32,7 @@ function creditDamage(dmg,owner){
   const f=(S.boosts||[]).slice();
   if(S.odT>0) f.push({key:'a:od',k:odK()*odRate()});
   if(S.flowT>0) f.push({key:'a:flow',k:flowK()*flowK()});
+  if(S.pwDmg>0||S.pwRate>0) f.push({key:'a:power',k:pwK()*pwRate()});
   if(hitBoost) f.push(...hitBoost);
   let K=1; for(const b of f) K*=b.k;
   if(K>1.0001){ const bonus=dmg-dmg/K,L=Math.log(K); for(const b of f) if(b.k>1) credit(b.key,bonus*Math.log(b.k)/L); dmg/=K; }
@@ -46,6 +47,10 @@ function runSummary(){
   for(const c of COMBOS) if(RUN.combos.has(c.id)) rows.push({name:c.name,kind:tl('Combo'),dmg:dmgOf('c:'+c.id),desc:c.desc});
   if(src['a:od']) rows.push({name:'Overdrive',kind:tl('Ability'),dmg:src['a:od']});
   if(src['a:flow']) rows.push({name:'Flow',kind:tl('Ability'),dmg:src['a:flow']});
+  if(src['a:power']) rows.push({name:tl('Power-ups'),kind:tl('Chest'),dmg:src['a:power']});
+  if(src['a:nade']) rows.push({name:tl('Grenade Jump'),kind:tl('Chest'),dmg:src['a:nade']});
+  if(src['a:divine']) rows.push({name:tl('Divine Touch'),kind:tl('Chest'),dmg:src['a:divine']});
+  if(src['a:bomb']) rows.push({name:tl('Bomb'),kind:tl('Chest'),dmg:src['a:bomb']});
   if(src['a:pound']) rows.push({name:tl('Ground pound'),kind:tl('Ability'),dmg:src['a:pound']});
   if(src['x:weather']) rows.push({name:tl('Thunder and weather'),kind:tl('Weather'),dmg:src['x:weather']});
   rows.sort((a,b)=>b.dmg-a.dmg);

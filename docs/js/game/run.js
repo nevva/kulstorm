@@ -9,7 +9,7 @@ function clearRun(){
   coins.forEach(c=>{ scene.remove(c.g); coinPool.push(c.g); }); coins=[];
   walls.forEach(w=>{ if(!w.dead) removeWall(w); }); walls=[];
   zaps.forEach(z=>{ z.t=0; z.m.visible=false; });
-  clearWeatherFx(); clearObstacles(); clearXp(); clearUnicorns(); clearBossFx(); shopEl.hidden=true; document.body.classList.remove('od-on');
+  clearWeatherFx(); clearObstacles(); clearChests(); clearXp(); clearUnicorns(); clearBossFx(); shopEl.hidden=true; document.body.classList.remove('od-on');
   puddles.forEach(q=>scene.remove(q.m)); puddles.length=0; pendSpawn.length=0;
   clearDmg(); clearSquad(); clearShards(); poundRing.visible=false; tutStart();
   shieldRing.visible=false; frontMarker.visible=false; bossBar.hidden=true;
@@ -53,7 +53,7 @@ function startGame(cfg){
   bossBar.hidden=true; $('newbest').hidden=true;
   mode='playing'; menuEl.hidden=true; overEl.hidden=true; hudEl.hidden=false;
   recomputeAuras(); updatePower(0,true); updateDifficulty(); updateHUD();
-  nextObsAt=dist+150; obsHinted={low:false,high:false,tall:false}; refreshKioskSign(); if(cfg.odFull&&OPT.overdrive) S.od=1;
+  nextObsAt=dist+150; nextChestAt=dist+(easeK()>0?40:80); obsHinted={low:false,high:false,tall:false}; refreshKioskSign(); if(cfg.odFull&&OPT.overdrive) S.od=1;
   tutStart();
   if(!tutWants('steer')) showHint(OPT.obstacles?tl('Drag sideways to steer · swipe up = jump, down = duck, down in the air = ground pound · run into a wall to headbutt it'):tl('Drag sideways to steer · run into a wall to headbutt it'));
 }
@@ -61,6 +61,8 @@ let last=performance.now();
 function frame(now){
   requestAnimationFrame(frame);
   let dt=(now-last)/1000; last=now; if(dt>0.05) dt=0.05;
+  if(mode==='divine'){ updateDivine(dt); renderer.render(scene,camera); updateDmg(dt); return; }
+  dt*=slowK();
   if(mode==='playing') tutCheck();
   const frozen=mode==='paused'||mode==='shop'||tutOn();
   if(!frozen) update(dt);
@@ -75,7 +77,7 @@ function update(dt){
   updateWorld(dt); updateWalls(dt);
   if(mode==='playing'){ updatePlayer(dt); updateSquad(dt); updateFire(dt); updateDelayed(dt); }
   else if(mode==='menu'){ S.x=0; updateSquad(dt); }
-  updateBullets(dt); updateEnemies(dt); updateEnemyBullets(dt); updateHearts(dt); updateCoins(dt); updateZaps(dt); updateWeather(dt); updateObstacles(dt); updateXp(dt); updateUnicorns(dt); updateBossFx(dt); if(mode==='playing') updateOD(dt); updatePound(dt);
+  updateBullets(dt); updateEnemies(dt); updateEnemyBullets(dt); updateHearts(dt); updateCoins(dt); updateZaps(dt); updateWeather(dt); updateObstacles(dt); updateXp(dt); updateChests(dt); updateUnicorns(dt); updateBossFx(dt); if(mode==='playing') updateOD(dt); updatePound(dt);
   blobs.update(dt,scroll); chunks.update(dt,scroll); updateShards(dt);
   updateCamera(dt); updateSky(dt); updateColors(dt);
   if(mode==='playing') updateHUD();

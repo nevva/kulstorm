@@ -42,6 +42,7 @@ function tutCheck(){
       for(const e of enemies){ if(e.dead||e.under||e.isBoss) continue; const q=e.g.position; if(q.z<hp.z&&Math.hypot(q.x-hp.x,q.z-hp.z)<POUND_R+1) return tutShow('pound'); }
     }
   }
+  if(tutWants('chest')&&chests.some(c=>c.openT<0&&c.g.position.z>-22)) return tutShow('chest');
   if(tutWants('wall')&&walls.some(w=>!w.dead&&w.g.position.z>-22)) return tutShow('wall');
   if(OPT.overdrive&&tutWants('od')&&S.od>=1&&!(S.odT>0)) return tutShow('od');
 }

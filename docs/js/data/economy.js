@@ -5,3 +5,26 @@ const XP_VAL={shambler:1,crawler:1,bloater:3,knight:3,splitter:1,mole:2,necro:4,
 const LVL_COST=[0,10,20,35,55];
 // Coin price of a hero talent point when you have no free one, by how many you have bought before.
 const TALENT_COST=b=>40+20*b;
+// Power-ups: one-off effects that only come out of chests.
+const POWERUPS=[
+  {id:'cash',kind:'power',rarity:'common',name:'Coin Bag',desc:'A burst of 10–20 coins',color:0xffc83d},
+  {id:'patch',kind:'power',rarity:'common',name:'Heart Pack',desc:'Heals the whole squad 40 HP',color:0xff3d6e},
+  {id:'frenzy',kind:'power',rarity:'common',name:'Frenzy',desc:'Double fire rate for 10 seconds',color:0xff8a3d},
+  {id:'power',kind:'power',rarity:'common',name:'Power Shot',desc:'Double damage for 10 seconds',color:0xff5c7a},
+  {id:'bubble',kind:'power',rarity:'rare',name:'Bubble',desc:'Two shield charges that each block a hit',color:0x49c3ff},
+  {id:'bomb',kind:'power',rarity:'rare',name:'Bomb',desc:'Blasts every enemy near the front',color:0x37474f},
+  {id:'battery',kind:'power',rarity:'rare',name:'Overdrive Battery',desc:'Fills the Overdrive meter',color:0xfff176},
+  {id:'line',kind:'power',rarity:'rare',name:'Line Up',desc:'The whole squad runs side by side across the road for 12 seconds',color:0x36e2b4},
+  {id:'nade',kind:'power',rarity:'rare',name:'Grenade Jump',desc:'For 15 seconds every jump throws a grenade ahead',color:0x558b2f},
+  {id:'slowmo',kind:'power',rarity:'rare',name:'Slow-Mo Roll',desc:'For 15 seconds time slows down while you roll',color:0x8fd3ff},
+  {id:'divine',kind:'power',rarity:'epic',name:'Divine Touch',desc:'Your next Overdrive stops time: tap enemies to make them vanish. Bosses only get hurt, so tap them again and again',color:0xfff3a0},
+  {id:'jackpot',kind:'power',rarity:'epic',name:'Jackpot',desc:'A rain of 60 coins',color:0xffd21f},
+];
+// Armory: what a new player has in the chests from the start, and the coin price to unlock the rest.
+// Unlocking buys a chance: the item can then come out of chests and walls.
+const STARTER_ITEMS=['cash','patch'];
+const RARITY_PRICE={common:60,rare:150,epic:320};
+const ITEM_PRICE={frenzy:25,recruit:30,power:35,steel:40,medic:45,fastload:45,bubble:80,bomb:90,battery:110,line:70,slowmo:100,nade:120,divine:300,jackpot:220};
+const itemPrice=u=>ITEM_PRICE[u.id]||RARITY_PRICE[u.rarity];
+// Coins a chest pays out instead when it rolls an item you have not unlocked.
+const LOCKED_COINS={common:5,rare:9,epic:16};

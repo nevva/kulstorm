@@ -3,13 +3,18 @@
 const WALL_COL={common:0x6fc3ff,rare:0xffd21f,epic:0xff5cf3},WALL_CSS={common:'#6fc3ff',rare:'#ffd21f',epic:'#ff5cf3'};
 const wallPostMat=mat(0xfff8e6,{r:0.35}),wallBarBg=mat(0x0d1030,{r:0.5}),wallBarFg=mat(0xff5c7a,{e:0.6});
 let walls=[];
+// Whether an upgrade can be handed out right now (not counting the Armory): uniques you have, maxed perks, a full squad and options rule some out.
+function upgradeFits(u){
+  return !(u.unique&&hasPart(u.id))&&!(u.max&&S.perks.filter(q=>q.id===u.id).length>=u.max)&&!(squad.length>=MAX_SQUAD&&u.kind==='gubbe')&&!(!OPT.team&&u.kind==='team')&&!(u.kind==='pet'&&(!OPT.unicorns||unicorns.length>=2));
+}
+const rarityW=(u,boss)=>boss?(u.rarity==='common'?10:u.rarity==='rare'?35:55):(u.rarity==='common'?60:u.rarity==='rare'?30:11);
+// Walls only offer what is unlocked in the Armory, so a new player's first run has none.
 function rollUpgrades(n,boss){
-  const full=squad.length>=MAX_SQUAD;
-  const pool=UPGRADES.filter(u=>!(u.unique&&hasPart(u.id))&&!(u.max&&S.perks.filter(q=>q.id===u.id).length>=u.max)&&!(full&&u.kind==='gubbe')&&!(!OPT.team&&u.kind==='team')&&!(u.kind==='pet'&&(!OPT.unicorns||unicorns.length>=2)));
+  const pool=UPGRADES.filter(u=>upgradeFits(u)&&isUnlocked(u.id));
   const picks=[];
   if(boss){ const ep=pool.filter(u=>u.rarity==='epic'); if(ep.length){ const u=pick(ep); picks.push(u); pool.splice(pool.indexOf(u),1); } }
   while(picks.length<n&&pool.length){
-    const ws=pool.map(u=>(boss?(u.rarity==='common'?10:u.rarity==='rare'?35:55):(u.rarity==='common'?60:u.rarity==='rare'?30:11))*(u.kind==='team'?0.7:1));
+    const ws=pool.map(u=>rarityW(u,boss)*(u.kind==='team'?0.7:1));
     let r=Math.random()*ws.reduce((a,b)=>a+b,0),idx=0;
     for(;idx<ws.length-1;idx++){ r-=ws[idx]; if(r<=0) break; }
     picks.push(pool.splice(idx,1)[0]);
@@ -56,7 +61,7 @@ function buildWall(u,boss){
 }
 let wallGroupId=0;
 function spawnWalls(lanes,boss){
-  const picks=rollUpgrades(lanes.length,boss); if(!picks.length) return;
+  const picks=rollUpgrades(lanes.length,boss); if(!picks.length) return 0;
   const hp=60*DIFF.hp*PF*(isW('heat')?1.3:1)*(boss?0.5:1),gid=boss?++wallGroupId:0;
   picks.forEach((u,i)=>{
     const lane=lanes[i];
@@ -65,6 +70,7 @@ function spawnWalls(lanes,boss){
   });
   if(boss){ toast(tl('Boss reward! Pick one')); sfx.combo(); }
   else { toast(picks.length>1?tl('Upgrades!'):tl('Upgrade!')); sfx.zone(); }
+  return picks.length;
 }
 function spawnRandomWalls(){
   const a=ri(0,LANES-1);

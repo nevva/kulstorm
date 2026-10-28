@@ -101,6 +101,14 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 body.od-on #odglow{opacity:1}
 @media (prefers-reduced-motion:reduce){ .odbtn.ready,.odbtn.active span{animation:none} }
 .chip.uni{font-size:11px;padding:4px 9px;color:var(--ink);background:linear-gradient(90deg,#ff8a8a,#ffd36b,#9dffb0,#8fd3ff,#d7a6ff)}
+#divine{position:fixed;inset:0;pointer-events:none;z-index:6;display:flex;flex-direction:column;align-items:center;padding-top:26vh;gap:4px;color:#fff3a0;text-shadow:0 2px 8px rgba(0,0,0,.6);background:radial-gradient(ellipse at center,rgba(255,243,160,0) 45%,rgba(255,210,31,.35) 100%)}
+#divine[hidden]{display:none}
+#divine b{font-family:var(--font-display);font-size:34px}
+#divine span{font-weight:800;font-size:15px}
+#divine i{font-style:normal;font-family:var(--font-display);font-size:26px}
+.chip.pw{background:linear-gradient(90deg,#ff5c7a,#ff8a3d);color:#fff}
+.hero.own{border-color:var(--mint)}
+.hero .rar{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#6b6f9a}
 .chip.flow{position:relative;overflow:hidden;background:linear-gradient(90deg,#ffd21f,#ff8a3d);box-shadow:0 0 14px rgba(255,190,60,.7)}
 #flowbar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--ink);opacity:.55}
 .xprow{display:flex;align-items:center;gap:8px;margin-top:8px}

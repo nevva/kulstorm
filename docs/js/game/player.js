@@ -35,7 +35,10 @@ function updatePlayer(dt){
 function updateSquad(dt){
   const k=1-Math.exp(-dt*10),kf=1-Math.exp(-dt*7);
   for(const m of squad) if(m.boff){ m.g.position.z-=m.boff; m.boff=0; }
-  if(OPT.snake){
+  if(S.pwLine>0&&mode==='playing'){
+    const order=chainOrder(),n=order.length;
+    order.forEach((m,i)=>{ const g=m.g; g.position.x+=(lineSlotX(i,n)-g.position.x)*k; g.position.z+=(0-g.position.z)*k; });
+  }else if(OPT.snake){
     let prev=null;
     for(const m of chainOrder()){
       const g=m.g;
@@ -92,7 +95,7 @@ function updateFire(dt){
   for(const m of squad){
     const w=WEAPONS[m.def.weapon||'pistol'];
     if(w.laser){ laserMember(m,w,A,dt); continue; }
-    const rate=w.rate*A.rate*formRate(m)*flowK()*odRate();
+    const rate=w.rate*A.rate*formRate(m)*flowK()*odRate()*pwRate();
     m.cd-=dt;
     if(m.cd<=0){ m.cd+=1/rate; fireFrom(m,w,A); }
   }
@@ -104,10 +107,11 @@ function laserMember(m,w,A,dt){
   m.laserTick-=dt;
   if(m.laserTick<=0){
     m.laserTick=0.1;
-    const base=w.dps*A.dmg*A.rate*formRate(m)*0.1*memberMult(m)*flowK()*flowK()*odK()*odRate(),burn=S.combos.has('burn');
+    const base=w.dps*A.dmg*A.rate*formRate(m)*0.1*memberMult(m)*flowK()*flowK()*odK()*odRate()*pwK()*pwRate(),burn=S.combos.has('burn');
     m.beams.forEach(b=>{
       if(!b.visible) return; const bx=b.position.x;
       for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position; if(p.z<0.5&&Math.abs(p.x-bx)<e.r+0.15){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitEnemy(e,dv,crit,tier,m,true); fxDamage(bx,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(burn&&!e.dead){ e.burn=3; e.burnDps=base*4; e.burnOwner=m; e.burnSrc='c:burn'; } if(crit&&S.combos.has('chain')&&!e.dead) chainFrom(e,dv,m); } }
+      for(const c of chests){ const cp=c.g.position; if(c.openT<0&&cp.z<0.5&&Math.abs(cp.x-bx)<0.8) hitChest(c,base,bx,0.6,cp.z+0.45); }
       for(const wl of walls){ const wp=wl.g.position; if(!wl.dead&&wp.z<0.5&&Math.abs(wp.x-bx)<1.8){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitWall(wl,dv,bx,rand(0.5,1.9),wp.z+0.3,crit,tier); fxDamage(bx,rand(0.6,1.8),wp.z+0.3,tier); } }
     });
     sfx.laser();
@@ -124,7 +128,7 @@ function fireFrom(m,w,A){
   m.g.userData.tip.getWorldPosition(tipV);
   const n=w.bullets+A.extra;
   const spread=w.spread+(n>1?0.07*(n-1):0);
-  const base=w.dmg*A.dmg*memberMult(m)*flowK()*odK();
+  const base=w.dmg*A.dmg*memberMult(m)*flowK()*odK()*pwK();
   const cp=S.combos.has('spike')&&w.id==='shotgun'?'c:spike':w.id==='minigun'&&S.combos.has('leadrain')?'c:leadrain':null;
   const pierce=(S.combos.has('spike')&&w.id==='shotgun')?99:w.id==='shuriken'?A.pierce+2:(w.id==='minigun'&&S.combos.has('leadrain'))?A.pierce+1:undefined;
   // Light close-range aim assist: bend shots up to ~8° toward the nearest enemy within 6 m in this gubbe's lane.
@@ -176,6 +180,7 @@ function updateBullets(dt){
         }
       }
     }
+    if(!dead) for(const c of chests){ if(c.openT>=0) continue; const cp=c.g.position; if(Math.abs(cp.z-d.z)<0.55&&Math.abs(cp.x-d.x)<0.7+d.size*0.2){ if(d.rocket) explodeAt(d.x,d.y,d.z,d.aoe,d.dmg,d.base,false,d.owner,0); else { hitChest(c,d.dmg,d.x,d.y,cp.z+0.45); sfx.hit(); } dead=true; break; } }
     if(!dead){
       for(const e of enemies){
         if(e.dead||e.under) continue;
@@ -224,7 +229,7 @@ function updateEnemyBullets(dt){
   al.length=n; ebullets.flush();
 }
 function updateDelayed(dt){
-  for(let i=delayed.length-1;i>=0;i--){ const q=delayed[i]; q.t-=dt; q.z+=scroll*dt; if(q.t<=0){ delayed.splice(i,1); dmgSrc='c:rain'; explodeAt(q.x,0.6,q.z,q.radius,q.dmg,q.base,false,q.owner,1); dmgSrc=null; } }
+  for(let i=delayed.length-1;i>=0;i--){ const q=delayed[i]; q.t-=dt; q.z+=scroll*dt; if(q.t<=0){ delayed.splice(i,1); dmgSrc=q.src||'c:rain'; explodeAt(q.x,0.6,q.z,q.radius,q.dmg,q.base,false,q.owner,1); dmgSrc=null; } }
 }
 function die(){
   unlockMouse();
@@ -233,7 +238,7 @@ function die(){
   squad.forEach(m=>{ if(m.dead) return; const p=m.g.position; fxExplosion(p.x,1,p.z,1.1,C(m.def.shirt)); m.g.visible=false; m.beams.forEach(b=>b.visible=false); });
   shieldRing.visible=false; frontMarker.visible=false; bossBar.hidden=true;
   if(!labRun&&Math.floor(dist)>best){ best=Math.floor(dist); store('kulstorm_best',best); $('newbest').hidden=false; } else $('newbest').hidden=true;
-  if(!labRun&&OPT.coins&&coinsRun>0){ bank+=coinsRun; saveBank(); }
+  bankRun();
   lastHeroGain=commitHeroXp();
 }
 let lastHeroGain={gain:0,ups:0};
@@ -243,8 +248,15 @@ function showOver(){
   $('odist').textContent=fmt(dist); $('okills').textContent=fmt(kills); $('obest').textContent=fmt(best);
   const hx=$('oherox'); hx.hidden=!(OPT.heroprog&&lastHeroGain.gain>0); hx.textContent=tl('+{0} hero XP',fmt(lastHeroGain.gain))+(lastHeroGain.ups?' · '+tl('Hero level {0}! +{1} talent points',HERO.lvl,lastHeroGain.ups):'');
   $('ocoins').textContent=labRun?tl('Lab run – no coins or records'):(OPT.coins?tl('+{0} coins · {1} total',fmt(coinsRun),fmt(bank)):'');
-  renderRunSummary(); renderOverUpgrades();
+  renderOverArmory(); renderRunSummary(); renderOverUpgrades();
   overEl.hidden=false; overEl.scrollTop=0;
+}
+// Game over: point at the Armory, naming the cheapest item still locked.
+function renderOverArmory(){
+  const el=$('oarmory'),btn=$('o-armory'),next=lockedItems()[0],on=!labRun&&OPT.coins&&!!next;
+  el.hidden=btn.hidden=!on; if(!on) return;
+  const n=affordableUnlocks(),price=itemPrice(next);
+  el.textContent=n>0?tl('You can unlock {0} in the Armory now!',n>1?tl('{0} items',n):next.name):tl('Next unlock: {0} · {1} coins short',next.name,fmt(price-bank));
 }
 // Game over: damage per gubbe, team perk, combo and ability this run, biggest first, with a bar for each one's share.
 function renderRunSummary(){

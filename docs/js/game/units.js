@@ -22,6 +22,11 @@ if(owned.indexOf('rookie')<0) owned.push('rookie');
 if(owned.indexOf(heroId)<0) heroId='rookie';
 // Bought gubbar join the start group unless opted out (benched). The free Rookie never joins as an extra.
 let benched=load('kulstorm_bench',[]);
-function saveBank(){ store('kulstorm_coins',Math.round(bank)); store('kulstorm_owned',owned); store('kulstorm_hero',heroId); store('kulstorm_bench',benched); }
+// Items unlocked in the Armory: only these come out of chests and walls. Lab runs, and play without coins, have everything.
+let unlocked=load('kulstorm_unlocked',STARTER_ITEMS.slice()),runsDone=load('kulstorm_runs',0);
+const isUnlocked=id=>labRun||!OPT.coins||unlocked.indexOf(id)>=0;
+function saveBank(){ store('kulstorm_coins',Math.round(bank)); store('kulstorm_owned',owned); store('kulstorm_hero',heroId); store('kulstorm_bench',benched); store('kulstorm_unlocked',unlocked); store('kulstorm_runs',runsDone); }
+// End of a real run: bank its coins and count it (the first runs are played at an easier pace, see easeK).
+function bankRun(){ if(labRun) return; if(OPT.coins&&coinsRun>0) bank+=coinsRun; runsDone++; saveBank(); }
 const startCompanions=()=>HEROES.filter(h=>h.price>0&&h.id!==heroId&&owned.indexOf(h.id)>=0&&benched.indexOf(h.id)<0);
 function companionDef(h){ return {id:'hero_'+h.id,kind:'gubbe',name:h.name,short:h.name,desc:h.desc,weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt}; }

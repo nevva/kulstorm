@@ -12,5 +12,6 @@ const TUTORIAL={
   pound:{title:'Ground pound',how:'Jump first …',text:'Enemies are close to the front. From the air you can slam into the ground.',do:'jump',then:'pound2'},
   pound2:{title:'… and down!',how:'Swipe down · S · Shift · ↓ in the air',text:'The ground pound hurts every enemy near the front, knocks them back and pulls in the ones a little further away.',do:'duck'},
   wall:{title:'Walls',how:'Shoot it, or run into it',text:'Shoot the wall to pieces to get what\'s on it: a new squad member or a perk for the whole squad. Run straight into it and your front-runner headbutts it apart, but takes damage from the wall\'s remaining health.',do:'ok'},
+  chest:{title:'Chests',how:'Shoot it, or run into it',text:'A chest holds a random item. Items you have unlocked in the Armory come out as they are; a locked one turns into coins. Unlock more between runs to fill the chests with better loot.',do:'ok'},
   od:{title:'OVERDRIVE ready!',how:'E · middle click · the button',text:'6 seconds of triple damage, double fire rate, shots that pierce everything and no damage to you. The meter charges from enemies, obstacles and walls.',do:'od'},
 };

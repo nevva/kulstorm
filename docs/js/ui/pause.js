@@ -59,7 +59,7 @@ $('p-restart').addEventListener('click',()=>{ pauseEl.hidden=true; startGame(las
 $('p-opts').addEventListener('click',()=>{ renderOpts('popts'); $('pause-main').hidden=true; $('pause-opts').hidden=false; });
 $('p-opts-back').addEventListener('click',()=>{ $('pause-opts').hidden=true; $('pause-main').hidden=false; });
 $('p-menu').addEventListener('click',()=>{
-  if(!labRun&&OPT.coins&&coinsRun>0){ bank+=coinsRun; saveBank(); }
+  bankRun();
   commitHeroXp();
   pauseEl.hidden=true; hudEl.hidden=true; clearRun(); mode='menu'; showMenu('main');
 });

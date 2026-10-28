@@ -55,7 +55,7 @@ function buildOffers(){
   const pool=[];
   shuffle(squad.filter(m=>m.lvl<5)).slice(0,3).forEach(m=>pool.push({type:'lvl',m,cost:LVL_COST[m.lvl]}));
   if(squad.some(m=>m.hp<m.maxHp*0.95)) pool.push({type:'heal',cost:15});
-  if(!hasPart('banker')&&squad.length<MAX_SQUAD&&Math.random()<0.45) pool.push({type:'banker',cost:30});
+  if(isUnlocked('banker')&&!hasPart('banker')&&squad.length<MAX_SQUAD&&Math.random()<0.45) pool.push({type:'banker',cost:30});
   if(!pool.length) pool.push({type:'heal',cost:15});
   R.offers=shuffle(pool).slice(0,3);
 }

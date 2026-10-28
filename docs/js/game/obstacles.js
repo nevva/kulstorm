@@ -14,7 +14,7 @@ function squadWave(kind){
     if(kind==='jump'){ m.jumpDelay=d; m.duckDelay=-1; }
     else { m.duckDelay=d; m.jumpDelay=-1; }
   }
-  if(kind==='jump'){ if((headMember().jy||0)>0.05&&OPT.dbljump) sfx.jump2(); else sfx.jump(); } else sfx.duck();
+  if(kind==='jump'){ if((headMember().jy||0)>0.05&&OPT.dbljump) sfx.jump2(); else sfx.jump(); if(S.pwNade>0) throwNade(); } else sfx.duck();
   tutAct(kind);
 }
 const squadJump=()=>squadWave('jump'),squadDuck=()=>squadWave('duck');
@@ -81,6 +81,7 @@ function spawnObstacle(type,s,n,z){
 }
 function spawnObstacleSet(){
   for(const wl of walls) if(wl.g.position.z<VIEW.spawn+14){ nextObsAt+=20; return; }
+  for(const c of chests) if(c.g.position.z<VIEW.spawn+10){ nextObsAt+=20; return; }
   const big=Math.min(0.35,0.1+dist/6000),r=Math.random();
   const n=r<big?3:r<big+0.35?2:1,s=ri(0,LANES-n),tr=Math.random(),type=(OPT.dbljump&&dist>600&&tr<0.22)?'tall':(tr<0.61?'low':'high');
   spawnObstacle(type,s,n,VIEW.spawn);
@@ -118,6 +119,7 @@ function addOD(x){ if(!OPT.overdrive||mode!=='playing'||S.odT>0||S.odLock>0) ret
 function triggerOD(force){
   if(!OPT.overdrive||mode!=='playing'||S.odT>0||(S.od<1&&!force)) return;
   S.od=0; S.odT=OD_T; S.odUsed=true; tutAct('od'); sfx.odStart(); shake(1.2);
+  if(S.divine>0) startDivine();
   for(const e of enemies){ if(e.dead||e.isBoss||e.under) continue; if(e.g.position.z>-22){ e.kb=Math.min(4,(e.kb||0)+2.6); e.stun=1; e.sq=1; } }
   const p=headMember().g.position; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; chunks.spawn(p.x,0.6,p.z-0.5,Math.cos(a)*9,rand(1,3),Math.sin(a)*9-3,0.6,0.3,0.08,C(0xffe066),C(0xffc23d),C(0xff8a3d),4,1.2,false,rand(4,10)); }
 }

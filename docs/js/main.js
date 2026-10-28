@@ -40,6 +40,7 @@ const FILES=[
   'game/weather.js',
   'game/obstacles.js',
   'game/unicorns.js',
+  'game/chests.js',
   'game/xpshop.js',
   'game/spawning.js',
   'game/player.js',
