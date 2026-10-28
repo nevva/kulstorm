@@ -45,7 +45,7 @@ function renderShop(){
   });
 }
 // Armory: every item chests and walls can give. Unlocking one adds it to what can drop.
-function armoryItems(){ return ABILITIES.filter(u=>u.id==='pound'?OPT.obstacles:OPT[u.id]).concat(POWERUPS,UPGRADES).filter(u=>(OPT.team||u.kind!=='team')&&(OPT.unicorns||u.kind!=='pet')&&powerOn(u)); }
+function armoryItems(){ return ABILITIES.filter(u=>abilityEnabled(u.id)).concat(POWERUPS,UPGRADES).filter(u=>(OPT.team||u.kind!=='team')&&(OPT.unicorns||u.kind!=='pet')&&powerOn(u)); }
 const lockedItems=()=>armoryItems().filter(u=>unlocked.indexOf(u.id)<0).sort((a,b)=>itemPrice(a)-itemPrice(b));
 const affordableUnlocks=()=>lockedItems().filter(u=>bank>=itemPrice(u)).length;
 const KIND_NAME={ability:'Ability',power:'Power-up',gubbe:'Squad member',team:'Team perk',pet:'Helper'};
@@ -61,7 +61,7 @@ function renderArmory(){
       const card=document.createElement('div'); card.className='hero'+(own?' own':'');
       const sw=document.createElement('div'); sw.className='sw'; sw.style.background=WALL_CSS[u.rarity]; card.appendChild(sw);
       const t=document.createElement('h4'); t.textContent=u.name; card.appendChild(t);
-      const r=document.createElement('span'); r.className='rar'; r.textContent=RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
+      const r=document.createElement('span'); r.className='rar'; r.textContent=(u.id==='payback'&&!own?tl('First upgrade')+' · ':'')+RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
       const p=document.createElement('p'); p.textContent=u.desc; card.appendChild(p);
       const b=document.createElement('button'); b.type='button';
       if(own){ b.textContent='✓ '+tl(u.kind==='ability'?'Unlocked':'In the chests'); b.disabled=true; }

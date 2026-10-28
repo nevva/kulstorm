@@ -4,6 +4,7 @@
 // An item unlocked in the Armory comes out as it is; a locked one pays out coins instead and shows what you could have had.
 // Golden chests drop after a boss when there is no boss reward wall to pick, and roll with boss odds.
 let chests=[],nextChestAt=60;
+const needsPaybackCoins=()=>!labRun&&OPT.coins&&!isUnlocked('payback')&&bank+coinsRun<ITEM_PRICE.payback;
 const chestWood=mat(0x9a6238,{r:0.6}),chestBand=mat(0xffc83d,{r:0.25,m:0.6,e:0.25}),chestGold=mat(0xffd21f,{r:0.2,m:0.7,e:0.45}),chestIn=mat(0x2a160c,{r:0.8});
 function buildChest(gold){
   const g=new THREE.Group(),body=gold?chestGold:chestWood,band=gold?chestWood:chestBand;
@@ -26,7 +27,7 @@ function spawnChest(gold){
     // keep clear of walls and obstacles near the horizon; try again a little later
     if(walls.some(w=>!w.dead&&w.g.position.z<VIEW.spawn+10)||obstacles.some(o=>o.z<VIEW.spawn+10)){ nextChestAt=dist+15; return; }
   }
-  const lane=gold?1:ri(0,LANES-1),g=buildChest(gold);
+  const lane=(gold||needsPaybackCoins())?1:ri(0,LANES-1),g=buildChest(gold);
   g.position.set(LANE_X[lane],0,VIEW.spawn); g.rotation.y=gold?0:rand(-0.25,0.25); scene.add(g);
   const hp=(gold?60:22)*DIFF.hp*PF;
   chests.push({g,lid:g.userData.lid,gold:!!gold,hp,maxHp:hp,openT:-1,sq:0,sparkT:0,dead:false});
@@ -55,7 +56,8 @@ function openChest(c){
   c.openT=0; addOD(0.05);
   sfx.upgrade(); shake(0.35);
   for(let i=0;i<22;i++){ const a=rand(0,Math.PI*2),sp=rand(1.5,4); blobs.spawn(p.x,0.8,p.z,Math.cos(a)*sp,rand(3,7),Math.sin(a)*sp,rand(0.5,0.9),0.16,0.05,WHITE,GOLD,C(0xff8a3d),-1,1,false,rand(1,4)); }
-  grantItem(rollChest(c.gold),p,c.gold);
+  const reward=!c.gold&&needsPaybackCoins()?POWERUPS.find(u=>u.id==='cash'):rollChest(c.gold);
+  grantItem(reward,p,c.gold);
   if(c.gold) grantItem(rollChest(true),p,true);
 }
 function grantItem(u,p,gold){
@@ -78,7 +80,7 @@ const PW_T=10;
 const pwK=()=>S.pwDmg>0?2:1, pwRate=()=>S.pwRate>0?2:1;
 function applyPowerup(u,p){
   switch(u.id){
-    case 'cash': spawnCoins(p.x,p.z,ri(10,20),1.2); break;
+    case 'cash': spawnCoins(p.x,p.z,ri(10,20),needsPaybackCoins()?0.45:1.2); break;
     case 'jackpot': spawnCoins(p.x,p.z,60,2.2); sfx.combo(); break;
     case 'patch': squad.forEach(m=>healMember(m,40)); sfx.pickup(); break;
     case 'frenzy': S.pwRate=PW_T; break;

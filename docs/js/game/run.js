@@ -32,6 +32,7 @@ function startGame(cfg){
   W.fixed=cfg.weather&&OPT.weather?cfg.weather:null; W.next=Math.floor(dist/300+1)*300; W.id='clear'; W.wind=0; W.mix=1;
   if(W.fixed) setWeather(W.fixed,true); else if(dist>0) rollWeather();
   const hero=heroById(cfg.hero);
+  S.T.rate=STARTING_FIRE_RATE_MULTIPLIER*(hasAbility('payback')?2:1);
   S.T.speed=hero.speed||1; S.T.coinMult=hero.coinMult||1; if(hero.T) for(const k in hero.T) S.T[k]*=hero.T[k];
   const L=addMember(leaderDef(hero)); L.charges=hero.shield||0;
   runHeroXp=0; lastHeroGain={gain:0,ups:0};

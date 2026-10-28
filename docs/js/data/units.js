@@ -10,6 +10,7 @@ const WEAPONS={
   laser:{id:'laser',name:'Laser',laser:true,dps:28,color:0x18ffff},
   shuriken:{id:'shuriken',name:'Shuriken',rate:2.4,dmg:13,bullets:3,spread:0.3,jitter:0.03,speed:24,size:1.1,color:0xcfd8dc,shuriken:true},
 };
+const STARTING_FIRE_RATE_MULTIPLIER=0.5;
 // kind 'gubbe': a wall adds this squad member; kind 'team': a wall grants the whole squad a permanent perk.
 const UPGRADES=[
   {id:'smg',kind:'gubbe',weapon:'smg',rarity:'common',name:'SMG Gunner',short:'SMG',desc:'Fires fast with light bullets',shirt:0x80deea},

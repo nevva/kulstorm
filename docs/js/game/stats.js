@@ -12,6 +12,7 @@ function credit(key,amt){ RUN.src[key]=(RUN.src[key]||0)+amt; }
 // Multipliers from powerups, rebuilt by recomputeAuras. k = how much they multiply the squad's damage per second.
 function runBoosts(A){
   const B=[];
+  if(hasAbility('payback')) B.push({key:'a:payback',k:2});
   for(const m of squad){
     const id=m.def.id,key='m:'+m.uid;
     if(id==='firerate') B.push({key,k:1.2});
@@ -45,6 +46,7 @@ function runSummary(){
   const perks={}; S.perks.forEach(p=>{ perks[p.id]=perks[p.id]||{p,n:0}; perks[p.id].n++; });
   for(const id in perks){ const {p,n}=perks[id]; rows.push({name:p.name+(n>1?' ×'+n:''),kind:tl('Team perk'),dmg:dmgOf('p:'+id),desc:p.desc}); }
   for(const c of COMBOS) if(RUN.combos.has(c.id)) rows.push({name:c.name,kind:tl('Combo'),dmg:dmgOf('c:'+c.id),desc:c.desc});
+  if(src['a:payback']) rows.push({name:tl('Payback Time'),kind:tl('Ability'),dmg:src['a:payback']});
   if(src['a:od']) rows.push({name:'Overdrive',kind:tl('Ability'),dmg:src['a:od']});
   if(src['a:flow']) rows.push({name:'Flow',kind:tl('Ability'),dmg:src['a:flow']});
   if(src['a:power']) rows.push({name:tl('Power-ups'),kind:tl('Chest'),dmg:src['a:power']});

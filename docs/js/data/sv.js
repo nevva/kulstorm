@@ -501,4 +501,7 @@ const SV={
   'Drag sideways to steer · swipe up = jump, down = duck · run into a wall to headbutt it':'Dra åt sidan för att styra · svep upp = hopp, ner = ducka · spring in i en vägg för att skalla den',
   'Game speed':'Spelhastighet',
   'Game speed: {0}×. Press to change.':'Spelhastighet: {0}×. Tryck för att ändra.',
+  'Payback Time':'Revanschdags',
+  'Start every run with double fire rate.':'Börja varje runda med dubbel eldhastighet.',
+  'First upgrade':'Första uppgraderingen',
 };
