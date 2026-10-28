@@ -217,6 +217,14 @@ $('lab-start').addEventListener('click',()=>{
 $('reset-tut').addEventListener('click',()=>{
   const b=$('reset-tut'); tutReset(); OPT.tutorial=true; saveOpts(); renderOpts(); b.textContent=tl('Tutorial will show again'); setTimeout(()=>{ b.textContent=tl('Show tutorial again'); },1500);
 });
+// Reset save: wipe all progress (coins, heroes, Armory unlocks, hero levels, record, seen tutorials) and reload as a new player. Settings, volume and language stay.
+const SAVE_KEYS=['kulstorm_coins','kulstorm_owned','kulstorm_hero','kulstorm_bench','kulstorm_unlocked','kulstorm_runs','kulstorm_heroprog','kulstorm_best','kulstorm_tut'];
+$('reset-all').addEventListener('click',()=>{
+  const b=$('reset-all');
+  if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to erase everything'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset save'); },3000); return; }
+  try{ SAVE_KEYS.forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  location.reload();
+});
 $('reset-save').addEventListener('click',()=>{
   const b=$('reset-save');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to reset'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset coins and purchases'); },3000); return; }

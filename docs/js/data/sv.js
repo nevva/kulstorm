@@ -486,4 +486,6 @@ const SV={
   'GRENADES':'GRANATER',
   'SLOW-MO':'SLOWMO',
   'DIVINE':'GUDOMLIG',
+  'Reset save':'Nollställ allt',
+  'Tap again to erase everything':'Tryck igen för att radera allt',
 };
