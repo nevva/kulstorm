@@ -5,3 +5,4 @@
 - `node dev.js` is the local development server, not a production backend.
 - Keep verification proportional to the change. Use focused checks; documentation-only changes do not need runtime tests.
 - Use concise, natural language. Cut unnecessary words. Avoid caveman grammar. Keep technical details, commands, and paths accurate.
+- Keep code concise and readable. Prefer self-explanatory names over comments. Use comments to explain non-obvious intent or constraints.
