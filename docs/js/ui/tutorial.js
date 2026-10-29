@@ -6,16 +6,20 @@
 const tutEl=$('tut');
 let tutSeen=load('kulstorm_tut',{}),tutCur=null,tutNext=null,tutNextT=0,tutD0=0,tutObs=null;
 const tutOn=()=>!!tutCur;
+// A card stays up for at least TUT_MIN ms (real time, the game is frozen) so a stray tap or key can't dismiss it unread.
+const TUT_MIN=1000;
+let tutShownAt=0;
+const tutLocked=()=>!!tutCur&&performance.now()-tutShownAt<TUT_MIN;
 const tutWants=id=>OPT.tutorial&&!tutSeen[id];
 function tutShow(id,o){
-  tutObs=o||null;
+  tutObs=o||null; tutShownAt=performance.now(); tutEl.classList.add('wait'); setTimeout(()=>tutEl.classList.remove('wait'),TUT_MIN);
   const c=TUTORIAL[id]; tutCur=id; tutSeen[id]=true; store('kulstorm_tut',tutSeen); tutNext=null;
   $('tut-title').textContent=c.title; $('tut-how').textContent=c.how; $('tut-text').textContent=c.text;
   $('tut-foot').textContent=c.do==='ok'?tl('Tap to continue'):tl('The game waits until you do it');
   keys.l=keys.r=false; if(c.do==='steer') S.targetX=S.x; tutEl.hidden=false; sfx.zone();
 }
 function tutHide(lead){
-  if(!tutCur) return;
+  if(!tutCur||tutLocked()) return;
   const c=TUTORIAL[tutCur]; tutCur=null; tutObs=null; tutEl.hidden=true;
   if(c.then){ tutNext=c.then; tutNextT=time+(lead||0); }
 }
@@ -33,7 +37,7 @@ function tutStart(){ tutObs=null; tutCur=null; tutNext=null; tutD0=dist; tutEl.h
 const tutReset=()=>{ tutSeen={}; store('kulstorm_tut',tutSeen); };
 // Every frame while playing, frozen or not: close a steer card once the player steers, otherwise look for the next card.
 function tutCheck(){
-  if(tutCur){ if(TUTORIAL[tutCur].do==='steer'&&(keys.l||keys.r||Math.abs(S.targetX-S.x)>0.6)) tutHide(); return; }
+  if(tutCur){ if(TUTORIAL[tutCur].do==='steer'){ if(tutLocked()){ keys.l=keys.r=false; S.targetX=S.x; } else if(keys.l||keys.r||Math.abs(S.targetX-S.x)>0.6) tutHide(); } return; }
   if(!OPT.tutorial||!squad.length) return;
   const h=headMember(),hp=h.g.position,air=h.jy||0;
   // follow-up cards come at the top of the jump the previous card asked for
@@ -58,7 +62,7 @@ function tutCheck(){
   if(hasAbility('overdrive')&&tutWants('od')&&S.od>=1&&!(S.odT>0)) return tutShow('od');
 }
 // Tapping the card does what it asks, so it can never get stuck.
-tutEl.addEventListener('click',()=>{ if(!tutCur) return; const d=TUTORIAL[tutCur].do; if(d==='jump') squadJump(); else if(d==='duck') squadDuck(); else if(d==='od') triggerOD(); else tutHide(); });
+tutEl.addEventListener('click',()=>{ if(!tutCur||tutLocked()) return; const d=TUTORIAL[tutCur].do; if(d==='jump') squadJump(); else if(d==='duck') squadDuck(); else if(d==='od') triggerOD(); else tutHide(); });
 $('tut-off').addEventListener('click',e=>{ e.stopPropagation(); OPT.tutorial=false; saveOpts(); tutCur=null; tutNext=null; tutEl.hidden=true; });
 canvas.addEventListener('pointerdown',()=>{ if(tutCur&&TUTORIAL[tutCur].do==='ok') tutHide(); });
 window.addEventListener('keydown',e=>{ if(tutCur&&mode==='playing'&&TUTORIAL[tutCur].do==='ok'&&e.key!=='Escape'&&e.key!=='p'&&e.key!=='P') tutHide(); });

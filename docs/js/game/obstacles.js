@@ -7,7 +7,7 @@ function doJump(m){
   else { m.vy=JUMP_V; m.dbUsed=false; m.duckT=0; }
 }
 function squadWave(kind){
-  if(mode!=='playing'||!OPT.obstacles||!squad.length) return;
+  if(mode!=='playing'||!OPT.obstacles||!squad.length||tutLocked()) return;
   const hz=headMember().g.position.z,sp=Math.max(4,scroll),lead=tutLead(kind);
   for(const m of squad){
     const d=lead+Math.max(0,m.g.position.z-hz)/sp;
@@ -117,7 +117,7 @@ function addFlow(n){ if(mode!=='playing') return; S.flow=Math.min(3,S.flow+n); S
 const OD_T=6;
 function addOD(x){ if(!hasAbility('overdrive')||mode!=='playing'||S.odT>0||S.odLock>0) return; const was=S.od; S.od=Math.min(1,S.od+x); if(was<1&&S.od>=1){ toast(tl('OVERDRIVE ready! Press E')); sfx.combo(); } }
 function triggerOD(force){
-  if(!hasAbility('overdrive')||mode!=='playing'||S.odT>0||(S.od<1&&!force)) return;
+  if(!hasAbility('overdrive')||mode!=='playing'||S.odT>0||(S.od<1&&!force)||(!force&&tutLocked())) return;
   S.od=0; S.odT=OD_T; S.odUsed=true; tutAct('od'); sfx.odStart(); shake(1.2);
   if(S.divine>0) startDivine();
   for(const e of enemies){ if(e.dead||e.isBoss||e.under) continue; if(e.g.position.z>-22){ e.kb=Math.min(4,(e.kb||0)+2.6); e.stun=1; e.sq=1; } }
