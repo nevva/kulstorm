@@ -41,6 +41,7 @@ const FILES=[
   'game/obstacles.js',
   'game/unicorns.js',
   'game/chests.js',
+  'game/scenery.js',
   'game/xpshop.js',
   'game/spawning.js',
   'game/player.js',

@@ -10,57 +10,117 @@ const stripeMat=new THREE.MeshStandardMaterial({color:C(0xffd21f),roughness:0.4,
 const curbMat=new THREE.MeshStandardMaterial({color:C(0x9aa5b1),roughness:0.45,flatShading:true,emissive:C(0x9aa5b1),emissiveIntensity:0});
 const ground=M(G.slab,groundMat,[90,0.4,200],[0,-0.3,-60],false); ground.receiveShadow=true; scene.add(ground);
 
+// Props: each is built in its own group around (x, z) and returns what scenery.js needs to make it react:
+// kind 'building' wobbles and chips when hit, 'small' gets knocked over; extra fields drive per-zone animations.
+const neonMats=[0xff2fd0,0x19e6ff,0x8cff3a,0xffe600].map(c=>new THREE.MeshStandardMaterial({color:C(c),emissive:C(c),emissiveIntensity:1.6,roughness:0.4,flatShading:true}));
+const blinkMat=new THREE.MeshStandardMaterial({color:C(0xff1744),emissive:C(0xff1744),emissiveIntensity:2,flatShading:true});
+const SPEC_SHIRTS=[0xff5c7a,0x49c3ff,0xffd21f,0x7cb342,0xb07cff,0xff9800];
+// A tiny onlooker for rooftops; scenery.js makes them cheer and duck.
+function spectator(g,x,y,z){
+  const s=new THREE.Group(); s.position.set(x,y,z);
+  s.add(M(G.box,pal(pick(SPEC_SHIRTS)),[0.3,0.36,0.22],[0,0.3,0])); s.add(M(G.box,pal(pick(SKIN_COL)),[0.24,0.24,0.24],[0,0.62,0]));
+  [-1,1].forEach(k=>{ const a=new THREE.Group(); a.position.set(k*0.19,0.44,0); a.add(M(G.box,pal(pick(SPEC_SHIRTS)),[0.08,0.3,0.08],[0,0.13,0],false)); s.add(a); });
+  g.add(s); return s;
+}
+function roofSpectators(g,x,h,z,w){ const out=[]; if(Math.random()<0.35) for(let i=0,n=ri(1,2);i<n;i++) out.push(spectator(g,x+rand(-w/3,w/3),h,z+rand(-0.4,0.4))); return out; }
 const PROPS={
-  city(g,x,z){
-    const w=rand(1.4,3),h=rand(2,8),d=rand(1.4,3);
+  city(g,x,z,side){
+    if(Math.random()<0.1) return billboard(g,x,z,side);
+    const w=rand(1.4,3),h=rand(2,8),d=rand(1.4,3),info={kind:'building',r:Math.max(w,d)/2+0.3,h,windows:[],specs:[]};
     g.add(M(G.box,pal(pick([0x5c6bc0,0x26a69a,0xef5350,0xffa726,0x42a5f5,0xab47bc,0xf5f5f5])),[w,h,d],[x,h/2,z]));
-    if(Math.random()<0.6){ const wm=Math.random()<0.7?windowMat:windowMat2,rows=Math.min(3,Math.floor(h/1.6)); for(let r=0;r<rows;r++) g.add(M(G.box,wm,[w*0.72,0.32,0.05],[x,1.0+r*1.5,z+d/2+0.02],false)); }
-    if(Math.random()<0.5) g.add(M(G.cyl,pal(0x90a4ae),[0.08,rand(0.8,2),0.08],[x+rand(-w/3,w/3),h+0.5,z]));
+    if(Math.random()<0.6){ const wm=Math.random()<0.7?windowMat:windowMat2,rows=Math.min(3,Math.floor(h/1.6)); for(let r=0;r<rows;r++){ const wn=M(G.box,wm,[w*0.72,0.32,0.05],[x,1.0+r*1.5,z+d/2+0.02],false); g.add(wn); info.windows.push(wn); } }
+    const top=Math.random(); let roof=h;
+    if(top<0.25){ const h2=rand(1,2.5); g.add(M(G.box,pal(0xcfd8dc),[w*0.6,h2,d*0.6],[x,h+h2/2,z])); roof=h+h2; info.h=roof; }
+    else if(top<0.45){ const tw=pal(0x8d6e63); [-1,1].forEach(k=>g.add(M(G.box,tw,[0.08,0.8,0.08],[x+k*0.3,h+0.4,z],false))); g.add(M(G.cyl,tw,[0.42,0.6,0.42],[x,h+1.05,z])); g.add(M(G.cone,tw,[0.46,0.3,0.46],[x,h+1.5,z],false)); }
+    else if(top<0.75){ g.add(M(G.cyl,pal(0x90a4ae),[0.06,rand(1,2.2),0.06],[x+w/4,h+0.8,z])); const l=M(G.sph,blinkMat,[0.09,0.09,0.09],[x+w/4,h+1.9,z],false); g.add(l); }
+    if(Math.random()<0.4){ const aw=M(G.box,pal(pick([0xef5350,0x26a69a,0xffd21f])),[0.12,0.08,1.1],[x-side*(w/2+0.25),1.4,z],false); aw.rotation.z=side*0.5; g.add(aw); }
     if(Math.random()<0.3){ g.add(M(G.cyl,pal(0x455a64),[0.08,2.4,0.08],[x-w/2-0.6,1.2,z])); g.add(M(G.sph,pal(0xfff59d,{e:1.2}),[0.24,0.24,0.24],[x-w/2-0.6,2.5,z],false)); }
+    info.specs=roofSpectators(g,x,roof,z,w);
+    return info;
   },
   jungle(g,x,z){
     if(Math.random()<0.72){
-      const h=rand(1.4,3.2); g.add(M(G.cyl,pal(0x6d4c41),[0.28,h,0.28],[x,h/2,z]));
+      const h=rand(1.4,3.2),info={kind:'small',r:1,tree:true}; g.add(M(G.cyl,pal(0x6d4c41),[0.28,h,0.28],[x,h/2,z]));
       const r=rand(0.9,1.8); g.add(M(G.ico,pal(pick([0x43a047,0x2e7d32,0x66bb6a,0x7cb342])),[r,r*0.9,r],[x,h+r*0.5,z]));
       if(Math.random()<0.5) g.add(M(G.ico,pal(0x66bb6a),[r*0.6,r*0.5,r*0.6],[x+rand(-0.5,0.5),h+r*1.1,z]));
-    }else{
-      const r=rand(0.5,0.9); g.add(M(G.ico,pal(0x7cb342),[r,r*0.7,r],[x,r*0.5,z]));
-      if(Math.random()<0.6) g.add(M(G.sph,pal(pick([0xff4081,0xffd600,0xff6e40])),[0.18,0.18,0.18],[x,r*0.95,z],false));
+      // a monkey swinging from the canopy
+      if(Math.random()<0.18){ const pv=new THREE.Group(); pv.position.set(x+r*0.6,h+r*0.3,z+0.4); pv.add(M(G.box,pal(0x5d4037),[0.06,0.7,0.06],[0,-0.35,0],false)); pv.add(M(G.sph,pal(0x6d4c41),[0.22,0.26,0.2],[0,-0.82,0])); pv.add(M(G.sph,pal(0xd7a86e),[0.15,0.14,0.12],[0,-0.55,0.1],false)); g.add(pv); info.swing=pv; }
+      return info;
     }
+    const r=rand(0.5,0.9); g.add(M(G.ico,pal(0x7cb342),[r,r*0.7,r],[x,r*0.5,z]));
+    if(Math.random()<0.6) g.add(M(G.sph,pal(pick([0xff4081,0xffd600,0xff6e40])),[0.18,0.18,0.18],[x,r*0.95,z],false));
     if(Math.random()<0.35){ const sx=x+rand(-0.8,0.8),sz=z+rand(-0.8,0.8),sm=Math.random()<0.5?shroomMat:shroomMat2; g.add(M(G.cyl,pal(0xfff3e0),[0.07,0.35,0.07],[sx,0.17,sz])); g.add(M(G.sph,sm,[0.28,0.14,0.28],[sx,0.38,sz],false)); }
+    return {kind:'small',r:r+0.2,tree:true};
   },
   desert(g,x,z){
     const k=Math.random();
-    if(k<0.45){ const h=rand(1.2,2.6),m=pal(0x43a047); g.add(M(G.cyl,m,[0.3,h,0.3],[x,h/2,z])); g.add(M(G.cyl,m,[0.2,0.9,0.2],[x+0.5,h*0.55,z])); g.add(M(G.cyl,m,[0.5,0.2,0.2],[x+0.3,h*0.4,z])); }
-    else if(k<0.85){ const r=rand(0.5,1.3); g.add(M(G.dod,pal(0xd7a86e),[r,r*0.7,r],[x,r*0.4,z])); }
-    else{ const s=rand(2.5,5); g.add(M(G.cone4,pal(0xe6b85c),[s,s*0.8,s],[x*1.6,s*0.4,z])); }
+    if(k<0.45){ const h=rand(1.2,2.6),m=pal(0x43a047); g.add(M(G.cyl,m,[0.3,h,0.3],[x,h/2,z])); g.add(M(G.cyl,m,[0.2,0.9,0.2],[x+0.5,h*0.55,z])); g.add(M(G.cyl,m,[0.5,0.2,0.2],[x+0.3,h*0.4,z])); return {kind:'small',r:0.7}; }
+    if(k<0.85){ const r=rand(0.5,1.3); g.add(M(G.dod,pal(0xd7a86e),[r,r*0.7,r],[x,r*0.4,z])); return {kind:'building',r:r+0.2}; }
+    const s=rand(2.5,5); g.add(M(G.cone4,pal(0xe6b85c),[s,s*0.8,s],[x*1.6,s*0.4,z])); return {kind:'none'};
   },
   neon(g,x,z){
-    const w=rand(1.2,2.6),h=rand(2.5,9);
+    const w=rand(1.2,2.6),h=rand(2.5,9),nm=pick(neonMats);
     g.add(M(G.box,pal(0x1b1540,{r:0.25}),[w,h,w],[x,h/2,z]));
-    const nc=pick([0xff2fd0,0x19e6ff,0x8cff3a,0xffe600]);
-    g.add(M(G.box,pal(nc,{e:1.6}),[w+0.12,0.18,w+0.12],[x,rand(0.5,h-0.5),z],false));
-    if(Math.random()<0.6) g.add(M(G.box,pal(nc,{e:1.6}),[0.15,h*0.8,0.15],[x+w/2+0.08,h/2,z+w/2+0.08],false));
+    g.add(M(G.box,nm,[w+0.12,0.18,w+0.12],[x,rand(0.5,h-0.5),z],false));
+    if(Math.random()<0.6) g.add(M(G.box,nm,[0.15,h*0.8,0.15],[x+w/2+0.08,h/2,z+w/2+0.08],false));
     if(Math.random()<0.3) g.add(M(G.ico0,pal(0x19e6ff,{e:1.5}),[0.4,0.4,0.4],[x,h+1,z],false));
+    return {kind:'building',r:w/2+0.3,h,specs:roofSpectators(g,x,h,z,w)};
   },
   ice(g,x,z){
     if(Math.random()<0.7){
       const r=rand(0.4,1.1),h=rand(1.5,5); g.add(M(G.cone,Math.random()<0.3?iceGlowMat:pal(0xb3f0ff,{r:0.12}),[r,h,r],[x,h/2,z]));
       if(Math.random()<0.5) g.add(M(G.cone,pal(0xd8f8ff,{r:0.12}),[r*0.6,h*0.6,r*0.6],[x+r*0.8,h*0.3,z+0.3]));
-    }else{
-      const m=pal(0xffffff,{r:0.6});
-      g.add(M(G.sph,m,[0.6,0.6,0.6],[x,0.55,z])); g.add(M(G.sph,m,[0.45,0.45,0.45],[x,1.35,z])); g.add(M(G.sph,m,[0.32,0.32,0.32],[x,1.95,z]));
-      const c=M(G.cone,pal(0xff7a00),[0.08,0.4,0.08],[x,1.95,z+0.45],false); c.rotation.x=Math.PI/2; g.add(c);
-      g.add(M(G.cyl,pal(0x212121),[0.3,0.3,0.3],[x,2.35,z]));
+      return {kind:'small',r:r+0.3};
     }
+    const m=pal(0xffffff,{r:0.6});
+    g.add(M(G.sph,m,[0.6,0.6,0.6],[x,0.55,z])); g.add(M(G.sph,m,[0.45,0.45,0.45],[x,1.35,z]));
+    // the head turns to watch the squad go by
+    const head=new THREE.Group(); head.position.set(x,1.95,z);
+    head.add(M(G.sph,m,[0.32,0.32,0.32],[0,0,0]));
+    const c=M(G.cone,pal(0xff7a00),[0.08,0.4,0.08],[0,0,0.45],false); c.rotation.x=Math.PI/2; head.add(c);
+    head.add(M(G.cyl,pal(0x212121),[0.3,0.3,0.3],[0,0.4,0]));
+    [-1,1].forEach(k=>head.add(M(G.sph,pal(0x212121),[0.05,0.05,0.05],[k*0.12,0.08,0.28],false)));
+    g.add(head);
+    return {kind:'small',r:0.8,head};
   },
   lava(g,x,z){
     const k=Math.random();
-    if(k<0.5){ const r=rand(0.6,1.5); g.add(M(G.dod,pal(0x3a2f2f,{r:0.7}),[r,r*0.8,r],[x,r*0.4,z])); }
-    else if(k<0.85){ const h=rand(1,3.5); g.add(M(G.cyl,pal(0xff6a00,{e:1.3}),[0.35,h,0.35],[x,h/2,z])); g.add(M(G.dod,pal(0x3a2f2f,{r:0.7}),[0.6,0.4,0.6],[x,0.2,z])); }
-    else{ const s=rand(3,6); g.add(M(G.cone,pal(0x4e342e,{r:0.8}),[s,s*0.7,s],[x*1.5,s*0.35,z])); g.add(M(G.cyl,pal(0xff6a00,{e:1.3}),[s*0.3,0.3,s*0.3],[x*1.5,s*0.7,z],false)); }
+    if(k<0.5){ const r=rand(0.6,1.5); g.add(M(G.dod,pal(0x3a2f2f,{r:0.7}),[r,r*0.8,r],[x,r*0.4,z])); return {kind:'building',r:r+0.2}; }
+    if(k<0.85){ const h=rand(1,3.5); g.add(M(G.cyl,pal(0xff6a00,{e:1.3}),[0.35,h,0.35],[x,h/2,z])); g.add(M(G.dod,pal(0x3a2f2f,{r:0.7}),[0.6,0.4,0.6],[x,0.2,z])); return {kind:'building',r:0.6,erupt:h}; }
+    const s=rand(3,6); g.add(M(G.cone,pal(0x4e342e,{r:0.8}),[s,s*0.7,s],[x*1.5,s*0.35,z])); g.add(M(G.cyl,pal(0xff6a00,{e:1.3}),[s*0.3,0.3,s*0.3],[x*1.5,s*0.7,z],false)); return {kind:'none'};
   },
 };
+// City billboard: shows the best distance or the starting hero; textures are made once per text.
+const bbTex={};
+function billboardTex(text){
+  if(bbTex[text]) return bbTex[text];
+  const c=document.createElement('canvas'); c.width=256; c.height=128; const x=c.getContext('2d');
+  x.fillStyle='#0d1030'; x.fillRect(0,0,256,128); x.fillStyle='#ffd21f'; x.fillRect(6,6,244,116); x.fillStyle='#0d1030';
+  x.textAlign='center'; x.textBaseline='middle'; let fs=40; x.font=fs+'px Bungee, Impact, sans-serif'; while(x.measureText(text).width>220&&fs>16){ fs-=3; x.font=fs+'px Bungee, Impact, sans-serif'; }
+  x.fillText(text,128,66); const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; return bbTex[text]=t;
+}
+function billboard(g,x,z,side){
+  const post=pal(0x455a64); [-1,1].forEach(k=>g.add(M(G.box,post,[0.12,3,0.12],[x,1.5,z+k*1.1])));
+  const text=pick([tl('BEST')+' '+fmt(best)+' m',heroById(heroId).name.toUpperCase(),'KULSTORM']);
+  const sign=new THREE.Mesh(G.plane,new THREE.MeshBasicMaterial({map:billboardTex(text)})); sign.scale.set(2.8,1.4,1); sign.position.set(x-side*0.1,3.4,z); sign.rotation.y=-side*1.0; g.add(sign);
+  return {kind:'building',r:1.4,h:4.1};
+}
+// Rare oddities, about one prop in 30: a giant rubber duck, a statue of the leader, or a UFO parked on a roof.
+function rareProp(g,x,z,side){
+  const k=Math.random();
+  if(k<0.34){ const y=pal(0xffd600); g.add(M(G.sph,y,[1.3,1,1.1],[x,1,z])); g.add(M(G.sph,y,[0.75,0.75,0.75],[x,2.2,z+0.4])); const b=M(G.box,pal(0xff7a00),[0.5,0.18,0.5],[x,2.1,z+1.1],false); g.add(b); [-1,1].forEach(e=>g.add(M(G.sph,pal(0x212121),[0.09,0.09,0.09],[x+e*0.3,2.4,z+0.95],false))); return {kind:'building',r:1.4,h:3}; }
+  if(k<0.67){ const st=pal(0x9e9e9e,{r:0.7}); g.add(M(G.box,st,[1.4,0.8,1.4],[x,0.4,z])); g.add(M(G.box,st,[0.5,0.9,0.4],[x,1.25,z])); g.add(M(G.box,st,[0.7,0.8,0.45],[x,2.1,z])); g.add(M(G.box,st,[0.5,0.5,0.5],[x,2.8,z])); const arm=M(G.box,st,[0.18,0.8,0.18],[x+0.45,2.8,z],false); arm.rotation.z=-0.5; g.add(arm); g.add(M(G.box,pal(0xffd21f),[0.56,0.1,0.56],[x,3.1,z],false)); return {kind:'building',r:0.9,h:3.2}; }
+  const h=rand(3,6); g.add(M(G.box,pal(0x37474f),[2,h,2],[x,h/2,z]));
+  const ufo=new THREE.Group(); ufo.position.set(x,h+1.2,z); ufo.add(M(G.cyl,pal(0xb0bec5,{r:0.2}),[1.2,0.18,1.2],[0,0,0])); ufo.add(M(G.sph,pal(0x80deea,{e:0.8}),[0.55,0.4,0.55],[0,0.15,0])); for(let i=0;i<6;i++){ const a=i/6*Math.PI*2; ufo.add(M(G.sph,blinkMat,[0.08,0.08,0.08],[Math.cos(a)*1.1,-0.02,Math.sin(a)*1.1],false)); } g.add(ufo);
+  return {kind:'building',r:1.2,h,ufo,uy:h+1.2};
+}
+// Barrels and piggy banks by the curb: shoot a barrel to blow up nearby enemies, a piggy bank for coins.
+function roadside(g,side,z){
+  const x=side*(HALF+0.8);
+  if(Math.random()<0.6){ const m=pal(0xd32f2f,{r:0.4}); g.add(M(G.cyl,m,[0.4,0.9,0.4],[x,0.45,z])); g.add(M(G.cyl,pal(0xffd21f),[0.42,0.08,0.42],[x,0.6,z],false)); return {kind:'barrel',r:0.6}; }
+  const p=pal(0xff8fb1,{r:0.35}); g.add(M(G.sph,p,[0.45,0.38,0.38],[x,0.42,z])); g.add(M(G.cyl,p,[0.16,0.12,0.16],[x,0.42,z+0.42],false)); [-1,1].forEach(k=>[-1,1].forEach(j=>g.add(M(G.cyl,p,[0.07,0.2,0.07],[x+k*0.2,0.1,z+j*0.2],false)))); g.add(M(G.box,pal(0x212121),[0.2,0.04,0.04],[x,0.8,z],false));
+  return {kind:'piggy',r:0.6};
+}
 let zoneIdx=0;
 const tgt={sky:RAW(ZONES[0].sky),fog:RAW(ZONES[0].fog),ground:C(ZONES[0].ground),road:C(ZONES[0].road),road2:C(ZONES[0].road2),stripe:C(ZONES[0].stripe),curb:C(ZONES[0].curb),hemiSky:C(ZONES[0].sky),hemiGround:C(ZONES[0].ground),glow:0};
 function setZone(i,instant){
@@ -160,7 +220,12 @@ const tiles=[];
 function fillProps(props){
   while(props.children.length) props.remove(props.children[0]);
   const fn=PROPS[ZONES[zoneIdx].props];
-  for(const side of [-1,1]){ const n=ri(2,4); for(let k=0;k<n;k++) fn(props,side*(HALF+1.3+rand(0,8)),rand(-TILE_L/2+0.6,TILE_L/2-0.6)); }
+  // each prop sits in its own group at (x,0,z) so it can wobble, tip over or animate on its own
+  const place=(build,x,z,side)=>{ const sub=new THREE.Group(),info=build(sub,x,z,side)||{}; sub.children.forEach(c=>{ c.position.x-=x; c.position.z-=z; }); sub.position.set(x,0,z); sub.userData=Object.assign({kind:'small',r:1,side,hit:0,wob:0,fall:0},info); props.add(sub); };
+  for(const side of [-1,1]){
+    const n=ri(2,4); for(let k=0;k<n;k++) place(Math.random()<1/30?rareProp:fn,side*(HALF+1.3+rand(0,8)),rand(-TILE_L/2+0.6,TILE_L/2-0.6),side);
+    if(Math.random()<0.16) place((g,x,z)=>roadside(g,side,z),side*(HALF+0.8),rand(-TILE_L/2+0.6,TILE_L/2-0.6),side);
+  }
 }
 function rebuildTiles(){ tiles.forEach(t=>fillProps(t.userData.props)); }
 const clouds=[];

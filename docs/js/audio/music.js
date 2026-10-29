@@ -131,7 +131,11 @@ const music=(function(){
       default: keys(pickChordTone(ch,55,67),t,0.75,1.1,0.4);
     }
   }
+  // Beat times for visuals that pulse with the music (neon signs).
+  const beats=[];
+  function beat(){ if(!ctx||!OPT.music||!sfx.enabled) return 0.5+0.5*Math.sin(performance.now()/1000*Math.PI*2*1.6); const now=ctx.currentTime; let last=-9; while(beats.length&&beats[0]<now-2) beats.shift(); for(const b of beats) if(b<=now) last=b; return Math.exp(-(now-last)*7); }
   function schedule(s,t0){
+    if(s%2===0) beats.push(t0);
     if(s===0) pickPhase();
     const t=t0+(s%2?STEP*G.swing:0),ch=prog[bar%prog.length],calm=!(phase==='run'||phase==='danger'||phase==='boss'),now=ctx.currentTime;
     hits=hits.filter(x=>now-x<5);
@@ -176,7 +180,7 @@ const music=(function(){
   }
   function reset(){ key=0; mem=[]; hits=[]; layers=1; buildFrom=null; }
   const state=()=>({phase,genre:G.name,layers:MUSIC.layers.slice(0,layers),bpm:Math.round(30/STEP)});  // for debugging
-  return {ensure,note,reset,state};
+  return {ensure,note,reset,state,beat};
 })();
 const wakeAudio=()=>{ sfx.init(); sfx.resume(); music.ensure(); };
 ['pointerdown','touchend','click','keydown'].forEach(ev=>window.addEventListener(ev,wakeAudio,true));

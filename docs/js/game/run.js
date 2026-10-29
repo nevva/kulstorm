@@ -9,7 +9,7 @@ function clearRun(){
   coins.forEach(c=>{ scene.remove(c.g); coinPool.push(c.g); }); coins=[];
   walls.forEach(w=>{ if(!w.dead) removeWall(w); }); walls=[];
   zaps.forEach(z=>{ z.t=0; z.m.visible=false; });
-  clearWeatherFx(); clearObstacles(); clearChests(); clearXp(); clearUnicorns(); clearBossFx(); shopEl.hidden=true; document.body.classList.remove('od-on');
+  clearWeatherFx(); clearScenery(); clearObstacles(); clearChests(); clearXp(); clearUnicorns(); clearBossFx(); shopEl.hidden=true; document.body.classList.remove('od-on');
   puddles.forEach(q=>scene.remove(q.m)); puddles.length=0; pendSpawn.length=0;
   clearDmg(); clearSquad(); clearShards(); poundRing.visible=false; tutStart();
   shieldRing.visible=false; frontMarker.visible=false; bossBar.hidden=true;
@@ -84,7 +84,7 @@ function update(dt){
   if(mode==='playing'){ dist+=scroll*dt; updatePower(dt); updateDifficulty(); checkEvents(); spawner(dt); }
   else if(mode==='menu'){ scroll=5; }
   else if(mode==='dead'){ deadT+=dt; scroll+=(0-scroll)*(1-Math.exp(-dt*1.5)); if(deadT>1.4&&!overShown) showOver(); }
-  updateWorld(dt); updateWalls(dt);
+  updateWorld(dt); updateScenery(dt); updateWalls(dt);
   if(mode==='playing'){ updatePlayer(dt); updateSquad(dt); updateFire(dt); updateDelayed(dt); }
   else if(mode==='menu'){ S.x=0; updateSquad(dt); }
   updateBullets(dt); updateEnemies(dt); updateEnemyBullets(dt); updateHearts(dt); updateCoins(dt); updateZaps(dt); updateWeather(dt); updateObstacles(dt); updateXp(dt); updateChests(dt); updateUnicorns(dt); updateBossFx(dt); if(mode==='playing') updateOD(dt); updatePound(dt);

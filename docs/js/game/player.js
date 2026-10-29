@@ -174,7 +174,7 @@ function updateBullets(dt){
     if(Math.abs(d.x)>HALF){
       if(d.bounce){ d.x=clamp(d.x,-HALF,HALF); d.vx=-d.vx; fxSpark(d.x,d.y,d.z,d.col); if(pinball){ d.dmg*=1.3; d.pin*=1.3; } }
       else if(gutter){ d.x=clamp(d.x,-HALF+0.05,HALF-0.05); if(d.vx!==0){ d.vz=-Math.hypot(d.vx,d.vz); d.vx=0; fxSpark(d.x,d.y,d.z,GOLD); } }
-      else if(Math.abs(d.x)>HALF+1.5) dead=true;
+      else if(Math.abs(d.x)>HALF+1.5){ dead=true; sceneryShot(d); }
     }
     if(d.z<minZ) dead=true;
     if(d.rocket){ d.trail-=dt; if(d.trail<=0){ d.trail=0.035; fxSmoke(d.x,d.y,d.z+0.3); } }

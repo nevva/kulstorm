@@ -55,10 +55,10 @@ function checkEvents(){
     const bt=pickBoss();
     boss=spawnEnemy(bt,1,VIEW.spawn); boss.maxHp=boss.hp=300*ENEMY[bt].hpK*DIFF.hp*(1+0.35*bossNo)*PF;
     bossNameEl.textContent='BOSS '+bossNo+' · '+BOSS_NAMES[bt]; bossBar.hidden=false;
-    toast(BOSS_NAMES[bt]+'!',true); sfx.boss(); shake(0.6);
+    toast(BOSS_NAMES[bt]+'!',true); sfx.boss(); shake(0.6); sceneryBoss(true);
   }
 }
 function bossDefeated(p){
-  bossBar.hidden=true; clearBossFx(); spawnPause=Math.max(spawnPause,5); sayAt(p.x,4,p.z,tl('Boss defeated!'),'#ffd21f'); shake(0.8); kills+=10;
+  bossBar.hidden=true; clearBossFx(); sceneryBoss(false); spawnPause=Math.max(spawnPause,5); sayAt(p.x,4,p.z,tl('Boss defeated!'),'#ffd21f'); shake(0.8); kills+=10;
   setTimeout(()=>{ if(mode==='playing'&&!spawnWalls([0,1,2],true)) spawnChest(true); },300);
 }
