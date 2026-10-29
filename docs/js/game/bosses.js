@@ -95,10 +95,30 @@ function laneWarn(lane,t,col){
   const m=new THREE.Mesh(G.strip,new THREE.MeshBasicMaterial({color:col||0xff1744,transparent:true,opacity:0.2,depthWrite:false}));
   m.scale.set(LANE_W-0.4,0.04,12); m.position.set(LANE_X[lane],0.07,-2); scene.add(m); bossWarns.push({m,t,t0:t});
 }
+// Shot tells: before a boss shoots, an orb charges at the muzzle and flashing lines on the road show where each shot will go.
+// The aim locks when the tell starts, so stepping out of the lines dodges the volley.
+const TELL=0.6;
+const aimAt=(x,z)=>Math.atan2(S.x-x,-z);
+const fanAngles=(a0,n,spread)=>Array.from({length:n},(_,k)=>a0+(k-(n-1)/2)*spread);
+function shotTell(x,y,z,angles,t,col){
+  const glow={color:col,transparent:true,depthWrite:false};
+  const orb=new THREE.Mesh(G.sph,new THREE.MeshBasicMaterial(Object.assign({blending:THREE.AdditiveBlending},glow)));
+  orb.position.set(x,y,z); scene.add(orb); bossWarns.push({m:orb,t,t0:t,orb:true});
+  angles.forEach(a=>{
+    const L=(1.5-z)/Math.cos(a),m=new THREE.Mesh(G.strip,new THREE.MeshBasicMaterial(glow));
+    m.scale.set(0.35,0.04,L); m.rotation.y=a; m.position.set(x+Math.sin(a)*L/2,0.08,z+Math.cos(a)*L/2); scene.add(m); bossWarns.push({m,t,t0:t});
+  });
+}
+// Tell now, then fire the locked volley after `t` (repeated `reps` times, `gap` apart).
+function volley(b,x,y,z,angles,spd,col,t,reps,gap){
+  shotTell(x,y,z,angles,t,col);
+  for(let r=0;r<(reps||1);r++) b.q.push({t:t+r*(gap||0),fn:()=>{ angles.forEach(a=>fireRaw(x,y,z,Math.sin(a)*spd,Math.cos(a)*spd,col)); sfx.hit(); }});
+}
 function updateBossFx(dt){
   for(let i=bossWarns.length-1;i>=0;i--){
     const w=bossWarns[i],k=1-w.t/w.t0; w.t-=dt;
-    w.m.material.opacity=0.12+0.4*k*(0.6+0.4*Math.sin(time*(10+24*k)));
+    if(w.orb){ w.m.scale.setScalar(0.15+0.45*k); w.m.material.opacity=0.35+0.55*k; }
+    else w.m.material.opacity=0.12+0.4*k*(0.6+0.4*Math.sin(time*(10+24*k)));
     if(w.t<=0){ scene.remove(w.m); w.m.material.dispose(); bossWarns.splice(i,1); }
   }
 }
@@ -109,11 +129,6 @@ function laneHit(lane,dmg,label,col){
   for(const m of squad.slice()){ const p=m.g.position; if(laneOf(p.x)!==lane) continue; if(!hit){ hit=true; pushDmg(p.x,2.8,p.z,label,'#ff5c7a',true,true); } hurtMember(m,dmg*DIFF.dmg,true); }
   for(let i=0;i<14;i++) chunks.spawn(LANE_X[lane]+rand(-1.6,1.6),0.2,rand(-6,2),rand(-1,1),rand(3,7),rand(-1,1),rand(0.6,1.1),0.25,0.1,col,col,SMOKE,16,0.5,true,rand(4,10));
   shake(hit?0.8:0.4); sfx.smack();
-}
-// A fan of n shots aimed at the squad.
-function spit(x,y,z,n,spread,spd,col){
-  const a0=Math.atan2(S.x-x,-z);
-  for(let k=0;k<n;k++){ const a=a0+(k-(n-1)/2)*spread; fireRaw(x,y,z,Math.sin(a)*spd,Math.cos(a)*spd,col); }
 }
 function bossInit(e){
   const u=e.u;
@@ -138,12 +153,11 @@ const BOSS_AI={
     if(e.hold) p.x=Math.sin(e.t*0.7)*2.6;
     u.legL.rotation.x=Math.sin(e.t*4)*0.35; u.legR.rotation.x=-u.legL.rotation.x;
     if(!act) return;
-    if(e.burst>0){ e.burstT-=dt; if(e.burstT<=0){ e.burstT=0.18; e.burst--; fireAimed(p.x,1.6,p.z+1.4,11+DIFF.speed); sfx.hit(); } return; }
     e.fireCd-=dt;
     if(e.fireCd<=0){
-      e.pattern=(e.pattern+1)%3;
-      if(e.pattern<2){ for(let k=-2;k<=2;k++){ const a=k*0.2+(e.pattern?0.1:0); fireRaw(p.x,1.6,p.z+1.4,Math.sin(a)*8,Math.cos(a)*8); } e.fireCd=1.6; }
-      else{ e.burst=3; e.burstT=0; e.fireCd=2.4; }
+      e.pattern=(e.pattern+1)%3; const x=p.x,z=p.z+1.4;
+      if(e.pattern<2){ volley(b,x,1.6,z,fanAngles(e.pattern?0.1:0,5,0.2),8,EB_COL,TELL); e.fireCd=1.6; }
+      else{ volley(b,x,1.6,z,[aimAt(x,z)],11+DIFF.speed,EB_COL,TELL,3,0.18); e.fireCd=2.4; }
     }
   },
   snake(e,dt,b,act){
@@ -161,7 +175,7 @@ const BOSS_AI={
       u.head.rotation.x*=Math.exp(-dt*5); u.jaw.rotation.x*=Math.exp(-dt*5);
       if(act){ b.cd-=dt; if(b.cd<=0){ b.n++;
         if(b.n%3===0){ b.st='aim'; b.st_t=1.0; b.lane=laneOf(S.x); laneWarn(b.lane,1.3,0x76ff03); sfx.zap(); }
-        else { u.jaw.rotation.x=0.6; spit(p.x,1.3,p.z+1.5,b.n%3===1?3:5,0.22,9+DIFF.speed,VENOM); sfx.hit(); b.cd=1.3; }
+        else { u.jaw.rotation.x=0.6; const z=p.z+1.5; volley(b,p.x,1.3,z,fanAngles(aimAt(p.x,z),b.n%3===1?3:5,0.22),9+DIFF.speed,VENOM,TELL); b.cd=1.3; }
       } }
     }
     // body follows where the head was, the first segments are dragged along by a strike
@@ -191,6 +205,7 @@ const BOSS_AI={
     });
     if(!act) return;
     const live=hs.map((h,i)=>i).filter(i=>!hs[i].dead);
+    if(b.st==='inhale'){ b.st_t-=dt; if(b.st_t<=0){ b.st='breath'; b.st_t=1.8; b.fire=0; } return; }
     if(b.st==='breath'){
       b.st_t-=dt; b.sweep=Math.sin((1-b.st_t/1.8)*Math.PI*2)*0.9; b.fire-=dt;
       if(b.fire<=0){ b.fire=0.07; const h=hs[b.who],q=headPos(e,h); if(!h.dead){ const a=Math.atan2(S.x-q[0],-q[2])*0.3+b.sweep*0.5; fireRaw(q[0],1.4,q[2],Math.sin(a)*10,Math.cos(a)*10,FIREB); fxFlame(q[0],q[1]-0.3,q[2]+0.3); } }
@@ -201,10 +216,11 @@ const BOSS_AI={
     b.n++;
     const pat=b.n%3;
     if(pat===1){ // each head spits a fireball volley in turn
-      live.forEach((i,k)=>b.q.push({t:k*0.3,fn:()=>{ const h=hs[i]; if(h.dead) return; const q=headPos(e,h); spit(q[0],1.6,q[2],3,0.18,9+DIFF.speed,FIREB); fxFlame(q[0],q[1],q[2]); sfx.hit(); }}));
+      live.forEach((i,k)=>b.q.push({t:k*0.3,fn:()=>{ const h=hs[i]; if(h.dead) return; const q=headPos(e,h); volley(b,q[0],1.6,q[2],fanAngles(aimAt(q[0],q[2]),3,0.18),9+DIFF.speed,FIREB,TELL); fxFlame(q[0],q[1],q[2]); }}));
       b.cd=2.0/rage;
     } else if(pat===2){ // one head sweeps a stream of fire
-      b.st='breath'; b.st_t=1.8; b.who=pick(live); b.fire=0; b.sweep=0; sfx.zap();
+      b.st='inhale'; b.st_t=TELL+0.2; b.who=pick(live); b.sweep=0; sfx.zap();
+      const q=headPos(e,hs[b.who]); shotTell(q[0],1.4,q[2],fanAngles(aimAt(q[0],q[2])*0.3,3,0.45),b.st_t,FIREB);
     } else { // fire rains on lanes, one more lane per lost head
       const lanes=shuffle([0,1,2]).slice(0,Math.min(2,4-b.heads));
       if(lanes.indexOf(laneOf(S.x))<0) lanes[0]=laneOf(S.x);
@@ -230,7 +246,7 @@ const BOSS_AI={
     b.n++;
     const pat=b.n%3;
     if(pat===1){ // web fan, a little slower than bullets so it can be weaved through
-      spit(p.x,1.5,p.z+1.6,7,0.16,7+DIFF.speed,WEB); sfx.hit(); b.cd=1.6;
+      const z=p.z+1.6; volley(b,p.x,1.5,z,fanAngles(aimAt(p.x,z),7,0.16),7+DIFF.speed,WEB,TELL); b.cd=1.6;
     } else if(pat===2){ // hatch spiderlings in every lane
       let alive=0; for(const o of enemies) if(!o.dead&&o.type==='spiderling') alive++;
       const n=Math.max(0,Math.min(e.hp<e.maxHp*0.5?6:4,14-alive));
@@ -239,6 +255,7 @@ const BOSS_AI={
       if(n>0) sayAt(p.x,3.4,p.z,tl('Spiderlings!'),'#ce93d8'); b.cd=2.2;
     } else { // leap to a new spot and land with a web burst
       b.st='leap'; b.st_t=0.8; b.x0=p.x; b.tx=clamp(S.x+rand(-2,2),-3.6,3.6); sfx.jump(); b.cd=99;
+      shotTell(b.tx,1,p.z+1.2,fanAngles(0,9,0.17),b.st_t,WEB);
     }
   },
   golem(e,dt,b,act){
@@ -260,7 +277,7 @@ const BOSS_AI={
       else if(angry){ const o=ri(0,1); lanes.push([0,1,2].filter(l=>l!==lanes[0])[o]); }
       b.st='wind'; b.st_t=1.4; b.lanes=lanes; lanes.forEach(l=>laneWarn(l,1.4,0xffb74d)); sfx.boss();
     } else { // hurl a burst of rocks
-      for(let k=0;k<(angry?5:3);k++) b.q.push({t:k*0.22,fn:()=>{ fireAimed(p.x+rand(-1,1),2.4,p.z+1.5,10+DIFF.speed,ROCK); sfx.hit(); }});
+      for(let k=0;k<(angry?5:3);k++){ const x=p.x+rand(-1,1),z=p.z+1.5; volley(b,x,2.4,z,[aimAt(x,z)],10+DIFF.speed,ROCK,TELL+k*0.22); }
       b.cd=1.8;
     }
   },
