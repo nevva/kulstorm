@@ -25,6 +25,7 @@ const ABILITIES=[
   {id:'payback',kind:'ability',rarity:'common',name:'Payback Time',desc:'Start every run with double fire rate.',color:0xff8a3d},
   {id:'moneymaker',kind:'ability',rarity:'common',name:'Money Maker',desc:'Enemies drop full coin stacks, chests give rewards, and coins are picked up from further away.',color:0xffc83d},
   {id:'bulletproof',kind:'ability',rarity:'common',name:'Bullet Proof',desc:'Double base health for the whole squad in every run.',color:0x49c3ff},
+  {id:'tackle',kind:'ability',rarity:'common',name:'Slide Tackle',desc:'Duck as an enemy comes at you to slide into it feet first, knocking it back and hurting it',color:0x36e2b4},
   {id:'dbljump',kind:'ability',rarity:'common',name:'Double Jump',desc:'Jump again in the air. Tall spike barricades need it',color:0x8fd3ff},
   {id:'pound',kind:'ability',rarity:'common',name:'Ground Pound',desc:'Duck in the air to slam down, hurting and knocking back enemies near the front',color:0xfff3c4},
   {id:'overdrive',kind:'ability',rarity:'common',name:'Overdrive',desc:'Charge a meter and unleash 6 seconds of super mode. Saves you once at 10% health',color:0xffe066},
@@ -36,7 +37,7 @@ const coinStackMax=runs=>Math.min(5,1+Math.floor(runs/2));
 // Unlocking buys a chance: the item can then come out of chests and walls.
 const STARTER_ITEMS=['cash','patch'];
 const RARITY_PRICE={common:60,rare:150,epic:320};
-const ITEM_PRICE={payback:5,moneymaker:8,bulletproof:10,dbljump:15,pound:20,overdrive:30,frenzy:25,recruit:30,power:35,steel:40,medic:45,fastload:45,bubble:80,bomb:90,battery:110,line:70,slowmo:100,nade:120,divine:300,jackpot:220};
+const ITEM_PRICE={payback:5,moneymaker:8,bulletproof:10,tackle:12,dbljump:15,pound:20,overdrive:30,frenzy:25,recruit:30,power:35,steel:40,medic:45,fastload:45,bubble:80,bomb:90,battery:110,line:70,slowmo:100,nade:120,divine:300,jackpot:220};
 const itemPrice=u=>ITEM_PRICE[u.id]||RARITY_PRICE[u.rarity];
 // Coins from the run it costs to take a locked item (or a mystery item from an empty chest) for that run only.
 const RUN_PRICE={common:10,rare:20,epic:35};

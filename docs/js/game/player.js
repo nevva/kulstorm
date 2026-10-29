@@ -24,7 +24,7 @@ function updatePlayer(dt){
   const recharge=S.combos.has('recharge');
   for(const m of squad){
     if(m.jumpDelay>=0){ m.jumpDelay-=dt; if(m.jumpDelay<0) doJump(m); }
-    if(m.duckDelay>=0){ m.duckDelay-=dt; if(m.duckDelay<0){ m.duckT=DUCK_T; m.slide=(m.jy||0)<=0.05&&slideAhead(m); if(m.slide) m.butt=0; if((m.jy||0)>0.05&&!m.pound&&hasAbility('pound')){ m.pound=true; m.poundSpin=POUND_SPIN; m.flip=1; m.flipSpd=1/POUND_SPIN; m.vy=0; } } }
+    if(m.duckDelay>=0){ m.duckDelay-=dt; if(m.duckDelay<0){ m.duckT=DUCK_T; m.slide=(m.jy||0)<=0.05&&slideAhead(m); if(m.slide){ m.butt=0; m.tackled=new Set(); } if((m.jy||0)>0.05&&!m.pound&&hasAbility('pound')){ m.pound=true; m.poundSpin=POUND_SPIN; m.flip=1; m.flipSpd=1/POUND_SPIN; m.vy=0; } } }
     if(m.poundSpin>0){ m.poundSpin-=dt; m.vy=m.poundSpin>0?0:POUND_V; } else m.vy=(m.vy||0)-GRAV*dt;
     m.jy=(m.jy||0)+m.vy*dt; if(m.jy<=0){ m.jy=0; m.vy=0; m.dbUsed=false; if(m.pound){ m.pound=false; groundPound(m); } }
     if(m.duckT>0) m.duckT=Math.max(0,m.duckT-dt);
@@ -65,6 +65,7 @@ function updateSquad(dt){
     if(air>0){ u.legL.rotation.x=0.6; u.legR.rotation.x=-0.3; }
     // slide tackle: lean far back with the legs out front, shoot forward a little and kick up dust
     if(sliding){
+      if(mode==='playing'&&hasAbility('tackle')) tackleEnemies(m);
       const q=m.duckT/DUCK_T,k=Math.min(1,(1-q)*6)*Math.min(1,q*5),off=-0.7*k;
       g.rotation.x=1.15*k; g.position.y=0.12*k; g.position.z+=off; m.boff=(m.boff||0)+off;
       u.legL.rotation.x=0.55*k; u.legR.rotation.x=0.8*k;

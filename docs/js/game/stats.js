@@ -51,6 +51,7 @@ function runSummary(){
   if(src['a:od']) rows.push({name:'Overdrive',kind:tl('Ability'),dmg:src['a:od']});
   if(src['a:flow']) rows.push({name:'Flow',kind:tl('Ability'),dmg:src['a:flow']});
   if(src['a:power']) rows.push({name:tl('Power-ups'),kind:tl('Chest'),dmg:src['a:power']});
+  if(src['a:tackle']) rows.push({name:tl('Slide Tackle'),kind:tl('Ability'),dmg:src['a:tackle']});
   if(src['a:parry']) rows.push({name:tl('Parry'),kind:tl('Ability'),dmg:src['a:parry']});
   if(src['a:nade']) rows.push({name:tl('Grenade Jump'),kind:tl('Chest'),dmg:src['a:nade']});
   if(src['a:divine']) rows.push({name:tl('Divine Touch'),kind:tl('Chest'),dmg:src['a:divine']});

@@ -6,11 +6,28 @@ function doJump(m){
   if((m.jy||0)>0.05){ if(hasAbility('dbljump')&&!m.dbUsed){ m.vy=DJUMP_V; m.dbUsed=true; const p=m.g.position,ninj=hasPart('ninja'); for(let i=0;i<(ninj?14:6);i++) blobs.spawn(p.x+rand(-0.3,0.3),p.y,p.z+rand(-0.2,0.2),rand(-1,1),rand(-1,0),rand(-1,1),ninj?0.8:0.45,ninj?0.3:0.22,ninj?0.6:0.05,ninj?C(0x757575):WHITE,ninj?C(0x424242):C(0xe0e0e0),C(0x9e9e9e),-1,1.5,false,ninj?2:0); } }
   else { m.vy=JUMP_V; m.dbUsed=false; m.duckT=0; }
 }
-// Ducking slides feet first instead of rolling when a bar, laser or wall is about to reach the gubbe.
+// Ducking slides feet first instead of rolling when a bar, laser or wall (or, with Slide Tackle, an enemy) is about to reach the gubbe.
 const SLIDE_TACKLE_K=0.35;
+const enemyAhead=(p,reach)=>enemies.some(e=>!e.dead&&!e.under&&!e.isBoss&&Math.abs(e.g.position.x-p.x)<e.r+0.5&&p.z-e.g.position.z>-0.5&&p.z-e.g.position.z<reach+e.r);
+// Slide Tackle: a sliding gubbe kicks every enemy it reaches once, hurting it and knocking it back.
+function tackleEnemies(m){
+  const p=m.g.position;
+  for(const e of enemies){
+    if(e.dead||e.under||m.tackled.has(e)) continue;
+    const q=e.g.position; if(Math.abs(q.x-p.x)>e.r+0.45||Math.abs(q.z-p.z)>e.r+0.7) continue;
+    m.tackled.add(e);
+    const dv=e.isBoss?e.maxHp*0.02:Math.min(e.maxHp*0.6,30*DIFF.hp*PF);
+    dmgSrc='a:tackle'; hitEnemy(e,dv,false,3,m,true); dmgSrc=null;
+    if(!e.isBoss&&e.type!=='tank') e.kb=Math.min(4,(e.kb||0)+2.5);
+    e.stun=Math.max(e.stun||0,0.8); e.sq=Math.max(e.sq||0,0.8);
+    fxSpark(q.x,0.6,q.z+e.r*0.5,C(0x36e2b4)); shake(0.35); sfx.smack();
+    if(m===headMember()) pushDmg(q.x,2.4,q.z,tl('TACKLE!'),'#36e2b4',true);
+  }
+}
 function slideAhead(m){
   const p=m.g.position,reach=scroll*DUCK_T+1.2;
   if(obstacles.some(o=>o.type==='high'&&!o.dead&&p.z-o.z>-0.5&&p.z-o.z<reach&&p.x>o.x0-0.25&&p.x<o.x1+0.25)) return true;
+  if(hasAbility('tackle')&&enemyAhead(p,reach)) return true;
   return walls.some(w=>!w.dead&&w.lane===laneOf(p.x)&&p.z-w.g.position.z>-0.5&&p.z-w.g.position.z<reach);
 }
 function squadWave(kind){
