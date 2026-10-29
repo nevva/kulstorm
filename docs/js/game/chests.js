@@ -72,26 +72,33 @@ function openChest(c){
   grantItem(reward,p);
   if(c.gold) grantItem(rollChest(true,pool),p);
 }
-const mysteryPrice=gold=>runPrice({rarity:gold?'rare':'common'});
-// An empty chest pauses the game and offers a gamble: run coins for a random item (locked or not) for this run.
+const MYSTERY_PRICE=10;
+// Free coins from an empty chest follow the same boosts as enemy drops: Gold Rush, the Banker and the heat wave.
+function chestCoinRoll(gold){
+  const k=(S.combos.has('goldrush')?2:1)*(hasPart('banker')?1.5:1)*(isW('heat')?1.5:1)*(gold?3:1);
+  return Math.max(1,Math.round(ri(3,8)*k));
+}
+// An empty chest pauses the game: gamble run coins for a random item (locked or not) for this run, or take a random handful of coins.
 function offerMystery(c){
-  const p=c.g.position.clone(),cost=mysteryPrice(c.gold);
+  const p=c.g.position.clone();
   if(mode!=='playing'){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0'); return; }
-  openItemShop(c.gold?tl('Empty golden chest'):tl('Empty chest'),[{type:'mystery',cost,gold:c.gold,p}]);
+  openItemShop(c.gold?tl('Empty golden chest'):tl('Empty chest'),[{type:'mystery',cost:MYSTERY_PRICE*(c.gold?2:1),gold:c.gold,p},{type:'coins',cost:0,gold:c.gold,p}]);
 }
 // Slot-machine reveal on the offer card: names flicker past, slow down and land on what was won, then the shop closes.
 function spinMystery(o){
-  const pool=chestPool().filter(powerUsable),won=[rollChest(o.gold,pool)]; if(o.gold) won.push(rollChest(true,pool));
+  const coins=o.type==='coins',n=coins?chestCoinRoll(o.gold):0,pool=chestPool().filter(powerUsable),won=coins?[]:[rollChest(o.gold,pool)]; if(o.gold&&!coins) won.push(rollChest(true,pool));
+  const coinText=v=>tl('{0} coins',v);
   const card=$('offer'+R.offers.indexOf(o)),h=card.querySelector('h4'),sw=card.querySelector('.sw'),p=card.querySelector('p'),pr=card.querySelector('.price');
   const css=u=>u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
   R.spinning=true; card.classList.add('spinning'); p.textContent=''; pr.textContent=tl('Spinning…');
-  let n=0,delay=45;
+  let t=0,delay=45;
   const tick=()=>{
     if(mode!=='shop'){ R.spinning=false; return; }
-    if(n++<22){ const u=pick(pool); h.textContent=u.name; sw.style.background=css(u); sfx.coin(); delay*=1.12; setTimeout(tick,delay); return; }
-    h.textContent=won.map(u=>u.name).join(' + '); sw.style.background=css(won[0]); p.textContent=won.map(u=>u.desc).join(' · ');
+    if(t++<22){ if(coins) h.textContent=coinText(Math.max(1,Math.round(n*rand(0.3,1.8)))); else { const u=pick(pool); h.textContent=u.name; sw.style.background=css(u); } sfx.coin(); delay*=1.12; setTimeout(tick,delay); return; }
+    if(coins){ h.textContent=coinText(n); p.textContent=''; }
+    else { h.textContent=won.map(u=>u.name).join(' + '); sw.style.background=css(won[0]); p.textContent=won.map(u=>u.desc).join(' · '); }
     pr.textContent=tl('You won!'); card.classList.remove('spinning'); card.classList.add('won'); sfx.unlock();
-    setTimeout(()=>{ R.spinning=false; won.forEach(u=>grantItem(u,o.p)); closeShop(); },1100);
+    setTimeout(()=>{ R.spinning=false; won.forEach(u=>grantItem(u,o.p)); closeShop(); if(coins) spawnCoins(S.x,-1.5,n,1.2); },1100);
   };
   tick();
 }

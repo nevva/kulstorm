@@ -65,6 +65,7 @@ function offerInfo(o){
   if(o.type==='lvl') return {col:hexCss(o.m.def.shirt),title:o.m.def.name+' → '+tl('lv {0}',o.m.lvl+1),desc:tl('+20% damage and +20% max HP, fully healed. Now level {0}.',o.m.lvl)};
   if(o.type==='heal') return {col:'#ff5c7a',title:tl('Full Heal'),desc:tl('Heals the whole squad to full health.')};
   if(o.type==='item') return {col:o.u.kind==='gubbe'?hexCss(o.u.shirt):WALL_CSS[o.u.rarity],title:o.u.name,desc:o.u.desc+' · '+tl('This run only.')};
+  if(o.type==='coins') return {col:'#ffc83d',title:tl('Coins'),desc:tl('Take a random handful of coins. Gold Rush, the Banker and heat waves make it bigger.')};
   if(o.type==='mystery') return {col:'#ffc83d',title:tl('Mystery item'),desc:o.gold?tl('Gamble for two random items, for this run only.'):tl('Gamble for a random item, for this run only.')};
   return {col:'#ffc83d',title:tl('The Banker'),desc:tl('New squad member: damage rises 1% per coin you carry, up to ×4.')};
 }
@@ -77,7 +78,7 @@ function renderBuy(){
     const sw=document.createElement('div'); sw.className='sw'; sw.style.background=inf.col; b.appendChild(sw);
     const h=document.createElement('h4'); h.textContent=inf.title; b.appendChild(h);
     const p=document.createElement('p'); p.textContent=inf.desc; b.appendChild(p);
-    const pr=document.createElement('span'); pr.className='price'; pr.textContent=o.bought?tl('Bought'):(i+1)+' · '+tl('{0} coins',o.cost); b.appendChild(pr);
+    const pr=document.createElement('span'); pr.className='price'; pr.textContent=o.bought?tl('Bought'):(i+1)+' · '+(o.cost?tl('{0} coins',o.cost):tl('Free')); b.appendChild(pr);
     const stale=(o.type==='lvl'&&(o.m.dead||squad.indexOf(o.m)<0||o.m.lvl>=5))||(o.type==='item'&&!upgradeFits(o.u));
     b.disabled=!!o.bought||stale||coinsRun<o.cost||(o.type==='banker'&&(hasPart('banker')||squad.length>=MAX_SQUAD));
     if(i===R.sel) b.classList.add('sel');
@@ -87,13 +88,14 @@ function renderBuy(){
   const rr=$('shop-reroll'); rr.hidden=!!R.title; rr.textContent=tl('New offers')+' · '+R.reroll; rr.disabled=coinsRun<R.reroll;
 }
 function buyOffer(o){
+  if(R.spinning) return false;
   const btn=$('offer'+R.offers.indexOf(o));
   if(o.bought||!btn||btn.disabled){ if(!o.bought){ $('shopwallet').textContent=(coinsRun<o.cost?tl("Can't afford"):tl("Can't buy"))+' · '+tl('{0} coins this run',fmt(Math.floor(coinsRun))); sfx.hurt(); } return false; }
   coinsRun-=o.cost; o.bought=true; hudCoins=-1;
   if(o.type==='lvl'){ const m=o.m; m.lvl++; m.maxHp=Math.round(m.maxHp*1.2); m.hp=m.maxHp; fxSparkle(m.g.position.x,1.4,m.g.position.z,C(m.def.shirt)); }
   else if(o.type==='heal'){ squad.forEach(m=>{ m.hp=m.maxHp; }); }
   else if(o.type==='item') grantItem(o.u,{x:S.x,z:-2});
-  else if(o.type==='mystery'){ updatePower(0,true); $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun))); spinMystery(o); return false; }
+  else if(o.type==='mystery'||o.type==='coins'){ updatePower(0,true); $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun))); spinMystery(o); return false; }
   else { addMember(defById('banker')); }
   sfx.buy(); updatePower(0,true); renderBuy();
   return true;
