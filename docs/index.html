@@ -6,7 +6,7 @@
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.29-2125">
+<link rel="stylesheet" href="css/style.css?v=2026.10.29-2131">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -56,7 +56,7 @@
     <button class="btn" id="play" type="button">Play</button>
     <div class="btnrow">
       <button class="btn small ghost" id="open-armory" type="button">Armory</button>
-      <button class="btn small ghost" id="open-shop" type="button">Hero Shop</button>
+      <button class="btn small ghost" id="open-shop" type="button">Barracks</button>
       <button class="btn small ghost" id="open-lab" type="button">Lab</button>
       <button class="btn small ghost" id="open-heroprog" type="button">Hero</button>
       <button class="btn small ghost" id="open-opts" type="button">Settings</button>
@@ -66,10 +66,17 @@
   </div>
 
   <div class="panel" id="menu-shop" hidden>
-    <h2 class="ph">Hero Shop</h2>
-    <p class="coins" id="shopcoins"></p>
-    <p class="sub">Coins you collect in runs are saved here. Buy a hero and pick them as your starting hero. Heroes you have bought join the starting group unless you leave them out.</p>
+    <div class="armorybar">
+      <button class="btn small ghost" id="shop-back" type="button">← Back</button>
+      <div class="chip coin bank" id="shopcoins">0</div>
+    </div>
+    <h2 class="ph">Barracks</h2>
+    <h3 class="sh">Heroes · always with you</h3>
+    <p class="sub">Bought once and with you from the start of every run. One leads; the others you own join the starting group unless you leave them out.</p>
     <div class="heroes" id="heroes"></div>
+    <h3 class="sh">Recruits · can join during a run</h3>
+    <p class="sub">Unlocking a recruit lets chests and walls hand them to you for free. It is a chance, not a guarantee.</p>
+    <div class="heroes" id="ar-gubbe"></div>
     <button class="btn small ghost" id="close-shop" type="button">Back</button>
   </div>
 
@@ -113,8 +120,6 @@
     <div class="heroes" id="ar-ability"></div>
     <h3 class="sh">Power-ups</h3>
     <div class="heroes" id="ar-power"></div>
-    <h3 class="sh">Squad members</h3>
-    <div class="heroes" id="ar-gubbe"></div>
     <h3 class="sh">Team perks and helpers</h3>
     <div class="heroes" id="ar-team"></div>
     <button class="btn small ghost" id="close-armory" type="button">Back</button>
@@ -250,8 +255,8 @@
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.29-2125"></script>
+<script src="js/version.js?v=2026.10.29-2131"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.29-2125"></script>
+<script src="js/main.js?v=2026.10.29-2131"></script>
 </body>
 </html>

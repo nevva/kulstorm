@@ -20,8 +20,11 @@ function renderMain(){
   const n=affordableUnlocks(); $('open-armory').hidden=!OPT.coins; $('open-armory').textContent=tl('Armory')+(n>0?' ('+n+')':'');
   if(mode==='menu'){ clearSquad(); S=freshState(); addMember(leaderDef(heroById(heroId))); startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD) addMember(companionDef(h)); }); }
 }
-function renderShop(){
-  $('shopcoins').textContent=tl('{0} coins in the bank',fmt(bank));
+// Barracks: heroes (bought, always in the run) and recruits (unlocked into what chests and walls can give).
+function renderShop(bought){
+  showBank(!!bought,'shopcoins');
+  const rb=$('ar-gubbe'); rb.innerHTML='';
+  armoryItems().filter(u=>u.kind==='gubbe').sort((a,b)=>itemPrice(a)-itemPrice(b)).forEach(u=>rb.appendChild(armoryCard(u,bought,renderShop)));
   const box=$('heroes'); box.innerHTML='';
   HEROES.forEach(h=>{
     const own=owned.indexOf(h.id)>=0,sel=heroId===h.id;
@@ -29,6 +32,7 @@ function renderShop(){
     const sw=document.createElement('div'); sw.className='sw'; sw.style.background=hexCss(h.shirt); card.appendChild(sw);
     const t=document.createElement('h4'); t.textContent=h.name; card.appendChild(t);
     const p=document.createElement('p'); p.textContent=h.desc+' · '+tl('Base health: {0} HP',memberBaseHealth(leaderDef(h))); card.appendChild(p);
+    const r=vetRank('hero_'+h.id),v=document.createElement('span'); v.className='rar vet'; v.textContent='★'.repeat(r)+'☆'.repeat(MEDALS.length-r)+(r?' · '+tl(MEDALS[r-1].name):''); card.appendChild(v);
     const b=document.createElement('button'); b.type='button';
     const joins=own&&!sel&&h.price>0;
     if(sel){ b.textContent=tl('Selected'); b.disabled=true; }
@@ -39,7 +43,7 @@ function renderShop(){
       b.addEventListener('click',()=>{ benched=benched.filter(x=>x!==h.id); if(on) benched.push(h.id); saveBank(); sfx.init(); sfx.pickup(); renderShop(); });
     }
     else if(own){ b.textContent=tl('Choose'); b.className='own'; b.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); }
-    else if(bank>=h.price){ b.textContent=tl('Buy')+' · '+fmt(h.price); b.addEventListener('click',()=>{ bank-=h.price; owned.push(h.id); heroId=h.id; saveBank(); sfx.init(); sfx.upgrade(); renderShop(); }); }
+    else if(bank>=h.price){ b.textContent=tl('Buy')+' · '+fmt(h.price); b.addEventListener('click',()=>{ bank-=h.price; owned.push(h.id); heroId=h.id; saveBank(); sfx.init(); sfx.resume(); sfx.unlock(); renderShop(h.id); }); }
     else { b.textContent=tl('Costs {0} · {1} short',fmt(h.price),fmt(h.price-bank)); b.disabled=true; }
     card.appendChild(b);
     if(own){ const ob=document.createElement('button'); ob.type='button'; ob.className='lead'; ob.textContent=tl('Outfit')+(heroOutfit(h.id)?' ✓':''); ob.addEventListener('click',()=>{ outfitHero=h.id; showMenu('outfit'); }); card.appendChild(ob); }
@@ -107,17 +111,17 @@ $('outfit-back').addEventListener('click',()=>showMenu('shop'));
 function armoryItems(){ return ABILITIES.filter(u=>abilityEnabled(u.id)).concat(POWERUPS,UPGRADES).filter(u=>(OPT.team||u.kind!=='team')&&(OPT.unicorns||u.kind!=='pet')&&powerOn(u)); }
 const lockedItems=()=>armoryItems().filter(u=>unlocked.indexOf(u.id)<0).sort((a,b)=>itemPrice(a)-itemPrice(b));
 const affordableUnlocks=()=>lockedItems().filter(u=>bank>=itemPrice(u)).length;
-const KIND_NAME={ability:'Ability',power:'Power-up',gubbe:'Squad member',team:'Team perk',pet:'Helper'};
+const KIND_NAME={ability:'Ability',power:'Power-up',gubbe:'Recruit',team:'Team perk',pet:'Helper'};
 let shownBank=0,bankTween=0;
 // Rolls the bank chip from the old amount to the new one, so a purchase visibly costs coins.
-function showBank(animate){
-  const el=$('armorycoins'),from=shownBank,to=bank; shownBank=bank; cancelAnimationFrame(bankTween);
+function showBank(animate,id){
+  const el=$(id||'armorycoins'),from=shownBank,to=bank; shownBank=bank; cancelAnimationFrame(bankTween);
   if(!animate){ el.textContent=fmt(to); return; }
   el.classList.remove('spend'); void el.offsetWidth; el.classList.add('spend');
   const t0=performance.now(),step=now=>{ const k=Math.min(1,(now-t0)/450); el.textContent=fmt(Math.round(from+(to-from)*(1-Math.pow(1-k,3)))); if(k<1) bankTween=requestAnimationFrame(step); };
   bankTween=requestAnimationFrame(step);
 }
-function armoryCard(u,bought){
+function armoryCard(u,bought,rerender){
   const own=unlocked.indexOf(u.id)>=0,price=itemPrice(u);
   const card=document.createElement('div'); card.className='hero'+(own?' own':'')+(u.id===bought?' bought':'');
   const sw=document.createElement('div'); sw.className='sw'; sw.style.background=WALL_CSS[u.rarity]; card.appendChild(sw);
@@ -127,7 +131,7 @@ function armoryCard(u,bought){
   if(u.kind==='gubbe'){ const r=vetRank(u.id),v=document.createElement('span'); v.className='rar vet'; v.textContent='★'.repeat(r)+'☆'.repeat(MEDALS.length-r)+(r?' · '+tl(MEDALS[r-1].name):''); card.appendChild(v); }
   const b=document.createElement('button'); b.type='button';
   if(own){ b.textContent='✓ '+tl(u.kind==='ability'?'Unlocked':'In the chests'); b.disabled=true; }
-  else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); boughtThisVisit.push(u.id); saveBank(); sfx.init(); sfx.resume(); sfx.unlock(); renderArmory(u.id); }); }
+  else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); boughtThisVisit.push(u.id); saveBank(); sfx.init(); sfx.resume(); sfx.unlock(); (rerender||renderArmory)(u.id); }); }
   else { b.textContent=tl('Costs {0} · {1} short',fmt(price),fmt(price-bank)); b.disabled=true; }
   card.appendChild(b); return card;
 }
@@ -140,7 +144,7 @@ function renderArmory(bought){
   $('armorystack').textContent=!hasAbility('moneymaker')?tl('Enemies drop single coins and chests are empty until you buy Money Maker.'):stackMax()<5?tl('Enemies drop coins in stacks of up to {0}. The stacks grow the more runs you play.',stackMax()):tl('Enemies drop coins in full stacks of up to 5.');
   const ready=all.filter(u=>boughtThisVisit.indexOf(u.id)>=0||(unlocked.indexOf(u.id)<0&&bank>=itemPrice(u))).sort((a,b)=>itemPrice(a)-itemPrice(b));
   $('ar-readybox').hidden=!ready.length; $('ar-ready').innerHTML=''; ready.forEach(u=>$('ar-ready').appendChild(armoryCard(u,bought)));
-  [['ar-ability',['ability']],['ar-power',['power']],['ar-gubbe',['gubbe']],['ar-team',['team','pet']]].forEach(([id,kinds])=>{
+  [['ar-ability',['ability']],['ar-power',['power']],['ar-team',['team','pet']]].forEach(([id,kinds])=>{
     const box=$(id); box.innerHTML='';
     all.filter(u=>kinds.indexOf(u.kind)>=0&&ready.indexOf(u)<0).sort((a,b)=>itemPrice(a)-itemPrice(b)).forEach(u=>box.appendChild(armoryCard(u,bought)));
   });
@@ -281,6 +285,7 @@ function renderTalents(box,redraw){
   });
 }
 $('close-shop').addEventListener('click',()=>showMenu('main'));
+$('shop-back').addEventListener('click',()=>showMenu('main'));
 $('close-lab').addEventListener('click',()=>showMenu('main'));
 $('close-opts').addEventListener('click',()=>showMenu('main'));
 $('lab-boss').addEventListener('click',()=>{ const extras=[]; for(const k in lab.counts) for(let i=0;i<lab.counts[k];i++) extras.push(k); startGame({hero:lab.hero,extras,perks:Object.keys(lab.perks).filter(k=>lab.perks[k]),dist:lab.dist,lab:true,off:Object.keys(lab.off).filter(k=>lab.off[k]),weather:lab.weather||null,tod:lab.tod?+lab.tod:null,bossNow:true,bossType:$('lab-bosstype').value||null}); });
