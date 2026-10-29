@@ -48,6 +48,16 @@ const UPGRADES=[
 ];
 const RARITY={common:'Common',rare:'Rare',epic:'Epic'};
 const MAX_SQUAD=9;
+// Veteran medals: a squad member type earns them by time spent in the squad over real runs (VET_NEED, cumulative seconds).
+// Each medal adds its own boost for every member of that type, in every run.
+const VET_NEED=[60,180,360,600,900];
+const MEDALS=[
+  {name:'Bronze Star',color:'#cd7f32',desc:'+10% max HP',hp:1.1},
+  {name:'Silver Star',color:'#c9d1db',desc:'+10% damage',dmg:1.1},
+  {name:'Gold Star',color:'#ffd21f',desc:'+15% fire rate',rate:1.15},
+  {name:'Valor Cross',color:'#ff5c7a',desc:'+15% max HP',hp:1.15},
+  {name:'Legend Medal',color:'#b18cff',desc:'+20% damage',dmg:1.2},
+];
 // Combos: when both parts are in the squad (or among the team perks), the effect is on. Lose a part and it is gone.
 const COMBOS=[
   {id:'burn',name:'Burn Beam',a:'laser',b:'crit',desc:'The laser sets enemies on fire'},

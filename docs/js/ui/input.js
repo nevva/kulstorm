@@ -54,7 +54,7 @@ window.addEventListener('keydown',e=>{
   if(mode==='playing'&&(e.key===' '||e.key==='ArrowUp'||e.key==='w'||e.key==='W')){ e.preventDefault(); if(!e.repeat) squadJump(); }
   if(mode==='playing'&&(e.key==='ArrowDown'||e.key==='Shift'||e.key==='s'||e.key==='S')){ e.preventDefault(); if(!e.repeat) squadDuck(); }
   if(mode==='playing'&&(e.key==='e'||e.key==='E')){ e.preventDefault(); if(!e.repeat) triggerOD(); }
-  if((e.key==='Enter'||e.key===' ')&&((mode==='menu'&&!$('menu-main').hidden)||(mode==='dead'&&overShown))){ e.preventDefault(); startGame(); }
+  if((e.key==='Enter'||e.key===' ')&&((mode==='menu'&&!$('menu-main').hidden)||(mode==='dead'&&overShown&&vetEl.hidden))){ e.preventDefault(); startGame(); }
 });
 window.addEventListener('keyup',e=>{
   if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') keys.l=false;

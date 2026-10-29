@@ -8,6 +8,7 @@ function updatePlayer(dt){
   S.targetX=clamp(S.targetX,-HALF+0.5,HALF-0.5);
   S.x+=(S.targetX-S.x)*(1-Math.exp(-dt*9*A.speed*flowK()*(isW('snow')?0.8:1)));
   if(S.parryT>0) S.parryT=Math.max(0,S.parryT-dt);
+  if(!labRun) trackVeterans(dt);
   if(S.flowT>0){ S.flowT-=dt; if(S.flowT<=0){ S.flow=0; hudFlow=-1; } else if(squad.length){ const m=pick(squad),pp=m.g.position; blobs.spawn(pp.x+rand(-0.25,0.25),0.15,pp.z+0.3,rand(-0.3,0.3),rand(0.3,0.8),rand(0.5,1.5),0.4,0.18,0.03,WHITE,FLOW_COL,C(0xff8a3d),0,1,false,0); } }
   // Automatic front: once a second, the toughest gubbe (HP + 25 per shield charge) takes the front if clearly tougher.
   S.frontT-=dt; S.frontHold-=dt;
@@ -245,7 +246,7 @@ function die(){
   squad.forEach(m=>{ if(m.dead) return; const p=m.g.position; fxExplosion(p.x,1,p.z,1.1,C(m.def.shirt)); m.g.visible=false; m.beams.forEach(b=>b.visible=false); });
   shieldRing.visible=false; frontMarker.visible=false; bossBar.hidden=true;
   if(!labRun&&Math.floor(dist)>best){ best=Math.floor(dist); store('kulstorm_best',best); $('newbest').hidden=false; } else $('newbest').hidden=true;
-  bankRun();
+  bankRun(); if(!labRun) awardVeterans();
   lastHeroGain=commitHeroXp();
 }
 let lastHeroGain={gain:0,ups:0};
@@ -256,8 +257,27 @@ function showOver(){
   const hx=$('oherox'); hx.hidden=!(OPT.heroprog&&lastHeroGain.gain>0); hx.textContent=tl('+{0} hero XP',fmt(lastHeroGain.gain))+(lastHeroGain.ups?' · '+tl('Hero level {0}! +{1} talent points',HERO.lvl,lastHeroGain.ups):'');
   $('ocoins').textContent=labRun?tl('Lab run – no coins or records'):(OPT.coins?tl('+{0} coins · {1} total',fmt(coinsRun),fmt(bank)):'');
   renderOverArmory(); renderRunSummary(); renderOverUpgrades();
-  if(!labRun&&OPT.coins){ openArmoryAfterRun(); return; }
-  overEl.hidden=false; overEl.scrollTop=0;
+  const next=!labRun&&OPT.coins?openArmoryAfterRun:()=>{ overEl.hidden=false; overEl.scrollTop=0; };
+  if(lastPromos.length){ showCeremony(lastPromos,next); lastPromos=[]; return; }
+  next();
+}
+// Promotion ceremony: each new medal is pinned on in turn, then Salute moves on to the Armory or the results.
+const vetEl=$('vet');
+function showCeremony(promos,next){
+  const box=$('vetlist'); box.innerHTML='';
+  promos.forEach((p,i)=>{
+    const row=document.createElement('div'); row.className='vetrow'; row.style.animationDelay=(0.35+i*0.55)+'s';
+    const md=document.createElement('div'); md.className='medal'; md.style.setProperty('--mc',p.medal.color);
+    const tx=document.createElement('div'); tx.className='vettxt';
+    const h=document.createElement('h4'); h.textContent=p.name;
+    const s=document.createElement('p'); s.textContent=tl(p.medal.name)+' · '+tl(p.medal.desc);
+    const pips=document.createElement('span'); pips.className='pips'; pips.textContent='★'.repeat(p.rank)+'☆'.repeat(MEDALS.length-p.rank);
+    tx.append(h,s,pips); row.append(md,tx); box.appendChild(row);
+    setTimeout(()=>{ if(!vetEl.hidden) sfx.unlock(); },(350+i*550));
+  });
+  vetEl.hidden=false; vetEl.scrollTop=0; sfx.combo();
+  $('vet-ok').onclick=()=>{ vetEl.hidden=true; next(); };
+  $('vet-ok').focus({preventScroll:true});
 }
 // Real runs end in the Armory; the game-over screen with the run results is one tap away.
 function openArmoryAfterRun(){ overEl.hidden=true; clearRun(); mode='menu'; showMenu('main'); showMenu('armory',true); }

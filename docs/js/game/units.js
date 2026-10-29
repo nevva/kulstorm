@@ -31,6 +31,21 @@ const memberBaseHealth=def=>Math.max(1,Math.round((def.hp||60)*STARTING_HEALTH_M
 const stackMax=()=>labRun||!OPT.coins?5:coinStackMax(runsDone);
 function saveBank(){ store('kulstorm_coins',Math.round(bank)); store('kulstorm_owned',owned); store('kulstorm_hero',heroId); store('kulstorm_bench',benched); store('kulstorm_unlocked',unlocked); store('kulstorm_runs',runsDone); }
 // End of a real run: bank its coins and count it (the first runs are played at an easier pace, see easeK).
+let VET=load('kulstorm_vet',{}),vetRun={},lastPromos=[];
+// The leader counts as their hero, so a hero earns medals whether leading or joining as a companion.
+const vetKey=m=>m.def.id==='leader'?'hero_'+((lastCfg&&lastCfg.hero)||heroId):m.def.id;
+const vetRank=key=>(VET[key]&&VET[key].rank)||0;
+function vetBoost(m,stat){ let k=1; const r=vetRank(vetKey(m)); for(let i=0;i<r;i++) k*=MEDALS[i][stat]||1; return k; }
+function trackVeterans(dt){ for(const m of squad) if(!m.dead){ const k=vetKey(m); vetRun[k]=(vetRun[k]||{t:0,name:m.def.id==='leader'?heroById((lastCfg&&lastCfg.hero)||heroId).name:m.def.name}); vetRun[k].t+=dt; } }
+// End of a real run: add this run's squad time and collect the medals earned.
+function awardVeterans(){
+  lastPromos=[];
+  for(const k in vetRun){
+    const v=VET[k]=VET[k]||{t:0,rank:0}; v.t+=vetRun[k].t; v.name=vetRun[k].name;
+    while(v.rank<MEDALS.length&&v.t>=VET_NEED[v.rank]){ lastPromos.push({key:k,name:v.name,rank:v.rank+1,medal:MEDALS[v.rank]}); v.rank++; }
+  }
+  vetRun={}; store('kulstorm_vet',VET);
+}
 function bankRun(){ if(labRun) return; if(OPT.coins&&coinsRun>0) bank+=coinsRun; runsDone++; saveBank(); }
 const startCompanions=()=>HEROES.filter(h=>h.price>0&&h.id!==heroId&&owned.indexOf(h.id)>=0&&benched.indexOf(h.id)<0);
 function companionDef(h){ return {id:'hero_'+h.id,kind:'gubbe',name:h.name,short:h.name,desc:h.desc,weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt}; }

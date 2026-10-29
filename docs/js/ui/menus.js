@@ -67,6 +67,7 @@ function armoryCard(u,bought){
   const t=document.createElement('h4'); t.textContent=u.name; card.appendChild(t);
   const r=document.createElement('span'); r.className='rar'; r.textContent=(u.id==='payback'&&!own?tl('First upgrade')+' · ':'')+RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
   const p=document.createElement('p'); p.textContent=u.desc+(u.kind==='gubbe'?' · '+tl('Base health: {0} HP',memberBaseHealth(u)):''); card.appendChild(p);
+  if(u.kind==='gubbe'){ const r=vetRank(u.id),v=document.createElement('span'); v.className='rar vet'; v.textContent='★'.repeat(r)+'☆'.repeat(MEDALS.length-r)+(r?' · '+tl(MEDALS[r-1].name):''); card.appendChild(v); }
   const b=document.createElement('button'); b.type='button';
   if(own){ b.textContent='✓ '+tl(u.kind==='ability'?'Unlocked':'In the chests'); b.disabled=true; }
   else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); boughtThisVisit.push(u.id); saveBank(); sfx.init(); sfx.resume(); sfx.unlock(); renderArmory(u.id); }); }
@@ -236,7 +237,7 @@ $('reset-tut').addEventListener('click',()=>{
   const b=$('reset-tut'); tutReset(); OPT.tutorial=true; saveOpts(); renderOpts(); b.textContent=tl('Tutorial will show again'); setTimeout(()=>{ b.textContent=tl('Show tutorial again'); },1500);
 });
 // Reset save: wipe all progress (coins, heroes, Armory unlocks, hero levels, record, seen tutorials) and reload as a new player. Settings, volume and language stay.
-const SAVE_KEYS=['kulstorm_coins','kulstorm_owned','kulstorm_hero','kulstorm_bench','kulstorm_unlocked','kulstorm_runs','kulstorm_heroprog','kulstorm_best','kulstorm_tut'];
+const SAVE_KEYS=['kulstorm_vet','kulstorm_coins','kulstorm_owned','kulstorm_hero','kulstorm_bench','kulstorm_unlocked','kulstorm_runs','kulstorm_heroprog','kulstorm_best','kulstorm_tut'];
 $('reset-all').addEventListener('click',()=>{
   const b=$('reset-all');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to erase everything'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset save'); },3000); return; }
@@ -246,5 +247,5 @@ $('reset-all').addEventListener('click',()=>{
 $('reset-save').addEventListener('click',()=>{
   const b=$('reset-save');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to reset'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset coins and purchases'); },3000); return; }
-  bank=0; owned=['rookie']; heroId='rookie'; benched=[]; unlocked=STARTER_ITEMS.slice(); runsDone=0; saveBank(); b.dataset.arm=''; b.textContent=tl('Reset done'); setTimeout(()=>{ b.textContent=tl('Reset coins and purchases'); },1500);
+  VET={}; bank=0; owned=['rookie']; heroId='rookie'; benched=[]; unlocked=STARTER_ITEMS.slice(); runsDone=0; saveBank(); b.dataset.arm=''; b.textContent=tl('Reset done'); setTimeout(()=>{ b.textContent=tl('Reset coins and purchases'); },1500);
 });

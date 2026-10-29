@@ -26,7 +26,7 @@ function feverDream(){
 }
 function startGame(cfg){
   cfg=cfg||{hero:heroId,extras:[],perks:[],dist:0,lab:false};
-  lastCfg=cfg; labRun=!!cfg.lab; menuSky=false;
+  lastCfg=cfg; labRun=!!cfg.lab; menuSky=false; vetRun={};
   sfx.init(); sfx.resume(); music.ensure(); music.reset();
   pauseEl.hidden=true;
   clearRun();

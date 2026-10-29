@@ -152,9 +152,9 @@ function recomputeAuras(){
 function rollForm(m){
   const r=()=>Math.round(rand(0.85,1.15)*100)/100;
   m.form={hp:r(),dmg:r(),rate:r()};
-  m.maxHp=Math.round(m.maxHp*m.form.hp); m.hp=m.maxHp;
+  m.maxHp=Math.round(m.maxHp*m.form.hp*vetBoost(m,'hp')); m.hp=m.maxHp;
 }
-const formRate=m=>m.form?m.form.rate:1;
+const formRate=m=>(m.form?m.form.rate:1)*vetBoost(m,'rate');
 function formText(m){ if(!m.form) return ''; const f=k=>(k>=1?'+':'−')+Math.round(Math.abs(k-1)*100)+PCT; return 'HP '+f(m.form.hp)+' · '+tl('Damage')+' '+f(m.form.dmg)+' · '+tl('Fire rate')+' '+f(m.form.rate); }
 // Per-member damage multiplier: the Veteran snowballs with damage dealt, the Glass Cannon scales with his own health.
 function memberMult(m){
@@ -163,7 +163,7 @@ function memberMult(m){
   if(m.def.id==='glass') k*=0.5+2*clamp(m.hp/m.maxHp,0,1);
   if(m.def.id==='banker') k*=Math.min(4,1+coinsRun*0.01);
   k*=1+0.2*((m.lvl||1)-1);
-  return k;
+  return k*vetBoost(m,'dmg');
 }
 // Squad power: estimated total damage per second relative to one lone pistol gubbe (4 shots/s × 10 = 40).
 const BASE_DPS=40;
@@ -189,7 +189,7 @@ function updatePower(dt,instant){
   pfT-=dt; if(pfT<=0||instant){ pfT=0.5; PFraw=Math.pow(squadPower(),0.8); }
   PF=instant?PFraw:PF+(PFraw-PF)*(1-Math.exp(-dt*0.8));
 }
-function chipText(m){ const k=memberMult(m); return m.def.short+((m.lvl||1)>1?' '+tl('lv {0}',m.lvl):'')+' '+Math.ceil(m.hp)+(Math.abs(k-1)>0.05?' ×'+k.toFixed(1):''); }
+function chipText(m){ const k=memberMult(m),r=vetRank(vetKey(m)); return (r?'★'.repeat(r)+' ':'')+m.def.short+((m.lvl||1)>1?' '+tl('lv {0}',m.lvl):'')+' '+Math.ceil(m.hp)+(Math.abs(k-1)>0.05?' ×'+k.toFixed(1):''); }
 function applyTeamPerk(u){
   S.perks.push(u);
   switch(u.id){
