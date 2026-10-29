@@ -186,6 +186,7 @@ function renderOpts(boxId){
 $('open-shop').addEventListener('click',()=>showMenu('shop'));
 $('open-armory').addEventListener('click',()=>showMenu('armory'));
 $('close-armory').addEventListener('click',()=>showMenu('main'));
+$('armory-back').addEventListener('click',()=>showMenu('main'));
 $('open-lab').addEventListener('click',()=>showMenu('lab'));
 $('open-opts').addEventListener('click',()=>showMenu('opts'));
 $('open-heroprog').addEventListener('click',()=>showMenu('heroprog'));

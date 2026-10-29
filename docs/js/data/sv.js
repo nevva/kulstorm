@@ -262,6 +262,7 @@ const SV={
   'Hero':'Hjälte',
   'Settings':'Inställningar',
   'Back':'Tillbaka',
+  '← Back':'← Tillbaka',
   'Coins you collect in runs are saved here. Buy a hero and pick them as your starting hero. Heroes you have bought join the starting group unless you leave them out.':'Mynt du samlar i rundorna sparas här. Köp en gubbe och välj den som din startgubbe. Köpta gubbar följer med i startgruppen, om du inte bockar ur dem.',
   'Test Lab':'Testlabb',
   'Put a squad together and test combinations. Lab runs don\'t count as records and give no coins.':'Sätt ihop en trupp och testa kombinationer. Labbrundor räknas inte som rekord och ger inga mynt.',
