@@ -59,7 +59,8 @@ function buildOffers(){
   const lockedUps=UPGRADES.filter(u=>upgradeFits(u)&&!isUnlocked(u.id));
   if(lockedUps.length&&Math.random()<0.5){ const u=pick(lockedUps); pool.push({type:'item',u,cost:runPrice(u)}); }
   if(!pool.length) pool.push({type:'heal',cost:15});
-  R.offers=shuffle(pool).slice(0,3);
+  // The chest gamble is always one of the three offers.
+  R.offers=shuffle(shuffle(pool).slice(0,2).concat({type:'mystery',cost:MYSTERY_PRICE,gold:false,p:{x:S.x,z:-2}}));
 }
 function offerInfo(o){
   if(o.type==='lvl') return {col:hexCss(o.m.def.shirt),title:o.m.def.name+' → '+tl('lv {0}',o.m.lvl+1),desc:tl('+20% damage and +20% max HP, fully healed. Now level {0}.',o.m.lvl)};
