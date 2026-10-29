@@ -520,6 +520,8 @@ const SV={
   'Start every run with double fire rate.':'Börja varje runda med dubbel eldhastighet.',
   'First upgrade':'Första uppgraderingen',
   'Run results':'Rundans resultat',
+  'Tilt parallax':'Lutningsparallax',
+  'Tilting your phone shifts the camera a little for a 3D effect':'När du lutar telefonen flyttar sig kameran lite för en 3D-effekt',
   'Outfit':'Utstyrsel',
   'Buy · {0} XP':'Köp · {0} XP',
   'previous':'föregående',

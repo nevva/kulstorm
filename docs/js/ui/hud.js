@@ -52,13 +52,36 @@ function updateHUD(){
   if(hudXp<0){ hudXp=1; $('xprow').hidden=!xpOn(); $('xplvl').textContent=tl('Lv {0}',R.lvl); $('xpbar').style.width=(100*R.xp/R.need).toFixed(1)+'%'; }
 }
 let hudXp=-1,hudFlow=-1;
+// Tilt parallax: tilting the phone moves the camera a little around the same target, so near and far things shift
+// against each other. The rest position slowly follows how the phone is held, so only tilting moves the view.
+const tilt={x:0,y:0,bx:null,by:null,ox:0,oy:0};
+window.addEventListener('deviceorientation',e=>{
+  if(e.beta==null||e.gamma==null) return;
+  const ang=(((screen.orientation&&screen.orientation.angle)||window.orientation||0)+360)%360;
+  let x=e.gamma,y=e.beta;
+  if(ang===90){ x=e.beta; y=-e.gamma; } else if(ang===270){ x=-e.beta; y=e.gamma; } else if(ang===180){ x=-e.gamma; y=-e.beta; }
+  if(tilt.bx==null||Math.abs(x-tilt.bx)>60||Math.abs(y-tilt.by)>60){ tilt.bx=x; tilt.by=y; }
+  tilt.x=x; tilt.y=y;
+});
+// iOS only reports orientation after the player allows it, which must be asked from a tap.
+function askTilt(){ const D=window.DeviceOrientationEvent; if(OPT.gyro&&D&&typeof D.requestPermission==='function') D.requestPermission().catch(()=>{}); }
+window.addEventListener('touchend',askTilt,{once:true});
+function updateTilt(dt){
+  let tx=0,ty=0;
+  if(OPT.gyro&&tilt.bx!=null){
+    const k=1-Math.exp(-dt*0.35); tilt.bx+=(tilt.x-tilt.bx)*k; tilt.by+=(tilt.y-tilt.by)*k;
+    tx=clamp((tilt.x-tilt.bx)/22,-1,1); ty=clamp((tilt.y-tilt.by)/22,-1,1);
+  }
+  const s=1-Math.exp(-dt*8); tilt.ox+=(tx-tilt.ox)*s; tilt.oy+=(ty-tilt.oy)*s;
+}
 function updateCamera(dt){
+  updateTilt(dt);
   shakeAmt=Math.max(0,shakeAmt-dt*2.4);
   const sx=(Math.random()-0.5)*shakeAmt*0.5,sy=(Math.random()-0.5)*shakeAmt*0.5;
   const px=mode==='menu'?Math.sin(time*0.5)*1.2:S.x;
   camX+=(px*0.35-camX)*(1-Math.exp(-dt*4));
   const want=(OPT.dyncam?clamp(0.78+0.065*(squad.length-1),0.78,1.32):1)*VIEW.scale*(S.odT>0?0.9:1);
   camK+=(want-camK)*(1-Math.exp(-dt*1.5));
-  camera.position.set(camX+sx,CAM0.y*camK+sy,CAM0.z*camK);
+  camera.position.set(camX+sx+tilt.ox*1.1,CAM0.y*camK+sy-tilt.oy*0.7,CAM0.z*camK);
   camera.lookAt(camX*0.6+sx,0.9+sy,CAM0.look*camK);
 }

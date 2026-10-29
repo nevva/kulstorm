@@ -12,6 +12,7 @@ const OPT_DEFS=[
   ['team','Team perks','Walls can give perks for the whole squad'],
   ['variance','Varied damage','Each shot deals up to ±25% different damage'],
   ['shake','Screen shake','The camera shakes on big hits'],
+  ['gyro','Tilt parallax','Tilting your phone shifts the camera a little for a 3D effect'],
   ['hearts','Heart drops','Enemies drop hearts that heal'],
   ['planet','Tiny planet','The world curves toward the horizon'],
   ['weather','Weather','Rain, fog, storm, snow, thunder and heat that affect play'],
