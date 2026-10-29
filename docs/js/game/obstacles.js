@@ -6,6 +6,13 @@ function doJump(m){
   if((m.jy||0)>0.05){ if(hasAbility('dbljump')&&!m.dbUsed){ m.vy=DJUMP_V; m.dbUsed=true; const p=m.g.position,ninj=hasPart('ninja'); for(let i=0;i<(ninj?14:6);i++) blobs.spawn(p.x+rand(-0.3,0.3),p.y,p.z+rand(-0.2,0.2),rand(-1,1),rand(-1,0),rand(-1,1),ninj?0.8:0.45,ninj?0.3:0.22,ninj?0.6:0.05,ninj?C(0x757575):WHITE,ninj?C(0x424242):C(0xe0e0e0),C(0x9e9e9e),-1,1.5,false,ninj?2:0); } }
   else { m.vy=JUMP_V; m.dbUsed=false; m.duckT=0; }
 }
+// Ducking slides feet first instead of rolling when a bar, laser or wall is about to reach the gubbe.
+const SLIDE_TACKLE_K=0.35;
+function slideAhead(m){
+  const p=m.g.position,reach=scroll*DUCK_T+1.2;
+  if(obstacles.some(o=>o.type==='high'&&!o.dead&&p.z-o.z>-0.5&&p.z-o.z<reach&&p.x>o.x0-0.25&&p.x<o.x1+0.25)) return true;
+  return walls.some(w=>!w.dead&&w.lane===laneOf(p.x)&&p.z-w.g.position.z>-0.5&&p.z-w.g.position.z<reach);
+}
 function squadWave(kind){
   if(mode!=='playing'||!OPT.obstacles||!squad.length||tutLocked()) return;
   const hz=headMember().g.position.z,sp=Math.max(4,scroll),lead=tutLead(kind);

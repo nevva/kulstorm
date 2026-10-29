@@ -24,7 +24,7 @@ function updatePlayer(dt){
   const recharge=S.combos.has('recharge');
   for(const m of squad){
     if(m.jumpDelay>=0){ m.jumpDelay-=dt; if(m.jumpDelay<0) doJump(m); }
-    if(m.duckDelay>=0){ m.duckDelay-=dt; if(m.duckDelay<0){ m.duckT=DUCK_T; if((m.jy||0)>0.05&&!m.pound&&hasAbility('pound')){ m.pound=true; m.poundSpin=POUND_SPIN; m.flip=1; m.flipSpd=1/POUND_SPIN; m.vy=0; } } }
+    if(m.duckDelay>=0){ m.duckDelay-=dt; if(m.duckDelay<0){ m.duckT=DUCK_T; m.slide=(m.jy||0)<=0.05&&slideAhead(m); if(m.slide) m.butt=0; if((m.jy||0)>0.05&&!m.pound&&hasAbility('pound')){ m.pound=true; m.poundSpin=POUND_SPIN; m.flip=1; m.flipSpd=1/POUND_SPIN; m.vy=0; } } }
     if(m.poundSpin>0){ m.poundSpin-=dt; m.vy=m.poundSpin>0?0:POUND_V; } else m.vy=(m.vy||0)-GRAV*dt;
     m.jy=(m.jy||0)+m.vy*dt; if(m.jy<=0){ m.jy=0; m.vy=0; m.dbUsed=false; if(m.pound){ m.pound=false; groundPound(m); } }
     if(m.duckT>0) m.duckT=Math.max(0,m.duckT-dt);
@@ -58,11 +58,18 @@ function updateSquad(dt){
     const air=m.jy||0;
     g.position.y=air>0?air:Math.abs(Math.sin(t))*0.07;
     // ducking on the ground: curl up into a ball and roll forward one full turn, around the ball's centre
-    const s0=m.def.id==='tank'?1.22:1,rolling=m.duckT>0&&air<=0&&!(m.butt>0)&&!(m.flip>0);
+    const s0=m.def.id==='tank'?1.22:1,sliding=m.slide&&m.duckT>0&&air<=0,rolling=!sliding&&m.duckT>0&&air<=0&&!(m.butt>0)&&!(m.flip>0);
     if(rolling||m.rollA>0){ m.rollA=(m.rollA||0)+dt*Math.PI*2/DUCK_T; if(m.rollA>=Math.PI*2){ if(m.duckT>0.05) m.rollA-=Math.PI*2; else { m.rollA=0; g.rotation.x=0; } } }
-    const ball=m.rollA>0,duck=ball?0.55:m.duckT>0?0.5:1;
+    const ball=m.rollA>0,duck=ball?0.55:sliding?1:m.duckT>0?0.5:1;
     g.scale.set(s0*(duck<1?1.15:1),s0*duck,s0);
     if(air>0){ u.legL.rotation.x=0.6; u.legR.rotation.x=-0.3; }
+    // slide tackle: lean far back with the legs out front, shoot forward a little and kick up dust
+    if(sliding){
+      const q=m.duckT/DUCK_T,k=Math.min(1,(1-q)*6)*Math.min(1,q*5),off=-0.7*k;
+      g.rotation.x=1.15*k; g.position.y=0.12*k; g.position.z+=off; m.boff=(m.boff||0)+off;
+      u.legL.rotation.x=0.55*k; u.legR.rotation.x=0.8*k;
+      if(Math.random()<dt*30) blobs.spawn(g.position.x+rand(-0.25,0.25),0.1,g.position.z-0.3,rand(-1,1),rand(0.4,1.2),rand(1,3),rand(0.4,0.6),0.22,0.5,SMOKE1,SMOKE1,SMOKE,-1,2,false,0);
+    } else if(m.slide&&!(m.butt>0)){ m.slide=false; g.rotation.x=0; }
     if(ball){ const a=m.rollA,c=0.55*s0,off=c*Math.sin(a); g.rotation.x=-a; g.position.y+=c*(1-Math.cos(a)); g.position.z+=off; m.boff=(m.boff||0)+off; u.legL.rotation.x=u.legR.rotation.x=-1.3; }
     m.recoil*=Math.exp(-dt*18);
     u.gun.position.z=-0.62+m.recoil;
