@@ -1,6 +1,6 @@
 'use strict';
 // ---------- XP crystals, run levels and the buy screen
-const R={xp:0,lvl:1,need:14,pending:0,reroll:5,offers:[],sel:0,title:''};
+const R={xp:0,lvl:1,need:14,pending:0,reroll:5,offers:[],sel:0,title:'',spinning:false};
 const xpOn=()=>OPT.xpshop&&OPT.coins;
 let xpGems=[]; const xpPool=[]; const xpMat=mat(0xb07cff,{e:0.6,r:0.2});
 function spawnXp(x,z,v){
@@ -65,7 +65,7 @@ function offerInfo(o){
   if(o.type==='lvl') return {col:hexCss(o.m.def.shirt),title:o.m.def.name+' → '+tl('lv {0}',o.m.lvl+1),desc:tl('+20% damage and +20% max HP, fully healed. Now level {0}.',o.m.lvl)};
   if(o.type==='heal') return {col:'#ff5c7a',title:tl('Full Heal'),desc:tl('Heals the whole squad to full health.')};
   if(o.type==='item') return {col:o.u.kind==='gubbe'?hexCss(o.u.shirt):WALL_CSS[o.u.rarity],title:o.u.name,desc:o.u.desc+' · '+tl('This run only.')};
-  if(o.type==='mystery') return {col:'#ffc83d',title:tl('Mystery item'),desc:o.gold?tl('Two random items from the chest, for this run only.'):tl('A random item from the chest, for this run only.')};
+  if(o.type==='mystery') return {col:'#ffc83d',title:tl('Mystery item'),desc:o.gold?tl('Gamble for two random items, for this run only.'):tl('Gamble for a random item, for this run only.')};
   return {col:'#ffc83d',title:tl('The Banker'),desc:tl('New squad member: damage rises 1% per coin you carry, up to ×4.')};
 }
 function renderBuy(){
@@ -93,7 +93,7 @@ function buyOffer(o){
   if(o.type==='lvl'){ const m=o.m; m.lvl++; m.maxHp=Math.round(m.maxHp*1.2); m.hp=m.maxHp; fxSparkle(m.g.position.x,1.4,m.g.position.z,C(m.def.shirt)); }
   else if(o.type==='heal'){ squad.forEach(m=>{ m.hp=m.maxHp; }); }
   else if(o.type==='item') grantItem(o.u,{x:S.x,z:-2});
-  else if(o.type==='mystery') grantMystery(o);
+  else if(o.type==='mystery'){ updatePower(0,true); $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun))); spinMystery(o); return false; }
   else { addMember(defById('banker')); }
   sfx.buy(); updatePower(0,true); renderBuy();
   return true;
@@ -114,7 +114,7 @@ function openItemShop(title,offers){
   $('shop-done').focus({preventScroll:true});
 }
 function closeShop(){
-  if(mode!=='shop') return;
+  if(mode!=='shop'||R.spinning) return;
   shopEl.hidden=true; mode='playing'; last=performance.now();
   if(shopRelock&&OPT.mouse) lockMouse(); shopRelock=false;
   for(const m of squad) m.invuln=0.6;

@@ -128,6 +128,11 @@ body.od-on #odglow{opacity:1}
 .offer{background:var(--paper);color:var(--ink);border-radius:16px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:5px;border:4px solid transparent;cursor:pointer;font-family:inherit;font-weight:600;min-width:0}
 .offer:hover:not(:disabled){transform:translateY(-2px)}
 .offer:disabled{opacity:.45;cursor:default}
+.offer.spinning{border-color:var(--accent);animation:spinshake .12s linear infinite}
+.offer.won{border-color:var(--mint);animation:wonpop .5s ease-out}
+@keyframes spinshake{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
+@keyframes wonpop{0%{transform:scale(1)}35%{transform:scale(1.08);box-shadow:0 0 0 6px rgba(54,226,180,.6)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.offer.spinning,.offer.won{animation:none}}
 .offer.bought{border-color:var(--mint);opacity:.7}
 .offer .sw{height:8px;border-radius:4px;width:100%}
 .offer h4{font-family:var(--font-display);font-size:15px;margin:0;line-height:1.1}

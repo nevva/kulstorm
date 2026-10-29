@@ -38,13 +38,14 @@ canvas.addEventListener('pointerup',e=>{
 canvas.addEventListener('pointercancel',()=>{ drag=null; });
 window.addEventListener('keydown',e=>{
   if(mode==='shop'){
+    if(R.spinning){ e.preventDefault(); e.stopImmediatePropagation(); return; }
     const n=R.offers.length,k=e.key;
     if(k==='ArrowLeft'||k==='a'||k==='A'){ e.preventDefault(); R.sel=(R.sel-1+n)%n; renderBuy(); sfx.duck(); }
     else if(k==='ArrowRight'||k==='d'||k==='D'){ e.preventDefault(); R.sel=(R.sel+1)%n; renderBuy(); sfx.duck(); }
     else if(k===' '||k==='Enter'){ e.preventDefault(); if(!e.repeat){ const o=R.offers[R.sel]; if(o&&buyOffer(o)) closeShop(); } e.stopImmediatePropagation(); return; }
     else if(k==='Escape'){ e.preventDefault(); closeShop(); }
     else if(k==='r'||k==='R'){ e.preventDefault(); shopReroll(); }
-    else if(/^[1-3]$/.test(k)){ const i=+k-1; if(R.offers[i]){ R.sel=i; if(buyOffer(R.offers[i])) closeShop(); else { const msg=$('shopwallet').textContent; renderBuy(); $('shopwallet').textContent=msg; } } }
+    else if(/^[1-3]$/.test(k)){ const i=+k-1; if(R.offers[i]){ R.sel=i; if(buyOffer(R.offers[i])) closeShop(); else if(!R.spinning){ const msg=$('shopwallet').textContent; renderBuy(); $('shopwallet').textContent=msg; } } }
     e.stopImmediatePropagation(); return;
   }
   if(e.target&&(e.target.tagName==='BUTTON'||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')) return;

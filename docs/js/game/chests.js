@@ -73,16 +73,27 @@ function openChest(c){
   if(c.gold) grantItem(rollChest(true,pool),p);
 }
 const mysteryPrice=gold=>runPrice({rarity:gold?'rare':'common'});
-// An empty chest: if the run's coins cover it, pause and offer a random item (locked or not) for this run.
+// An empty chest pauses the game and offers a gamble: run coins for a random item (locked or not) for this run.
 function offerMystery(c){
   const p=c.g.position.clone(),cost=mysteryPrice(c.gold);
-  if(mode!=='playing'||coinsRun<cost){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0',tl('Carry {0} coins to buy a mystery item',cost)); return; }
+  if(mode!=='playing'){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0'); return; }
   openItemShop(c.gold?tl('Empty golden chest'):tl('Empty chest'),[{type:'mystery',cost,gold:c.gold,p}]);
 }
-function grantMystery(o){
-  const pool=chestPool().filter(powerUsable);
-  grantItem(rollChest(o.gold,pool),o.p);
-  if(o.gold) grantItem(rollChest(true,pool),o.p);
+// Slot-machine reveal on the offer card: names flicker past, slow down and land on what was won, then the shop closes.
+function spinMystery(o){
+  const pool=chestPool().filter(powerUsable),won=[rollChest(o.gold,pool)]; if(o.gold) won.push(rollChest(true,pool));
+  const card=$('offer'+R.offers.indexOf(o)),h=card.querySelector('h4'),sw=card.querySelector('.sw'),p=card.querySelector('p'),pr=card.querySelector('.price');
+  const css=u=>u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
+  R.spinning=true; card.classList.add('spinning'); p.textContent=''; pr.textContent=tl('Spinning…');
+  let n=0,delay=45;
+  const tick=()=>{
+    if(mode!=='shop'){ R.spinning=false; return; }
+    if(n++<22){ const u=pick(pool); h.textContent=u.name; sw.style.background=css(u); sfx.coin(); delay*=1.12; setTimeout(tick,delay); return; }
+    h.textContent=won.map(u=>u.name).join(' + '); sw.style.background=css(won[0]); p.textContent=won.map(u=>u.desc).join(' · ');
+    pr.textContent=tl('You won!'); card.classList.remove('spinning'); card.classList.add('won'); sfx.unlock();
+    setTimeout(()=>{ R.spinning=false; won.forEach(u=>grantItem(u,o.p)); closeShop(); },1100);
+  };
+  tick();
 }
 function grantItem(u,p){
   const css=u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
