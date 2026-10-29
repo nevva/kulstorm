@@ -223,7 +223,7 @@ const DMG_MILESTONES=[1000,2500,5000,10000,25000,50000,100000,250000];
 const msLevel=v=>{ let i=0; while(i<DMG_MILESTONES.length&&v>=DMG_MILESTONES[i]) i++; return i; };
 function restartAnim(el,cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
 function dmgMilestone(n,lv,x,y,z){
-  const el=n.el; el.style.fontSize=Math.min(44,(n.tier===4?27:15)+lv*5)+'px';
+  const el=n.el; el.style.fontSize=Math.min(44,(n.tier===4?27:12)+lv*5)+'px';
   restartAnim(el,lv>=3?'ms-hi':'ms'); n.life=n.max+0.4;
   sfx.milestone(lv+3); if(lv>=2) shake(0.15+0.05*lv);
 }
