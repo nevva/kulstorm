@@ -147,7 +147,7 @@ for(let i=0;i<40;i++){ const el=document.createElement('div'); el.className='dmg
 function pushDmg(x,y,z,text,css,big,force,sub,life){
   if(!OPT.numbers&&!force) return;
   const el=dmgPool.pop(); if(!el) return;
-  el.hidden=false; el.textContent=text; if(sub){ const s=document.createElement('small'); s.textContent=sub; el.appendChild(s); } el.style.color=css; el.style.opacity='1'; el.classList.toggle('big',!!big);
+  el.hidden=false; el.classList.remove('bump','ms','ms-hi'); el.style.fontSize=''; el.textContent=text; if(sub){ const s=document.createElement('small'); s.textContent=sub; el.appendChild(s); } el.style.color=css; el.style.opacity='1'; el.classList.toggle('big',!!big);
   life=life||0.75; dmgLive.push({el,x,y,z,life,max:life,vx:life>1?0:rand(-0.6,0.6)});
 }
 // A message that floats up from an enemy, like the hit numbers but readable for longer.

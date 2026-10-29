@@ -86,6 +86,8 @@ const sfx=(function(){
     unlock(){ if(!ok()) return; const t=T(); [0,0.05,0.1].forEach((d,i)=>mallet(t+d,v(1568+i*260,0.02),0.12,0.12,0.15)); nz(t+0.14,0.05,0.12,'highpass',5000,5000,0.7);
       thump(t+0.16,140,50,0.3,0.45,0.25); [523,659,784,1046,1318].forEach((f,i)=>{ mallet(t+0.16+i*0.06,f,0.7,0.15,0.35); ring(t+0.16+i*0.06,f*2,0.9,0.025,0.4); }); },
     upgrade(){ if(!ok()) return; const t=T(); thump(t,120,45,0.3,0.5,0.25); [523,659,784,1046].forEach((f,i)=>mallet(t+i*0.085,f,0.5,0.17,0.3)); },
+    // Damage milestone: a bright chime that climbs a step per milestone, with a soft thump under the bigger ones.
+    milestone(lv){ if(!ok()||!gate('ms',90)) return; const t=T(),f=523*Math.pow(2,Math.min(lv,10)*2/12); if(lv>=3) thump(t,130,50,0.18,0.3,0.15); mallet(t,f,0.35,0.13,0.3); mallet(t+0.06,f*1.5,0.4,0.1,0.35); ring(t+0.06,f*2,0.5,0.025,0.4); },
     combo(){ if(!ok()) return; const t=T(); thump(t,100,38,0.4,0.6,0.3); thump(t+0.18,100,38,0.3,0.45,0.3); [392,523,659,784,1046,1318].forEach((f,i)=>mallet(t+i*0.06,f,0.5,0.14,0.35)); },
     zone(){ if(!ok()) return; const t=T(); thump(t,92,44,0.45,0.42,0.3); nz(t,0.7,0.09,'lowpass',200,1300,0.8,0.3,0.45); },
     boss(){ if(!ok()) return; const t=T(); [0,0.28,0.5].forEach((d,i)=>thump(t+d,i===2?65:80,28,i===2?1.1:0.45,i===2?0.95:0.6,0.35)); nz(t+0.5,1.4,0.25,'lowpass',500,60,0.8,0.4,0.2); },

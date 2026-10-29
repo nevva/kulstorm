@@ -22,6 +22,13 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 #dmgs{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 .dmg{position:absolute;left:0;top:0;font-family:var(--font-display);font-size:15px;color:#fff;text-shadow:0 2px 0 var(--ink),0 0 6px rgba(0,0,0,.5);will-change:transform,opacity;white-space:nowrap;font-variant-numeric:tabular-nums}
 .dmg.big{font-size:27px}
+.dmg.bump{animation:dmgbump .16s ease-out}
+.dmg.ms{animation:dmgms .45s cubic-bezier(.2,1.6,.4,1)}
+.dmg.ms-hi{animation:dmgmshi .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes dmgbump{40%{scale:1.18}}
+@keyframes dmgms{0%{scale:1}30%{scale:1.7;filter:brightness(2);text-shadow:0 2px 0 var(--ink),0 0 18px #ffd21f}100%{scale:1}}
+@keyframes dmgmshi{0%{scale:1;rotate:0deg}20%{scale:2.2;rotate:-6deg;filter:brightness(2.4);text-shadow:0 2px 0 var(--ink),0 0 28px #ffd21f,0 0 50px #ff5cf3}45%{rotate:5deg}100%{scale:1;rotate:0deg}}
+@media (prefers-reduced-motion:reduce){.dmg.bump,.dmg.ms,.dmg.ms-hi{animation:none}}
 .dmg small{display:block;text-align:center;font-size:.5em;letter-spacing:.04em}
 
 /* HUD */
