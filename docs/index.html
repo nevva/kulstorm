@@ -6,7 +6,7 @@
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.29-2136">
+<link rel="stylesheet" href="css/style.css?v=2026.10.29-2140">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -85,13 +85,15 @@
       <div class="chip coin bank xpbank" id="outfitxp">0</div>
     </div>
     <h2 class="ph" id="outfit-title">Outfit</h2>
-    <canvas id="outfit-view" width="240" height="280"></canvas>
     <div class="seg" role="radiogroup">
       <button type="button" id="outfit-random" role="radio">Random look</button>
       <button type="button" id="outfit-custom" role="radio">My outfit</button>
     </div>
     <p class="sub" id="outfit-help">XP you earn in runs is also style XP. Spend it here on hats, shirts and trousers.</p>
-    <div id="outfit-rows"></div>
+    <div class="outfit-wrap">
+      <div id="outfit-rows"></div>
+      <canvas id="outfit-view" width="240" height="280"></canvas>
+    </div>
   </div>
 
   <div class="panel" id="menu-armory" hidden>
@@ -160,6 +162,7 @@
     <p class="sub" id="hp-info"></p>
     <div class="list" id="hp-talents"></div>
     <div class="btnrow">
+      <button class="btn small" id="hp-outfit" type="button">Outfit</button>
       <button class="btn small ghost" id="hp-reset" type="button">Refund all points</button>
       <button class="btn small ghost" id="close-heroprog" type="button">Back</button>
     </div>
@@ -255,8 +258,8 @@
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.29-2136"></script>
+<script src="js/version.js?v=2026.10.29-2140"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.29-2136"></script>
+<script src="js/main.js?v=2026.10.29-2140"></script>
 </body>
 </html>

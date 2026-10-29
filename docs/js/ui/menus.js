@@ -46,14 +46,14 @@ function renderShop(bought){
     else if(bank>=h.price){ b.textContent=tl('Buy')+' · '+fmt(h.price); b.addEventListener('click',()=>{ bank-=h.price; owned.push(h.id); heroId=h.id; saveBank(); sfx.init(); sfx.resume(); sfx.unlock(); renderShop(h.id); }); }
     else { b.textContent=tl('Costs {0} · {1} short',fmt(h.price),fmt(h.price-bank)); b.disabled=true; }
     card.appendChild(b);
-    if(own){ const ob=document.createElement('button'); ob.type='button'; ob.className='lead'; ob.textContent=tl('Outfit')+(heroOutfit(h.id)?' ✓':''); ob.addEventListener('click',()=>{ outfitHero=h.id; showMenu('outfit'); }); card.appendChild(ob); }
+    if(own){ const ob=document.createElement('button'); ob.type='button'; ob.className='lead'; ob.textContent=tl('Outfit')+(heroOutfit(h.id)?' ✓':''); ob.addEventListener('click',()=>{ outfitHero=h.id; outfitFrom='shop'; outfitTrial=null; showMenu('outfit'); }); card.appendChild(ob); }
     if(joins){ const l=document.createElement('button'); l.type='button'; l.className='lead'; l.textContent=tl('Make starting hero'); l.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); card.appendChild(l); }
     box.appendChild(card);
   });
 }
 // Outfit editor: pick a random look or build an outfit; locked hats and colours are bought on the spot with style XP.
 let outfitHero='rookie',outfitView=null,outfitRaf=0;
-function outfitPreview(){
+function outfitPreview(outfit){
   if(!outfitView){
     const r=new THREE.WebGLRenderer({canvas:$('outfit-view'),antialias:true,alpha:true}); r.outputEncoding=THREE.sRGBEncoding; r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
     const sc=new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xffffff,0x6b7a8a,0.9)); const l=new THREE.DirectionalLight(0xffffff,0.9); l.position.set(3,5,-6); sc.add(l);
@@ -62,7 +62,7 @@ function outfitPreview(){
   }
   const v=outfitView,h=heroById(outfitHero);
   if(v.g){ v.sc.remove(v.g); }
-  v.g=buildGubbe(Object.assign(leaderDef(h),{id:'hero_'+h.id,outfit:heroOutfit(h.id)})); v.g.userData.barFg.parent.visible=false; v.sc.add(v.g);
+  v.g=buildGubbe(Object.assign(leaderDef(h),{id:'hero_'+h.id,outfit})); v.g.userData.barFg.parent.visible=false; v.sc.add(v.g);
   if(!outfitRaf){ const t0=performance.now(),spin=now=>{ if(!v.g){ outfitRaf=0; return; } v.g.rotation.y=Math.sin((now-t0)/1400)*0.9; v.r.render(v.sc,v.cam); outfitRaf=requestAnimationFrame(spin); }; outfitRaf=requestAnimationFrame(spin); }
 }
 function outfitStop(){ if(outfitRaf) cancelAnimationFrame(outfitRaf); outfitRaf=0; if(outfitView&&outfitView.g){ outfitView.sc.remove(outfitView.g); outfitView.g=null; } }
@@ -70,28 +70,31 @@ function outfitBuy(item,price){
   if(WARD.xp<price){ sfx.init(); sfx.hurt(); $('outfit-help').textContent=tl('Not enough style XP: {0} more needed.',fmt(price-WARD.xp)); return false; }
   WARD.xp-=price; WARD.own.push(item); saveWardrobe(); sfx.init(); sfx.resume(); sfx.unlock(); return true;
 }
+// Each setting is a carousel showing one choice; stepping onto a locked piece tries it on in the preview, and Buy keeps it.
+let outfitTrial=null,outfitFrom='shop';
 function renderOutfit(){
   const h=heroById(outfitHero),cur=OUTFITS[h.id]||(OUTFITS[h.id]=Object.assign({custom:false},defaultOutfit(h))),custom=!!cur.custom;
+  if(!outfitTrial||outfitTrial.hero!==h.id) outfitTrial={hero:h.id,o:Object.assign({},cur)};
+  const t=outfitTrial.o;
   $('outfit-title').textContent=tl('{0}: outfit',h.name); $('outfit-help').textContent=tl('XP you earn in runs is also style XP. Spend it here on hats, shirts and trousers.'); $('outfitxp').textContent=tl('{0} style XP',fmt(WARD.xp));
   [['outfit-random',!custom],['outfit-custom',custom]].forEach(([id,on])=>{ const b=$(id); b.classList.toggle('on',on); b.setAttribute('aria-checked',String(on)); });
   $('outfit-random').onclick=()=>{ cur.custom=false; saveWardrobe(); renderOutfit(); };
-  $('outfit-custom').onclick=()=>{ cur.custom=true; saveWardrobe(); renderOutfit(); };
+  $('outfit-custom').onclick=()=>{ cur.custom=true; outfitTrial=null; saveWardrobe(); renderOutfit(); };
   const box=$('outfit-rows'); box.innerHTML=''; box.hidden=!custom;
-  const set=(k,v)=>{ cur[k]=v; saveWardrobe(); sfx.init(); sfx.pickup(); renderOutfit(); };
-  // One row of choices. opt: {v, label?, color?, item?, price?}
+  // opts: [{v, label?, color?, item?, price?}]
   const row=(title,key,opts)=>{
-    const r=document.createElement('div'); r.className='orow';
-    const t=document.createElement('h3'); t.className='sh'; t.textContent=tl(title); r.appendChild(t);
-    const w=document.createElement('div'); w.className='opts';
-    opts.forEach(o=>{
-      const b=document.createElement('button'); b.type='button'; b.className='opt'+(o.color!=null?' sw':'')+(cur[key]===o.v?' on':'');
-      const locked=o.item&&!outfitOwned(o.item,h);
-      if(o.color!=null){ b.style.background=hexCss(o.color); b.setAttribute('aria-label',tl(title)+' '+hexCss(o.color)); } else b.textContent=o.label;
-      if(locked){ b.classList.add('locked'); const pr=document.createElement('span'); pr.className='pr'; pr.textContent=fmt(o.price); b.appendChild(pr); }
-      b.addEventListener('click',()=>{ if(locked&&!outfitBuy(o.item,o.price)) return; set(key,o.v); });
-      w.appendChild(b);
-    });
-    r.appendChild(w); box.appendChild(r);
+    const i=Math.max(0,opts.findIndex(o=>o.v===t[key])),o=opts[i],locked=!!o.item&&!outfitOwned(o.item,h);
+    const r=document.createElement('div'); r.className='orow'+(locked?' locked':'');
+    const hd=document.createElement('h3'); hd.className='sh'; hd.textContent=tl(title); r.appendChild(hd);
+    const line=document.createElement('div'); line.className='car';
+    const step=d=>{ const n=opts[(i+d+opts.length)%opts.length]; t[key]=n.v; if(!n.item||outfitOwned(n.item,h)){ cur[key]=n.v; saveWardrobe(); } sfx.init(); sfx.duck(); renderOutfit(); };
+    const arrow=(d,txt)=>{ const b=document.createElement('button'); b.type='button'; b.className='arr'; b.textContent=txt; b.setAttribute('aria-label',tl(title)+' '+(d<0?tl('previous'):tl('next'))); b.addEventListener('click',()=>step(d)); return b; };
+    const val=document.createElement('div'); val.className='val';
+    if(o.color!=null){ const sw=document.createElement('span'); sw.className='swatch'; sw.style.background=hexCss(o.color); val.appendChild(sw); } else val.append(o.label);
+    const n=document.createElement('small'); n.textContent=(i+1)+'/'+opts.length; val.appendChild(n);
+    line.append(arrow(-1,'‹'),val,arrow(1,'›')); r.appendChild(line);
+    if(locked){ const b=document.createElement('button'); b.type='button'; b.className='buy'; b.textContent=tl('Buy · {0} XP',fmt(o.price)); b.addEventListener('click',()=>{ if(!outfitBuy(o.item,o.price)) return; cur[key]=o.v; saveWardrobe(); renderOutfit(); }); r.appendChild(b); }
+    box.appendChild(r);
   };
   if(custom){
     row('Body','fem',[{v:false,label:tl('Broad')},{v:true,label:tl('Slim')}]);
@@ -99,14 +102,15 @@ function renderOutfit(){
     row('Haircut','hair',[...new Set(HAIR_M.concat(HAIR_F))].map(s=>({v:s,label:tl(s)})));
     row('Hair colour','hairCol',HAIR_COL.map(c=>({v:c,color:c})));
     row('Hat','hat',[{v:null,label:tl('None')}].concat(HATS.map(id=>({v:id,label:tl(id),item:'hat:'+id,price:HAT_PRICE[id]}))));
-    if(cur.hat) row('Hat colour','hatCol',HAT_COL.map((c,i)=>({v:i,color:c})));
+    if(t.hat) row('Hat colour','hatCol',HAT_COL.map((c,i)=>({v:i,color:c})));
     row('Shirt','shirt',[h.shirt].concat(SHIRT_COL.filter(c=>c!==h.shirt)).map(c=>({v:c,color:c,item:'shirt:'+c,price:SHIRT_PRICE})));
     row('Trousers','pants',PANTS_COL.map(c=>({v:c,color:c,item:'pants:'+c,price:PANTS_PRICE})));
   }
-  outfitPreview();
+  outfitPreview(custom?t:null);
   if(mode==='menu') renderMain();
 }
-$('outfit-back').addEventListener('click',()=>showMenu('shop'));
+$('hp-outfit').addEventListener('click',()=>{ outfitHero=heroId; outfitFrom='heroprog'; outfitTrial=null; showMenu('outfit'); });
+$('outfit-back').addEventListener('click',()=>{ outfitTrial=null; showMenu(outfitFrom); });
 // Armory: every item chests and walls can give. Unlocking one adds it to what can drop.
 function armoryItems(){ return ABILITIES.filter(u=>abilityEnabled(u.id)).concat(POWERUPS,UPGRADES).filter(u=>(OPT.team||u.kind!=='team')&&(OPT.unicorns||u.kind!=='pet')&&powerOn(u)); }
 const lockedItems=()=>armoryItems().filter(u=>unlocked.indexOf(u.id)<0).sort((a,b)=>itemPrice(a)-itemPrice(b));
