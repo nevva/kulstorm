@@ -244,7 +244,11 @@ function renderOpts(boxId){
   });
 }
 // Language: the current one is the filled button; picking the other reloads the page in that language.
-['en','sv'].forEach(l=>{ const b=$('lang-'+l); b.classList.toggle('ghost',l!==LANG); b.setAttribute('aria-pressed',String(l===LANG)); b.addEventListener('click',()=>{ if(l!==LANG) setLang(l); }); });
+// Language: a flag in the corner of the main menu shows the current language; tapping it switches to the other one.
+const FLAGS={
+  sv:'<svg viewBox="0 0 16 10" preserveAspectRatio="xMidYMid slice"><rect width="16" height="10" fill="#006aa7"/><rect x="5" width="2" height="10" fill="#fecc00"/><rect y="4" width="16" height="2" fill="#fecc00"/></svg>',
+  en:'<svg viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice"><clipPath id="uk"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath><path d="M0,0v30h60v-30z" fill="#012169"/><path d="M0,0 60,30M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30M60,0 0,30" clip-path="url(#uk)" stroke="#c8102e" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#c8102e" stroke-width="6"/></svg>'};
+{ const b=$('langflag'),other=LANG==='sv'?'en':'sv'; b.innerHTML=FLAGS[LANG]; b.setAttribute('aria-label',LANG==='sv'?'Språk: svenska. Byt till English':'Language: English. Switch to svenska'); b.addEventListener('click',()=>setLang(other)); }
 $('open-shop').addEventListener('click',()=>showMenu('shop'));
 $('open-armory').addEventListener('click',()=>showMenu('armory'));
 $('close-armory').addEventListener('click',()=>showMenu('main'));
@@ -286,7 +290,7 @@ function renderTalents(box,redraw){
 }
 $('close-shop').addEventListener('click',()=>showMenu('main'));
 $('shop-back').addEventListener('click',()=>showMenu('main'));
-$('close-lab').addEventListener('click',()=>showMenu('main'));
+$('close-lab').addEventListener('click',()=>showMenu('opts'));
 $('close-opts').addEventListener('click',()=>showMenu('main'));
 $('lab-boss').addEventListener('click',()=>{ const extras=[]; for(const k in lab.counts) for(let i=0;i<lab.counts[k];i++) extras.push(k); startGame({hero:lab.hero,extras,perks:Object.keys(lab.perks).filter(k=>lab.perks[k]),dist:lab.dist,lab:true,off:Object.keys(lab.off).filter(k=>lab.off[k]),weather:lab.weather||null,tod:lab.tod?+lab.tod:null,bossNow:true,bossType:$('lab-bosstype').value||null}); });
 $('lab-clear').addEventListener('click',()=>{ lab.counts={}; lab.perks={}; renderLab(); });
