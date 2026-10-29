@@ -239,6 +239,7 @@ const SV={
   'The ground pound hurts every enemy near the front, knocks them back and pulls in the ones a little further away.':'Markstöten skadar alla fiender nära fronten, slår dem bakåt och drar in de som står lite längre bort.',
   'Walls':'Väggar',
   'Shoot it, or run into it':'Skjut den, eller spring in i den',
+  'Run into it':'Spring in i den',
   'Shoot the wall to pieces to get what\'s on it: a new squad member or a perk for the whole squad. Run straight into it and your front-runner headbutts it apart, but takes damage from the wall\'s remaining health.':'Skjut sönder väggen för att få det som står på den: en ny gubbe eller en vinst för hela truppen. Springer du rakt in i den skallar fronten sönder den, men tar skada av väggens kvarvarande hälsa.',
   'OVERDRIVE ready!':'OVERDRIVE redo!',
   'E · middle click · the button':'E · mittenklick · knappen',

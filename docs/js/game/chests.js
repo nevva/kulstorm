@@ -1,5 +1,5 @@
 'use strict';
-// ---------- chests: turn up on the road now and then; shoot one open or run into it for a random item.
+// ---------- chests: turn up on the road now and then; run into one for a random item. Shots and blasts pass them by.
 // The roll covers every item in the game (squad members, team perks, the unicorn and the power-ups in POWERUPS).
 // Only items unlocked in the Armory come out. Before Money Maker chests are empty, but run coins can buy a mystery item from them.
 // Golden chests drop after a boss when there is no boss reward wall to pick, and roll with boss odds.
@@ -29,14 +29,8 @@ function spawnChest(gold){
   }
   const lane=(gold||needsPaybackCoins())?1:ri(0,LANES-1),g=buildChest(gold);
   g.position.set(LANE_X[lane],0,VIEW.spawn); g.rotation.y=gold?0:rand(-0.25,0.25); scene.add(g);
-  const hp=(gold?60:22)*DIFF.hp*PF;
-  chests.push({g,lid:g.userData.lid,gold:!!gold,hp,maxHp:hp,openT:-1,sq:0,sparkT:0,dead:false});
+  chests.push({g,lid:g.userData.lid,gold:!!gold,openT:-1,sparkT:0,dead:false});
   if(gold){ toast(tl('Golden chest!')); sfx.combo(); }
-}
-function hitChest(c,dmg,x,y,z){
-  if(c.openT>=0) return;
-  c.hp-=dmg; c.sq=1; fxHit(x,y,z,GOLD);
-  if(c.hp<=0) openChest(c);
 }
 // Power-ups that need an option that is off (Overdrive, jumping and rolling) never drop and are hidden in the Armory.
 const powerOn=u=>(OPT.overdrive||(u.id!=='battery'&&u.id!=='divine'))&&(OPT.obstacles||(u.id!=='nade'&&u.id!=='slowmo'));
@@ -116,7 +110,6 @@ function updateChests(dt){
       if(c.openT>0.7){ const k=Math.max(0.01,1-(c.openT-0.7)*2.5); c.g.scale.setScalar(s0*k); }
       if(c.openT>1.1) c.dead=true;
     } else {
-      if(c.sq>0){ c.sq*=Math.exp(-dt*12); const k=1+0.1*c.sq; c.g.scale.set(s0*k,s0/k,s0*k); }
       c.lid.rotation.x=-0.08*Math.max(0,Math.sin(time*6+p.x));
       c.sparkT-=dt; if(c.sparkT<=0){ c.sparkT=c.gold?0.05:0.14; blobs.spawn(p.x+rand(-0.6,0.6),rand(0.4,1.2),p.z+rand(-0.4,0.4),0,rand(0.5,1.4),0,0.5,0.1,0.03,WHITE,GOLD,C(0xffb300),-1,1,false,0); }
       if(mode==='playing') for(const m of squad){ const q=m.g.position; if(Math.abs(q.x-p.x)<0.95&&Math.abs(q.z-p.z)<0.8){ openChest(c); break; } }

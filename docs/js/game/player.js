@@ -111,7 +111,6 @@ function laserMember(m,w,A,dt){
     m.beams.forEach(b=>{
       if(!b.visible) return; const bx=b.position.x;
       for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position; if(p.z<0.5&&Math.abs(p.x-bx)<e.r+0.15){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitEnemy(e,dv,crit,tier,m,true); fxDamage(bx,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(burn&&!e.dead){ e.burn=3; e.burnDps=base*4; e.burnOwner=m; e.burnSrc='c:burn'; } if(crit&&S.combos.has('chain')&&!e.dead) chainFrom(e,dv,m); } }
-      for(const c of chests){ const cp=c.g.position; if(c.openT<0&&cp.z<0.5&&Math.abs(cp.x-bx)<0.8) hitChest(c,base,bx,0.6,cp.z+0.45); }
       for(const wl of walls){ const wp=wl.g.position; if(!wl.dead&&wp.z<0.5&&Math.abs(wp.x-bx)<1.8){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitWall(wl,dv,bx,rand(0.5,1.9),wp.z+0.3,crit,tier); fxDamage(bx,rand(0.6,1.8),wp.z+0.3,tier); } }
     });
     sfx.laser();
@@ -180,7 +179,6 @@ function updateBullets(dt){
         }
       }
     }
-    if(!dead) for(const c of chests){ if(c.openT>=0) continue; const cp=c.g.position; if(Math.abs(cp.z-d.z)<0.55&&Math.abs(cp.x-d.x)<0.7+d.size*0.2){ if(d.rocket) explodeAt(d.x,d.y,d.z,d.aoe,d.dmg,d.base,false,d.owner,0); else { hitChest(c,d.dmg,d.x,d.y,cp.z+0.45); sfx.hit(); } dead=true; break; } }
     if(!dead){
       for(const e of enemies){
         if(e.dead||e.under) continue;

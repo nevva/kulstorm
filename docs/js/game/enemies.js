@@ -269,7 +269,6 @@ function explodeAt(x,y,z,radius,dmg,base,hurtPlayer,owner,depth){
   const napalm=S.combos.has('napalm');
   for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position,dx=p.x-x,dz=p.z-z,rr=radius+e.r; if(dx*dx+dz*dz<rr*rr){ const dv=dmg*varyDmg(0.8,1.2),tier=dmgTier(dv/base,false); hitEnemy(e,dv,false,tier,owner,true); fxDamage(p.x,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(napalm&&!e.dead){ e.burn=3; e.burnDps=Math.max(e.burnDps,dmg*0.15); e.burnOwner=owner; e.burnSrc='c:napalm'; } } }
   for(const wl of walls){ const wp=wl.g.position; if(!wl.dead&&Math.abs(wp.z-z)<radius+0.3&&Math.abs(wp.x-x)<radius+1.8) hitWall(wl,dmg,wp.x,1.15,wp.z+0.3,false,1); }
-  for(const c of chests){ const cp=c.g.position; if(c.openT<0&&Math.abs(cp.z-z)<radius+0.4&&Math.abs(cp.x-x)<radius+0.7) hitChest(c,dmg,cp.x,0.6,cp.z+0.4); }
   if(hurtPlayer) blastSquad(x,z,radius,20*DIFF.dmg);
   if(!depth&&S.combos.has('rain')){ for(let i=0;i<3;i++) delayed.push({t:0.35+i*0.12,x:clamp(x+rand(-2.5,2.5),-HALF,HALF),z:z+rand(-2.5,2.5),radius:radius*0.7,dmg:dmg*0.5,base,owner}); }
 }
