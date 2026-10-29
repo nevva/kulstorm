@@ -87,6 +87,8 @@ function renderBuy(){
     b.addEventListener('click',()=>{ R.sel=i; if(buyOffer(o)) closeShop(); });
     box.appendChild(b);
   });
+  // Chest and wall choices always end in a pick (the coins are free), so only the level-up shop can be skipped.
+  $('shop-done').hidden=$('shophelp').hidden=!!R.title;
   const rr=$('shop-reroll'); rr.hidden=!!R.title; rr.textContent=tl('New offers')+' · '+R.reroll; rr.disabled=coinsRun<R.reroll;
 }
 function buyOffer(o){
@@ -115,7 +117,7 @@ function openItemShop(title,offers){
   shopRelock=locked(); unlockMouse();
   mode='shop'; keys.l=keys.r=false; drag=null; R.title=title; R.offers=offers; R.sel=0;
   renderBuy(); shopEl.hidden=false; sfx.level();
-  $('shop-done').focus({preventScroll:true});
+  $('offer0').focus({preventScroll:true});
 }
 function closeShop(){
   if(mode!=='shop'||R.spinning) return;
