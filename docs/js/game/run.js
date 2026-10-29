@@ -88,7 +88,7 @@ function update(dt){
   if(mode==='playing'){ updatePlayer(dt); updateSquad(dt); updateFire(dt); updateDelayed(dt); }
   else if(mode==='menu'){ S.x=0; updateSquad(dt); }
   updateBullets(dt); updateEnemies(dt); updateEnemyBullets(dt); updateHearts(dt); updateCoins(dt); updateZaps(dt); updateWeather(dt); updateObstacles(dt); updateXp(dt); updateChests(dt); updateUnicorns(dt); updateBossFx(dt); if(mode==='playing') updateOD(dt); updatePound(dt);
-  blobs.update(dt,scroll); chunks.update(dt,scroll); updateShards(dt);
+  blobs.update(dt,scroll); chunks.update(dt,scroll); updateShards(dt); updateBlobShadows();
   updateCamera(dt); updateSky(dt); updateColors(dt);
   if(mode==='playing') updateHUD();
 }

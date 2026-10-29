@@ -177,3 +177,22 @@ function zapFx(x1,y1,z1,x2,y2,z2,life){
   for(let i=0;i<4;i++){ const p=zA.clone().lerp(zB,i/3); blobs.spawn(p.x,p.y,p.z,rand(-1,1),rand(1,2),rand(-1,1),0.2,0.25,0.05,WHITE,CYAN,CYAN,0,0,false,0); }
 }
 function updateZaps(dt){ for(const z of zaps){ if(z.t>0){ z.t-=dt; z.m.position.z+=scroll*dt; if(z.t<=0) z.m.visible=false; } } }
+// Blob shadows: a soft dark disc on the road under every gubbe, enemy and unicorn, shrinking as they leave the ground.
+// They show day and night and make jumps easy to read; the sun's real shadows still fall as before.
+const BLOB_SHADOW_N=220;
+const blobShadowTex=(function(){
+  const c=document.createElement('canvas'); c.width=c.height=64; const x=c.getContext('2d'),gr=x.createRadialGradient(32,32,0,32,32,32);
+  gr.addColorStop(0,'rgba(0,0,0,1)'); gr.addColorStop(0.55,'rgba(0,0,0,.7)'); gr.addColorStop(1,'rgba(0,0,0,0)');
+  x.fillStyle=gr; x.fillRect(0,0,64,64); return new THREE.CanvasTexture(c);
+})();
+const blobShadows=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({map:blobShadowTex,color:0x000000,transparent:true,opacity:0.42,depthWrite:false}),BLOB_SHADOW_N);
+blobShadows.frustumCulled=false; blobShadows.renderOrder=-1; scene.add(blobShadows);
+const blobM=new THREE.Matrix4(),blobS=new THREE.Vector3(),blobP=new THREE.Vector3(),blobQ=new THREE.Quaternion();
+function updateBlobShadows(){
+  let n=0;
+  const put=(x,z,r,h)=>{ if(n>=BLOB_SHADOW_N) return; const k=clamp(1-h*0.18,0.3,1),s=r*2*k; blobM.compose(blobP.set(x,0.04,z),blobQ,blobS.set(s,1,s*0.8)); blobShadows.setMatrixAt(n++,blobM); };
+  for(const m of squad){ if(m.dead||!m.g.visible) continue; const p=m.g.position; put(p.x,p.z,0.42*m.g.scale.x,m.jy||0); }
+  for(const e of enemies){ if(e.dead||e.under||!e.g.visible) continue; const p=e.g.position; put(p.x,p.z,e.r*(e.isBoss?0.9:1.05),p.y); }
+  for(const u of unicorns){ const p=u.g.position; put(p.x,p.z,0.7,Math.max(0,p.y)); }
+  blobShadows.count=n; blobShadows.instanceMatrix.needsUpdate=true;
+}
