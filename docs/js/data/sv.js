@@ -514,7 +514,7 @@ const SV={
   'Spinning…':'Snurrar…',
   'Coins':'Mynt',
   'Free':'Gratis',
-  'Take a random handful of coins. Gold Rush, the Banker and heat waves make it bigger.':'Ta en slumpad näve mynt. Guldregn, Bankiren och värmeböljor gör den större.',
+  'Take a random handful of coins. Gold Rush, the Banker and heat waves make it bigger.':'Ta en slumpad näve mynt. Guldregn, Bankiren och hetta gör den större.',
   'You won!':'Du vann!',
   'This run only.':'Bara den här rundan.',
   '{0} COINS · THIS RUN ONLY':'{0} MYNT · BARA DENNA RUNDA',
