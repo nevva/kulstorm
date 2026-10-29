@@ -203,7 +203,7 @@ function killEnemy(e,byPlayer){
     music.note(e.isBoss?'boss':e.type);
     kills++;
     addOD(e.isBoss?0.4:(e.maxHp>60*DIFF.hp*PF?0.03:0.012));
-    if(OPT.heroprog&&!labRun) runHeroXp+=(XP_VAL[e.isBoss?'boss':e.type]||1)*(DN.full&&DN.nightF>0.5?1.5:1);
+    if(!labRun) runHeroXp+=(XP_VAL[e.isBoss?'boss':e.type]||1)*(DN.full&&DN.nightF>0.5?1.5:1);
     const dropK=isW('heat')?1.5:1;
     if(OPT.hearts){ const chance=(e.type==='tank'||e.isBoss)?1:0.08*dropK; if(Math.random()<chance) spawnHeart(p.x,p.z,e.isBoss?40:e.type==='tank'?ri(15,30):ri(5,30)); }
     if(xpOn()){ const v=(XP_VAL[e.isBoss?'boss':e.type]||1)*(DN.full&&DN.nightF>0.5?1.5:1); if((e.type!=='swarm'&&e.type!=='bats')||Math.random()<0.5) spawnXp(p.x+rand(-0.5,0.5),p.z+rand(-0.5,0.5),v); }

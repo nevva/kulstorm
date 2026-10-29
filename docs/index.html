@@ -6,7 +6,7 @@
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.29-2121">
+<link rel="stylesheet" href="css/style.css?v=2026.10.29-2125">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -71,6 +71,21 @@
     <p class="sub">Coins you collect in runs are saved here. Buy a hero and pick them as your starting hero. Heroes you have bought join the starting group unless you leave them out.</p>
     <div class="heroes" id="heroes"></div>
     <button class="btn small ghost" id="close-shop" type="button">Back</button>
+  </div>
+
+  <div class="panel" id="menu-outfit" hidden>
+    <div class="armorybar">
+      <button class="btn small ghost" id="outfit-back" type="button">← Back</button>
+      <div class="chip coin bank xpbank" id="outfitxp">0</div>
+    </div>
+    <h2 class="ph" id="outfit-title">Outfit</h2>
+    <canvas id="outfit-view" width="240" height="280"></canvas>
+    <div class="seg" role="radiogroup">
+      <button type="button" id="outfit-random" role="radio">Random look</button>
+      <button type="button" id="outfit-custom" role="radio">My outfit</button>
+    </div>
+    <p class="sub" id="outfit-help">XP you earn in runs is also style XP. Spend it here on hats, shirts and trousers.</p>
+    <div id="outfit-rows"></div>
   </div>
 
   <div class="panel" id="menu-armory" hidden>
@@ -235,8 +250,8 @@
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.29-2121"></script>
+<script src="js/version.js?v=2026.10.29-2125"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.29-2121"></script>
+<script src="js/main.js?v=2026.10.29-2125"></script>
 </body>
 </html>

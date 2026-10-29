@@ -85,6 +85,13 @@ const HEROES=[
   {id:'mogul',name:'The Mogul',price:500,desc:'+50% coins and a Magnet Man from the start.',shirt:0xffd21f,hp:100,weapon:'pistol',coinMult:1.5,extras:['magnet']},
   {id:'legend',name:'The Legend',price:1200,desc:'Shotgun, 3 shield charges and +20% damage from the start.',shirt:0xb07cff,hp:110,weapon:'shotgun',shield:3,T:{dmg:1.2}},
 ];
+// Outfits: each hero either looks random every run or wears what the player picked in the outfit editor.
+// Body, skin, haircut and hair colour are free; hats, shirts and trousers are bought with style XP (all XP earned in real runs).
+const SKIN_COL=[0xffcc9c,0xf1b382,0xd08b5b,0xa0613a,0x6b3e26];
+const HAIR_COL=[0x3e2723,0x6d4c41,0xffeb3b,0x212121,0xd84315,0xfafafa,0x9e9e9e];
+const HAT_PRICE={cap:40,beanie:40,beret:60,bowler:80,hardhat:80,fedora:100,cowboy:120,party:120,tophat:160,viking:200};
+const SHIRT_COL=[0xff5c7a,0x546e7a,0x80deea,0x7cb342,0xffd21f,0xb07cff,0xff9800,0x00897b,0xfafafa,0x212121],SHIRT_PRICE=30;
+const PANTS_COL=[0x3949ab,0x212121,0x5d4037,0x2e7d32,0x9e9e9e,0xc62828,0xfafafa],PANTS_PRICE=20;
 // Hero progression: XP earned across runs gives levels; each level is one talent point.
 const TALENTS=[
   {id:'tough',name:'Tough',desc:'+8 max HP for you per point',max:10},

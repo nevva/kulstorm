@@ -12,7 +12,8 @@ function heroSpent(){ let n=0; for(const k in HERO.pts) n+=HERO.pts[k]||0; retur
 const heroFree=()=>HERO.lvl+(HERO.bought||0)-heroSpent();
 function saveHero(){ store('kulstorm_heroprog',HERO); }
 function commitHeroXp(){
-  if(labRun||!OPT.heroprog||runHeroXp<=0) return {gain:0,ups:0};
+  if(!labRun&&runHeroXp>0){ WARD.xp+=Math.round(runHeroXp); saveWardrobe(); }
+  if(labRun||!OPT.heroprog||runHeroXp<=0){ runHeroXp=0; return {gain:0,ups:0}; }
   const gain=Math.round(runHeroXp); HERO.xp+=gain; runHeroXp=0; let ups=0;
   while(HERO.xp>=heroNeed(HERO.lvl)){ HERO.xp-=heroNeed(HERO.lvl); HERO.lvl++; ups++; }
   saveHero(); return {gain,ups};
@@ -31,6 +32,13 @@ const memberBaseHealth=def=>Math.max(1,Math.round((def.hp||60)*STARTING_HEALTH_M
 const stackMax=()=>labRun||!OPT.coins?5:coinStackMax(runsDone);
 function saveBank(){ store('kulstorm_coins',Math.round(bank)); store('kulstorm_owned',owned); store('kulstorm_hero',heroId); store('kulstorm_bench',benched); store('kulstorm_unlocked',unlocked); store('kulstorm_runs',runsDone); }
 // End of a real run: bank its coins and count it (the first runs are played at an easier pace, see easeK).
+let WARD=load('kulstorm_wardrobe',{xp:0,own:[]}),OUTFITS=load('kulstorm_outfits',{});
+function saveWardrobe(){ store('kulstorm_wardrobe',WARD); store('kulstorm_outfits',OUTFITS); }
+const defaultOutfit=h=>({fem:false,skin:SKIN_COL[0],hair:'short',hairCol:HAIR_COL[0],hat:null,hatCol:0,shirt:h.shirt,pants:PANTS_COL[0]});
+// A hero's chosen outfit, or null for a random look.
+const heroOutfit=id=>{ const o=OUTFITS[id]; return o&&o.custom?o:null; };
+// Free pieces: the hero's own shirt colour, the first trousers and going without a hat.
+const outfitOwned=(item,h)=>item==='hat:'||item==='shirt:'+h.shirt||item==='pants:'+PANTS_COL[0]||WARD.own.indexOf(item)>=0;
 let VET=load('kulstorm_vet',{}),vetRun={},lastPromos=[];
 // The leader counts as their hero, so a hero earns medals whether leading or joining as a companion.
 const vetKey=m=>m.def.id==='leader'?'hero_'+((lastCfg&&lastCfg.hero)||heroId):m.def.id;
@@ -48,4 +56,4 @@ function awardVeterans(){
 }
 function bankRun(){ if(labRun) return; if(OPT.coins&&coinsRun>0) bank+=coinsRun; runsDone++; saveBank(); }
 const startCompanions=()=>HEROES.filter(h=>h.price>0&&h.id!==heroId&&owned.indexOf(h.id)>=0&&benched.indexOf(h.id)<0);
-function companionDef(h){ return {id:'hero_'+h.id,kind:'gubbe',name:h.name,short:h.name,desc:h.desc,weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt}; }
+function companionDef(h){ return {id:'hero_'+h.id,kind:'gubbe',name:h.name,short:h.name,desc:h.desc,weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt,outfit:heroOutfit(h.id)}; }

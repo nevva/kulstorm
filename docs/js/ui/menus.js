@@ -1,15 +1,15 @@
 'use strict';
 // ---------- menu, shop, lab, options
-const PANELS=['main','shop','armory','lab','opts','heroprog'];
+const PANELS=['main','shop','armory','lab','opts','heroprog','outfit'];
 let armoryAfterRun=false,boughtThisVisit=[];
 function showMenu(which,afterRun){
   armoryAfterRun=which==='armory'&&!!afterRun; boughtThisVisit=[];
   if(mode==='menu'){ menuSky=true; labRun=false; }
   PANELS.forEach(p=>{ $('menu-'+p).hidden=p!==which; });
   menuEl.hidden=false; menuEl.scrollTop=0;
-  if(which==='main') renderMain(); if(which==='shop') renderShop(); if(which==='armory') renderArmory(); if(which==='lab') renderLab(); if(which==='opts') renderOpts(); if(which==='heroprog') renderHeroProg();
+  if(which==='main') renderMain(); if(which==='shop') renderShop(); if(which==='armory') renderArmory(); if(which==='lab') renderLab(); if(which==='opts') renderOpts(); if(which==='heroprog') renderHeroProg(); if(which==='outfit') renderOutfit(); else outfitStop();
 }
-function leaderDef(h){ return {id:'leader',kind:'gubbe',name:tl('You'),short:tl('You'),weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt}; }
+function leaderDef(h){ return {id:'leader',kind:'gubbe',name:tl('You'),short:tl('You'),weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt,outfit:heroOutfit(h.id)}; }
 function renderMain(){
   $('menubest').textContent=best>0?tl('Best: {0} m',fmt(best)):tl('No record yet');
   $('menucoins').textContent=OPT.coins?tl('{0} coins in the bank',fmt(bank)):''; $('menucoins').hidden=!OPT.coins;
@@ -42,10 +42,67 @@ function renderShop(){
     else if(bank>=h.price){ b.textContent=tl('Buy')+' · '+fmt(h.price); b.addEventListener('click',()=>{ bank-=h.price; owned.push(h.id); heroId=h.id; saveBank(); sfx.init(); sfx.upgrade(); renderShop(); }); }
     else { b.textContent=tl('Costs {0} · {1} short',fmt(h.price),fmt(h.price-bank)); b.disabled=true; }
     card.appendChild(b);
+    if(own){ const ob=document.createElement('button'); ob.type='button'; ob.className='lead'; ob.textContent=tl('Outfit')+(heroOutfit(h.id)?' ✓':''); ob.addEventListener('click',()=>{ outfitHero=h.id; showMenu('outfit'); }); card.appendChild(ob); }
     if(joins){ const l=document.createElement('button'); l.type='button'; l.className='lead'; l.textContent=tl('Make starting hero'); l.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); card.appendChild(l); }
     box.appendChild(card);
   });
 }
+// Outfit editor: pick a random look or build an outfit; locked hats and colours are bought on the spot with style XP.
+let outfitHero='rookie',outfitView=null,outfitRaf=0;
+function outfitPreview(){
+  if(!outfitView){
+    const r=new THREE.WebGLRenderer({canvas:$('outfit-view'),antialias:true,alpha:true}); r.outputEncoding=THREE.sRGBEncoding; r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    const sc=new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xffffff,0x6b7a8a,0.9)); const l=new THREE.DirectionalLight(0xffffff,0.9); l.position.set(3,5,-6); sc.add(l);
+    const cam=new THREE.PerspectiveCamera(32,240/280,0.1,50); cam.position.set(0,1.35,-4.6); cam.lookAt(0,1.0,0);
+    outfitView={r,sc,cam,g:null};
+  }
+  const v=outfitView,h=heroById(outfitHero);
+  if(v.g){ v.sc.remove(v.g); }
+  v.g=buildGubbe(Object.assign(leaderDef(h),{id:'hero_'+h.id,outfit:heroOutfit(h.id)})); v.g.userData.barFg.parent.visible=false; v.sc.add(v.g);
+  if(!outfitRaf){ const t0=performance.now(),spin=now=>{ if(!v.g){ outfitRaf=0; return; } v.g.rotation.y=Math.sin((now-t0)/1400)*0.9; v.r.render(v.sc,v.cam); outfitRaf=requestAnimationFrame(spin); }; outfitRaf=requestAnimationFrame(spin); }
+}
+function outfitStop(){ if(outfitRaf) cancelAnimationFrame(outfitRaf); outfitRaf=0; if(outfitView&&outfitView.g){ outfitView.sc.remove(outfitView.g); outfitView.g=null; } }
+function outfitBuy(item,price){
+  if(WARD.xp<price){ sfx.init(); sfx.hurt(); $('outfit-help').textContent=tl('Not enough style XP: {0} more needed.',fmt(price-WARD.xp)); return false; }
+  WARD.xp-=price; WARD.own.push(item); saveWardrobe(); sfx.init(); sfx.resume(); sfx.unlock(); return true;
+}
+function renderOutfit(){
+  const h=heroById(outfitHero),cur=OUTFITS[h.id]||(OUTFITS[h.id]=Object.assign({custom:false},defaultOutfit(h))),custom=!!cur.custom;
+  $('outfit-title').textContent=tl('{0}: outfit',h.name); $('outfit-help').textContent=tl('XP you earn in runs is also style XP. Spend it here on hats, shirts and trousers.'); $('outfitxp').textContent=tl('{0} style XP',fmt(WARD.xp));
+  [['outfit-random',!custom],['outfit-custom',custom]].forEach(([id,on])=>{ const b=$(id); b.classList.toggle('on',on); b.setAttribute('aria-checked',String(on)); });
+  $('outfit-random').onclick=()=>{ cur.custom=false; saveWardrobe(); renderOutfit(); };
+  $('outfit-custom').onclick=()=>{ cur.custom=true; saveWardrobe(); renderOutfit(); };
+  const box=$('outfit-rows'); box.innerHTML=''; box.hidden=!custom;
+  const set=(k,v)=>{ cur[k]=v; saveWardrobe(); sfx.init(); sfx.pickup(); renderOutfit(); };
+  // One row of choices. opt: {v, label?, color?, item?, price?}
+  const row=(title,key,opts)=>{
+    const r=document.createElement('div'); r.className='orow';
+    const t=document.createElement('h3'); t.className='sh'; t.textContent=tl(title); r.appendChild(t);
+    const w=document.createElement('div'); w.className='opts';
+    opts.forEach(o=>{
+      const b=document.createElement('button'); b.type='button'; b.className='opt'+(o.color!=null?' sw':'')+(cur[key]===o.v?' on':'');
+      const locked=o.item&&!outfitOwned(o.item,h);
+      if(o.color!=null){ b.style.background=hexCss(o.color); b.setAttribute('aria-label',tl(title)+' '+hexCss(o.color)); } else b.textContent=o.label;
+      if(locked){ b.classList.add('locked'); const pr=document.createElement('span'); pr.className='pr'; pr.textContent=fmt(o.price); b.appendChild(pr); }
+      b.addEventListener('click',()=>{ if(locked&&!outfitBuy(o.item,o.price)) return; set(key,o.v); });
+      w.appendChild(b);
+    });
+    r.appendChild(w); box.appendChild(r);
+  };
+  if(custom){
+    row('Body','fem',[{v:false,label:tl('Broad')},{v:true,label:tl('Slim')}]);
+    row('Skin','skin',SKIN_COL.map(c=>({v:c,color:c})));
+    row('Haircut','hair',[...new Set(HAIR_M.concat(HAIR_F))].map(s=>({v:s,label:tl(s)})));
+    row('Hair colour','hairCol',HAIR_COL.map(c=>({v:c,color:c})));
+    row('Hat','hat',[{v:null,label:tl('None')}].concat(HATS.map(id=>({v:id,label:tl(id),item:'hat:'+id,price:HAT_PRICE[id]}))));
+    if(cur.hat) row('Hat colour','hatCol',HAT_COL.map((c,i)=>({v:i,color:c})));
+    row('Shirt','shirt',[h.shirt].concat(SHIRT_COL.filter(c=>c!==h.shirt)).map(c=>({v:c,color:c,item:'shirt:'+c,price:SHIRT_PRICE})));
+    row('Trousers','pants',PANTS_COL.map(c=>({v:c,color:c,item:'pants:'+c,price:PANTS_PRICE})));
+  }
+  outfitPreview();
+  if(mode==='menu') renderMain();
+}
+$('outfit-back').addEventListener('click',()=>showMenu('shop'));
 // Armory: every item chests and walls can give. Unlocking one adds it to what can drop.
 function armoryItems(){ return ABILITIES.filter(u=>abilityEnabled(u.id)).concat(POWERUPS,UPGRADES).filter(u=>(OPT.team||u.kind!=='team')&&(OPT.unicorns||u.kind!=='pet')&&powerOn(u)); }
 const lockedItems=()=>armoryItems().filter(u=>unlocked.indexOf(u.id)<0).sort((a,b)=>itemPrice(a)-itemPrice(b));
@@ -237,7 +294,7 @@ $('reset-tut').addEventListener('click',()=>{
   const b=$('reset-tut'); tutReset(); OPT.tutorial=true; saveOpts(); renderOpts(); b.textContent=tl('Tutorial will show again'); setTimeout(()=>{ b.textContent=tl('Show tutorial again'); },1500);
 });
 // Reset save: wipe all progress (coins, heroes, Armory unlocks, hero levels, record, seen tutorials) and reload as a new player. Settings, volume and language stay.
-const SAVE_KEYS=['kulstorm_vet','kulstorm_coins','kulstorm_owned','kulstorm_hero','kulstorm_bench','kulstorm_unlocked','kulstorm_runs','kulstorm_heroprog','kulstorm_best','kulstorm_tut'];
+const SAVE_KEYS=['kulstorm_wardrobe','kulstorm_outfits','kulstorm_vet','kulstorm_coins','kulstorm_owned','kulstorm_hero','kulstorm_bench','kulstorm_unlocked','kulstorm_runs','kulstorm_heroprog','kulstorm_best','kulstorm_tut'];
 $('reset-all').addEventListener('click',()=>{
   const b=$('reset-all');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to erase everything'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset save'); },3000); return; }
@@ -247,5 +304,5 @@ $('reset-all').addEventListener('click',()=>{
 $('reset-save').addEventListener('click',()=>{
   const b=$('reset-save');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to reset'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset coins and purchases'); },3000); return; }
-  VET={}; bank=0; owned=['rookie']; heroId='rookie'; benched=[]; unlocked=STARTER_ITEMS.slice(); runsDone=0; saveBank(); b.dataset.arm=''; b.textContent=tl('Reset done'); setTimeout(()=>{ b.textContent=tl('Reset coins and purchases'); },1500);
+  VET={}; WARD={xp:0,own:[]}; OUTFITS={}; bank=0; owned=['rookie']; heroId='rookie'; benched=[]; unlocked=STARTER_ITEMS.slice(); runsDone=0; saveBank(); b.dataset.arm=''; b.textContent=tl('Reset done'); setTimeout(()=>{ b.textContent=tl('Reset coins and purchases'); },1500);
 });
