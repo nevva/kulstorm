@@ -8,7 +8,7 @@ function upgradeFits(u){
   return !(u.unique&&hasPart(u.id))&&!(u.max&&S.perks.filter(q=>q.id===u.id).length>=u.max)&&!(squad.length>=MAX_SQUAD&&u.kind==='gubbe')&&!(!OPT.team&&u.kind==='team')&&!(u.kind==='pet'&&(!OPT.unicorns||unicorns.length>=2));
 }
 const rarityW=(u,boss)=>boss?(u.rarity==='common'?10:u.rarity==='rare'?35:55):(u.rarity==='common'?60:u.rarity==='rare'?30:11);
-// Walls offer any upgrade, unlocked ones more often. A locked one costs run coins (see wallCost) and lasts this run.
+// Walls offer any upgrade, unlocked ones more often. Breaking an unlocked one gives it for free; a locked one offers a gamble for it.
 function rollUpgrades(n,boss){
   const pool=UPGRADES.filter(upgradeFits);
   const picks=[];
@@ -27,15 +27,14 @@ function wrapText(x,text,maxW){
   if(line) lines.push(line);
   return lines;
 }
-const wallCost=u=>isUnlocked(u.id)?0:runPrice(u);
-function signTexture(u,boss,cost){
+function signTexture(u,boss,locked){
   const c=document.createElement('canvas'); c.width=512; c.height=384; const x=c.getContext('2d');
   x.fillStyle='#fff8e6'; x.fillRect(0,0,512,384);
   x.fillStyle=boss?'#ffc83d':WALL_CSS[u.rarity]; x.fillRect(0,0,512,72);
   if(boss){ x.strokeStyle='#ffc83d'; x.lineWidth=14; x.strokeRect(7,7,498,370); }
   x.textAlign='center'; x.textBaseline='middle';
   x.fillStyle='#0d1030'; x.font='800 30px Nunito, sans-serif';
-  if(cost) x.fillText(tl('{0} COINS · THIS RUN ONLY',cost),256,38); else x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
+  if(locked) x.fillText(tl('LOCKED · GAMBLE FOR IT'),256,38); else x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
   let fs=54; x.font=fs+'px Bungee, Impact, sans-serif';
   while(x.measureText(u.name).width>470&&fs>28){ fs-=4; x.font=fs+'px Bungee, Impact, sans-serif'; }
   x.fillStyle=u.kind==='gubbe'?hexCss(u.shirt):'#0d1030';
@@ -46,14 +45,14 @@ function signTexture(u,boss,cost){
   const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=4; return t;
 }
 const wallGoldMat=mat(0xffc83d,{r:0.2,m:0.6,e:0.35});
-function buildWall(u,boss,cost){
+function buildWall(u,boss,locked){
   const g=new THREE.Group(),post=boss?wallGoldMat:wallPostMat;
   const m=new THREE.MeshStandardMaterial({color:C(WALL_COL[u.rarity]),roughness:0.28,flatShading:true,emissive:new THREE.Color(0),emissiveIntensity:1});
   g.add(M(G.box,m,[3.6,2.3,0.5],[0,1.15,0]));
   [-1,1].forEach(s=>g.add(M(G.box,post,[0.22,2.65,0.62],[s*1.8,1.32,0])));
   g.add(M(G.box,post,[3.82,0.22,0.62],[0,2.54,0]));
   if(boss) [-1,1].forEach(s=>g.add(M(G.ico0,wallGoldMat,[0.3,0.3,0.3],[s*1.8,2.85,0],false)));
-  const tex=signTexture(u,boss,cost),sm=new THREE.MeshBasicMaterial({map:tex});
+  const tex=signTexture(u,boss,locked),sm=new THREE.MeshBasicMaterial({map:tex});
   const sign=new THREE.Mesh(G.plane,sm); sign.scale.set(2.8,2.1,1); sign.position.set(0,1.15,0.26); g.add(sign);
   g.add(M(G.box,wallBarBg,[3.2,0.16,0.16],[0,2.92,0],false));
   const bar=M(G.box,wallBarFg,[3.2,0.12,0.2],[0,2.92,0],false); g.add(bar);
@@ -66,8 +65,8 @@ function spawnWalls(lanes,boss){
   const hp=60*DIFF.hp*PF*(isW('heat')?1.3:1)*(boss?0.5:1),gid=boss?++wallGroupId:0;
   picks.forEach((u,i)=>{
     const lane=lanes[i];
-    const cost=wallCost(u),g=buildWall(u,boss,cost); g.position.set(LANE_X[lane],0,VIEW.spawn); scene.add(g);
-    walls.push({u,cost,g,lane,hp,maxHp:hp,dead:false,flash:0,sq:0,colL:g.userData.m.color,accDmg:0,accTier:0,accT:-1,boss:!!boss,gid});
+    const locked=!isUnlocked(u.id),g=buildWall(u,boss,locked); g.position.set(LANE_X[lane],0,VIEW.spawn); scene.add(g);
+    walls.push({u,locked,g,lane,hp,maxHp:hp,dead:false,flash:0,sq:0,colL:g.userData.m.color,accDmg:0,accTier:0,accT:-1,boss:!!boss,gid});
   });
   if(boss){ toast(tl('Boss reward! Pick one')); sfx.combo(); }
   else { toast(picks.length>1?tl('Upgrades!'):tl('Upgrade!')); sfx.zone(); }
@@ -97,9 +96,9 @@ function breakWall(w){
   removeWall(w);
   if(w.gid) for(const o of walls){ if(o!==w&&!o.dead&&o.gid===w.gid){ o.dead=true; fxShatter(o.g.position.x,o.g.position.z,wallPieceMat(o),o.boss?wallGoldMat:wallPostMat,0.7); removeWall(o); } }
   if(OPT.coins) spawnCoin(p.x+rand(-0.5,0.5),p.z,Math.min(3,stackMax()));
-  // A locked wall pauses like an empty chest: buy its item, gamble on a mystery item, or take free coins.
-  if(w.cost){
-    if(mode==='playing') openItemShop(w.u.name,[{type:'item',u:w.u,cost:w.cost},{type:'mystery',cost:MYSTERY_PRICE*(w.boss?2:1),gold:w.boss,p:p.clone()},{type:'coins',cost:0,gold:w.boss,p:p.clone()}]);
+  // A locked wall pauses like an empty chest: gamble for a chance at its perk, or take free coins.
+  if(w.locked){
+    if(mode==='playing') openItemShop(w.u.name,[{type:'mystery',cost:MYSTERY_PRICE*(w.boss?2:1),gold:w.boss,target:w.u,p:p.clone()},{type:'coins',cost:0,gold:w.boss,p:p.clone()}]);
     return;
   }
   if(w.u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }

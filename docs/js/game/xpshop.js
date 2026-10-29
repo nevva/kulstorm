@@ -67,6 +67,7 @@ function offerInfo(o){
   if(o.type==='heal') return {col:'#ff5c7a',title:tl('Full Heal'),desc:tl('Heals the whole squad to full health.')};
   if(o.type==='item') return {col:o.u.kind==='gubbe'?hexCss(o.u.shirt):WALL_CSS[o.u.rarity],title:o.u.name,desc:o.u.desc+' · '+tl('This run only.')};
   if(o.type==='coins') return {col:'#ffc83d',title:tl('Coins'),desc:tl('Take a random handful of coins. Gold Rush, the Banker and heat waves make it bigger.')};
+  if(o.type==='mystery'&&o.target) return {col:WALL_CSS[o.target.rarity],title:tl('Gamble'),desc:tl('{0}% chance to win {1}, otherwise a random item. This run only.',Math.round(WALL_GAMBLE_WIN*100),o.target.name)+(o.gold?' '+tl('Plus one more random item.'):'')};
   if(o.type==='mystery') return {col:'#ffc83d',title:tl('Mystery item'),desc:o.gold?tl('Gamble for two random items, for this run only.'):tl('Gamble for a random item, for this run only.')};
   return {col:'#ffc83d',title:tl('The Banker'),desc:tl('New squad member: damage rises 1% per coin you carry, up to ×4.')};
 }

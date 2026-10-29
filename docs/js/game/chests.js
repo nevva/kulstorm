@@ -72,7 +72,7 @@ function openChest(c){
   grantItem(reward,p);
   if(c.gold) grantItem(rollChest(true,pool),p);
 }
-const MYSTERY_PRICE=10;
+const MYSTERY_PRICE=10,WALL_GAMBLE_WIN=0.5;
 // Free coins from an empty chest follow the same boosts as enemy drops: Gold Rush, the Banker and the heat wave.
 function chestCoinRoll(gold){
   const k=(S.combos.has('goldrush')?2:1)*(hasPart('banker')?1.5:1)*(isW('heat')?1.5:1)*(gold?3:1);
@@ -91,7 +91,10 @@ function collectCoins(n){
 }
 // Slot-machine reveal on the offer card: names flicker past, slow down and land on what was won, then the shop closes.
 function spinMystery(o){
-  const coins=o.type==='coins',n=coins?chestCoinRoll(o.gold):0,pool=chestPool().filter(powerUsable),won=coins?[]:[rollChest(o.gold,pool)]; if(o.gold&&!coins) won.push(rollChest(true,pool));
+  const coins=o.type==='coins',n=coins?chestCoinRoll(o.gold):0,pool=chestPool().filter(powerUsable),won=[];
+  // A wall gamble lands on the wall's perk half the time, otherwise on something else.
+  if(!coins) won.push(o.target?(Math.random()<WALL_GAMBLE_WIN?o.target:rollChest(o.gold,pool.filter(u=>u!==o.target))):rollChest(o.gold,pool));
+  if(o.gold&&!coins) won.push(rollChest(true,pool));
   const coinText=v=>tl('{0} coins',v);
   const card=$('offer'+R.offers.indexOf(o)),h=card.querySelector('h4'),sw=card.querySelector('.sw'),p=card.querySelector('p'),pr=card.querySelector('.price');
   const css=u=>u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
