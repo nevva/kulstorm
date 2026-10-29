@@ -8,14 +8,14 @@ function doJump(m){
 }
 function squadWave(kind){
   if(mode!=='playing'||!OPT.obstacles||!squad.length) return;
-  const hz=headMember().g.position.z,sp=Math.max(4,scroll);
+  const hz=headMember().g.position.z,sp=Math.max(4,scroll),lead=tutLead(kind);
   for(const m of squad){
-    const d=Math.max(0,m.g.position.z-hz)/sp;
+    const d=lead+Math.max(0,m.g.position.z-hz)/sp;
     if(kind==='jump'){ m.jumpDelay=d; m.duckDelay=-1; }
     else { m.duckDelay=d; m.jumpDelay=-1; }
   }
   if(kind==='jump'){ if((headMember().jy||0)>0.05&&hasAbility('dbljump')) sfx.jump2(); else sfx.jump(); if(S.pwNade>0) throwNade(); } else sfx.duck();
-  tutAct(kind);
+  tutAct(kind,lead);
 }
 const squadJump=()=>squadWave('jump'),squadDuck=()=>squadWave('duck');
 // Ground pound: ducking in the air does a quick somersault, hanging for POUND_SPIN s, then slams the gubbe down. When the front gubbe lands, a shockwave hits enemies within
