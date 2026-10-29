@@ -32,7 +32,7 @@ function renderShop(bought){
     const sw=document.createElement('div'); sw.className='sw'; sw.style.background=hexCss(h.shirt); card.appendChild(sw);
     const t=document.createElement('h4'); t.textContent=h.name; card.appendChild(t);
     const p=document.createElement('p'); p.textContent=h.desc+' · '+tl('Base health: {0} HP',memberBaseHealth(leaderDef(h))); card.appendChild(p);
-    const r=vetRank('hero_'+h.id),v=document.createElement('span'); v.className='rar vet'; v.textContent='★'.repeat(r)+'☆'.repeat(MEDALS.length-r)+(r?' · '+tl(MEDALS[r-1].name):''); card.appendChild(v);
+    const v=document.createElement('span'); v.className='rar vet'; v.textContent=vetLine('hero_'+h.id); card.appendChild(v);
     const b=document.createElement('button'); b.type='button';
     const joins=own&&!sel&&h.price>0;
     if(sel){ b.textContent=tl('Selected'); b.disabled=true; }
@@ -132,7 +132,7 @@ function armoryCard(u,bought,rerender){
   const t=document.createElement('h4'); t.textContent=u.name; card.appendChild(t);
   const r=document.createElement('span'); r.className='rar'; r.textContent=(u.id==='payback'&&!own?tl('First upgrade')+' · ':'')+RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
   const p=document.createElement('p'); p.textContent=u.desc+(u.kind==='gubbe'?' · '+tl('Base health: {0} HP',memberBaseHealth(u)):''); card.appendChild(p);
-  if(u.kind==='gubbe'){ const r=vetRank(u.id),v=document.createElement('span'); v.className='rar vet'; v.textContent='★'.repeat(r)+'☆'.repeat(MEDALS.length-r)+(r?' · '+tl(MEDALS[r-1].name):''); card.appendChild(v); }
+  if(u.kind==='gubbe'){ const v=document.createElement('span'); v.className='rar vet'; v.textContent=vetLine(u.id); card.appendChild(v); }
   const b=document.createElement('button'); b.type='button';
   if(own){ b.textContent='✓ '+tl(u.kind==='ability'?'Unlocked':'In the chests'); b.disabled=true; }
   else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); boughtThisVisit.push(u.id); saveBank(); sfx.init(); sfx.resume(); sfx.unlock(); (rerender||renderArmory)(u.id); }); }

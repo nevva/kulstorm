@@ -50,13 +50,14 @@ const RARITY={common:'Common',rare:'Rare',epic:'Epic'};
 const MAX_SQUAD=9;
 // Veteran medals: a squad member type earns them by time spent in the squad over real runs (VET_NEED, cumulative seconds).
 // Each medal adds its own boost for every member of that type, in every run.
-const VET_NEED=[60,180,360,600,900];
+// The steps grow steeply (3 min, 10 min, 25 min, 1 h, 2 h in total) so the last two medals are rare and worth a ceremony of their own.
+const VET_NEED=[180,600,1500,3600,7200];
 const MEDALS=[
   {name:'Bronze Star',color:'#cd7f32',desc:'+10% max HP',hp:1.1},
   {name:'Silver Star',color:'#c9d1db',desc:'+10% damage',dmg:1.1},
   {name:'Gold Star',color:'#ffd21f',desc:'+15% fire rate',rate:1.15},
-  {name:'Valor Cross',color:'#ff5c7a',desc:'+15% max HP',hp:1.15},
-  {name:'Legend Medal',color:'#b18cff',desc:'+20% damage',dmg:1.2},
+  {name:'Valor Cross',color:'#ff5c7a',desc:'+20% max HP and a shield charge at the start of every run',hp:1.2,shield:1,epic:true},
+  {name:'Legend Medal',color:'#b18cff',desc:'+25% damage and a golden glow',dmg:1.25,glow:true,epic:true},
 ];
 // Combos: when both parts are in the squad (or among the team perks), the effect is on. Lose a part and it is gone.
 const COMBOS=[

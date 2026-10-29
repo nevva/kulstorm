@@ -155,6 +155,7 @@ function rollForm(m){
   const r=()=>Math.round(rand(0.85,1.15)*100)/100;
   m.form={hp:r(),dmg:r(),rate:r()};
   m.maxHp=Math.round(m.maxHp*m.form.hp*vetBoost(m,'hp')); m.hp=m.maxHp;
+  const vr=vetRank(vetKey(m)); if(vr>=4) m.charges+=MEDALS[3].shield; m.legend=vr>=5;
 }
 const formRate=m=>(m.form?m.form.rate:1)*vetBoost(m,'rate');
 function formText(m){ if(!m.form) return ''; const f=k=>(k>=1?'+':'−')+Math.round(Math.abs(k-1)*100)+PCT; return 'HP '+f(m.form.hp)+' · '+tl('Damage')+' '+f(m.form.dmg)+' · '+tl('Fire rate')+' '+f(m.form.rate); }

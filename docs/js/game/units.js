@@ -43,6 +43,11 @@ let VET=load('kulstorm_vet',{}),vetRun={},lastPromos=[];
 // The leader counts as their hero, so a hero earns medals whether leading or joining as a companion.
 const vetKey=m=>m.def.id==='leader'?'hero_'+((lastCfg&&lastCfg.hero)||heroId):m.def.id;
 const vetRank=key=>(VET[key]&&VET[key].rank)||0;
+// "★★☆☆☆ · Silver Star · next 4/10 min" for cards.
+function vetLine(key){
+  const r=vetRank(key),t=(VET[key]&&VET[key].t)||0,min=s=>Math.floor(s/60);
+  return '★'.repeat(r)+'☆'.repeat(MEDALS.length-r)+(r?' · '+tl(MEDALS[r-1].name):'')+(r<MEDALS.length?' · '+tl('next {0}/{1} min',min(t),min(VET_NEED[r])):'');
+}
 function vetBoost(m,stat){ let k=1; const r=vetRank(vetKey(m)); for(let i=0;i<r;i++) k*=MEDALS[i][stat]||1; return k; }
 function trackVeterans(dt){ for(const m of squad) if(!m.dead){ const k=vetKey(m); vetRun[k]=(vetRun[k]||{t:0,name:m.def.id==='leader'?heroById((lastCfg&&lastCfg.hero)||heroId).name:m.def.name}); vetRun[k].t+=dt; } }
 // End of a real run: add this run's squad time and collect the medals earned.

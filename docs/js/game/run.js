@@ -42,7 +42,7 @@ function startGame(cfg){
   const hero=heroById(cfg.hero);
   S.T.rate=STARTING_FIRE_RATE_MULTIPLIER*(hasAbility('payback')?2:1);
   S.T.speed=hero.speed||1; S.T.coinMult=hero.coinMult||1; if(hero.T) for(const k in hero.T) S.T[k]*=hero.T[k];
-  const L=addMember(leaderDef(hero)); L.charges=hero.shield||0;
+  const L=addMember(leaderDef(hero)); L.charges+=hero.shield||0;
   runHeroXp=0; lastHeroGain={gain:0,ups:0};
   if(OPT.heroprog){
     const P=id=>HERO.pts[id]||0;
@@ -53,7 +53,7 @@ function startGame(cfg){
     for(let i=0;i<extra;i++){ const pool=UPGRADES.filter(u=>u.kind==='gubbe'&&!(u.unique&&hasPart(u.id))); if(squad.length<MAX_SQUAD) addMember(pick(pool)); }
   }
   if(!labRun){
-    startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD){ const m=addMember(companionDef(h)); m.charges=h.shield||0; } });
+    startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD){ const m=addMember(companionDef(h)); m.charges+=h.shield||0; } });
     squad.forEach(rollForm); toast(tl('Daily form')+': '+formText(L));
   }
   (hero.extras||[]).concat(cfg.extras||[]).forEach(id=>{ const d=defById(id); if(d&&squad.length<MAX_SQUAD) addMember(d); });
