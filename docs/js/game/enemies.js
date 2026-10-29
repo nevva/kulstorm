@@ -377,7 +377,8 @@ function updateEnemies(dt){
       if(e.type==='charger'&&e.state===2){
         e.state=3; let tg=null,bd2=1e9;
         if(playing) for(const m of squad){ const mp=m.g.position; if(laneOf(mp.x)!==e.lane) continue; const d2=(mp.x-p.x)**2+(mp.z-p.z)**2; if(d2<bd2){ bd2=d2; tg=m; } }
-        if(tg){ hurtMember(tg,e.dmg*DIFF.dmg,true); tg.hurtT=0.7; shake(0.9); sfx.smack(); pushDmg(tg.g.position.x,2.8,tg.g.position.z,'RAM!','#ff5c7a',true,true); }
+        if(tg&&tryParry(tg)) e.stun=0.8;
+        else if(tg){ hurtMember(tg,e.dmg*DIFF.dmg,true); tg.hurtT=0.7; shake(0.9); sfx.smack(); pushDmg(tg.g.position.x,2.8,tg.g.position.z,'RAM!','#ff5c7a',true,true); }
         e.atkCd=1.4;
       }
       // At the wall they shuffle sideways toward the squad, crossing lanes, and hit anyone within reach.
@@ -388,7 +389,7 @@ function updateEnemies(dt){
       if(playing) for(const m of squad){ const mp=m.g.position; if(laneOf(mp.x)!==e.lane&&Math.abs(mp.x-p.x)>reach) continue; const dx=mp.x-p.x,dz=mp.z-p.z,d2=dx*dx+dz*dz; if(d2<bd){ bd=d2; target=m; } }
       if(target&&!(e.stun>0)){
         e.atkCd-=dt;
-        if(e.atkCd<=0){ e.atkCd=(e.type==='tank'||e.type==='charger')?1.2:0.8; e.lunge=1; hurtMember(target,e.dmg*0.5*DIFF.dmg); fxSpark(target.g.position.x+rand(-0.3,0.3),1,target.g.position.z-0.2,e.colorL); }
+        if(e.atkCd<=0){ e.atkCd=(e.type==='tank'||e.type==='charger')?1.2:0.8; e.lunge=1; if(tryParry(target)) e.stun=0.6; else hurtMember(target,e.dmg*0.5*DIFF.dmg); fxSpark(target.g.position.x+rand(-0.3,0.3),1,target.g.position.z-0.2,e.colorL); }
       } else e.atkCd=Math.min(e.atkCd,0.3);
     }
     else if(e.g.rotation.z) e.g.rotation.z*=Math.exp(-dt*6);

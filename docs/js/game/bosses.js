@@ -126,7 +126,7 @@ function clearBossFx(){ bossWarns.forEach(w=>{ scene.remove(w.m); w.m.material.d
 // Hurt every gubbe standing in the lane.
 function laneHit(lane,dmg,label,col){
   let hit=false;
-  for(const m of squad.slice()){ const p=m.g.position; if(laneOf(p.x)!==lane) continue; if(!hit){ hit=true; pushDmg(p.x,2.8,p.z,label,'#ff5c7a',true,true); } hurtMember(m,dmg*DIFF.dmg,true); }
+  for(const m of squad.slice()){ const p=m.g.position; if(laneOf(p.x)!==lane) continue; if(tryParry(m)) continue; if(!hit){ hit=true; pushDmg(p.x,2.8,p.z,label,'#ff5c7a',true,true); } hurtMember(m,dmg*DIFF.dmg,true); }
   for(let i=0;i<14;i++) chunks.spawn(LANE_X[lane]+rand(-1.6,1.6),0.2,rand(-6,2),rand(-1,1),rand(3,7),rand(-1,1),rand(0.6,1.1),0.25,0.1,col,col,SMOKE,16,0.5,true,rand(4,10));
   shake(hit?0.8:0.4); sfx.smack();
 }

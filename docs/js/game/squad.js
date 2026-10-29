@@ -215,6 +215,16 @@ function ensureBeams(m,n){
 const shieldRing=M(G.ring,mat(0xffd21f,{e:0.6,r:0.3}),[1,1,1],[0,0.9,0],false); shieldRing.rotation.x=Math.PI/2; shieldRing.visible=false; scene.add(shieldRing);
 const frontMarker=M(G.cone,mat(0xffd21f,{e:0.7,r:0.3}),[0.22,0.4,0.22],[0,2.9,0],false); frontMarker.rotation.x=Math.PI; frontMarker.visible=false; scene.add(frontMarker);
 function totalShield(){ let n=0; for(const m of squad) n+=m.charges; return n; }
+// Parry: the start of a ground roll blocks an enemy hit, and the squad hits harder for a moment after.
+const PARRY_WIN=0.25,PARRY_T=1.5,PARRY_K=2;
+const parryK=()=>S.parryT>0?PARRY_K:1;
+function tryParry(m){
+  if(mode!=='playing'||m.dead||!(m.duckT>DUCK_T-PARRY_WIN)||(m.jy||0)>0.05) return false;
+  const p=m.g.position,fresh=!(S.parryT>PARRY_T-0.15);
+  S.parryT=PARRY_T; m.invuln=Math.max(m.invuln,0.2); fxShield(p.x,0.9,p.z);
+  if(fresh){ fxSparkle(p.x,1.2,p.z,C(0xffe066)); pushDmg(p.x,2.8,p.z,tl('PARRY!'),'#ffe066',true,true,tl('Strike back now')); sfx.crit(); shake(0.3); addOD(0.04); }
+  return true;
+}
 function hurtMember(m,d,force){
   if(mode!=='playing'||m.dead) return;
   if(S.odT>0){ if(Math.random()<0.4){ const p=m.g.position; fxSparkle(p.x,1.2,p.z,C(0xffe066)); } return; }
