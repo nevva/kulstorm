@@ -3,7 +3,7 @@
 function shake(a){ if(OPT.shake) shakeAmt=Math.min(1.5,shakeAmt+a); }
 function flash(){ flashEl.classList.add('on'); setTimeout(()=>flashEl.classList.remove('on'),60); }
 let toastT=null;
-function toast(txt,isBoss){ toastEl.textContent=txt; toastEl.classList.toggle('boss',!!isBoss); toastEl.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>toastEl.classList.remove('show'),1800); }
+function toast(txt,isBoss){ toastEl.textContent=txt; toastEl.classList.toggle('boss',!!isBoss); toastEl.classList.remove('show'); void toastEl.offsetWidth; toastEl.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>toastEl.classList.remove('show'),isBoss?2000:1000); }
 let hintT=null;
 function showHint(txt){ hintEl.textContent=txt; hintEl.classList.add('show'); clearTimeout(hintT); hintT=setTimeout(()=>hintEl.classList.remove('show'),3800); }
 let hudDist=-1,hudHp=-1,hudShield=-1,hudCoins=-1;
