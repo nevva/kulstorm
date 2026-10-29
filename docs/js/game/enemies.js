@@ -208,9 +208,9 @@ function killEnemy(e,byPlayer){
     if(OPT.hearts){ const chance=(e.type==='tank'||e.isBoss)?1:0.08*dropK; if(Math.random()<chance) spawnHeart(p.x,p.z,e.isBoss?40:e.type==='tank'?ri(15,30):ri(5,30)); }
     if(xpOn()){ const v=(XP_VAL[e.isBoss?'boss':e.type]||1)*(DN.full&&DN.nightF>0.5?1.5:1); if((e.type!=='swarm'&&e.type!=='bats')||Math.random()<0.5) spawnXp(p.x+rand(-0.5,0.5),p.z+rand(-0.5,0.5),v); }
     if(OPT.coins){
-      // Bosses and big enemies drop fixed amounts; small ones sometimes drop a stack worth 1-5.
+      // Bosses and big enemies drop fixed amounts; small ones sometimes drop a stack worth 1-5. Without Money Maker every drop is a single coin.
       const sm=stackMax(),n=e.isBoss?4*sm:e.type==='tank'?sm:(e.type==='knight'||e.type==='necro'||e.type==='charger'||e.type==='bloater')?Math.min(sm,ri(2,4)):(Math.random()<0.35*dropK?rollCoinStack():0);
-      if(n) spawnCoins(p.x,p.z,n*(S.combos.has('goldrush')?2:1));
+      if(n) spawnCoins(p.x,p.z,hasAbility('moneymaker')?n*(S.combos.has('goldrush')?2:1):1);
     }
   }
   if(e.type==='bomber') explodeAt(p.x,0.5,p.z,3,45*DIFF.hp,45*DIFF.hp,byPlayer,null,1);

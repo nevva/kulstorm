@@ -82,6 +82,9 @@ const sfx=(function(){
     },
     hurt(){ if(!ok()) return; const t=T(); thump(t,125,48,0.2,0.65,0.1); nz(t,0.22,0.3,'lowpass',650,140,1.2); },
     pickup(){ if(!ok()) return; const t=T(); [659,880,1319].forEach((f,i)=>mallet(t+i*0.075,f,0.3,0.14,0.25)); },
+    // Purchase: a quick cash-register clink of coins, then a bright rising chord that rings out.
+    unlock(){ if(!ok()) return; const t=T(); [0,0.05,0.1].forEach((d,i)=>mallet(t+d,v(1568+i*260,0.02),0.12,0.12,0.15)); nz(t+0.14,0.05,0.12,'highpass',5000,5000,0.7);
+      thump(t+0.16,140,50,0.3,0.45,0.25); [523,659,784,1046,1318].forEach((f,i)=>{ mallet(t+0.16+i*0.06,f,0.7,0.15,0.35); ring(t+0.16+i*0.06,f*2,0.9,0.025,0.4); }); },
     upgrade(){ if(!ok()) return; const t=T(); thump(t,120,45,0.3,0.5,0.25); [523,659,784,1046].forEach((f,i)=>mallet(t+i*0.085,f,0.5,0.17,0.3)); },
     combo(){ if(!ok()) return; const t=T(); thump(t,100,38,0.4,0.6,0.3); thump(t+0.18,100,38,0.3,0.45,0.3); [392,523,659,784,1046,1318].forEach((f,i)=>mallet(t+i*0.06,f,0.5,0.14,0.35)); },
     zone(){ if(!ok()) return; const t=T(); thump(t,92,44,0.45,0.42,0.3); nz(t,0.7,0.09,'lowpass',200,1300,0.8,0.3,0.45); },

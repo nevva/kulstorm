@@ -249,8 +249,11 @@ function showOver(){
   const hx=$('oherox'); hx.hidden=!(OPT.heroprog&&lastHeroGain.gain>0); hx.textContent=tl('+{0} hero XP',fmt(lastHeroGain.gain))+(lastHeroGain.ups?' · '+tl('Hero level {0}! +{1} talent points',HERO.lvl,lastHeroGain.ups):'');
   $('ocoins').textContent=labRun?tl('Lab run – no coins or records'):(OPT.coins?tl('+{0} coins · {1} total',fmt(coinsRun),fmt(bank)):'');
   renderOverArmory(); renderRunSummary(); renderOverUpgrades();
+  if(!labRun&&OPT.coins){ openArmoryAfterRun(); return; }
   overEl.hidden=false; overEl.scrollTop=0;
 }
+// Real runs end in the Armory; the game-over screen with the run results is one tap away.
+function openArmoryAfterRun(){ overEl.hidden=true; clearRun(); mode='menu'; showMenu('main'); showMenu('armory',true); }
 // Game over: point at the Armory, naming the cheapest item still locked.
 function renderOverArmory(){
   const el=$('oarmory'),btn=$('o-armory'),next=lockedItems()[0],on=!labRun&&OPT.coins&&!!next;

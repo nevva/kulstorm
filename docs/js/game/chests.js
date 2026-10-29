@@ -56,6 +56,7 @@ function openChest(c){
   c.openT=0; addOD(0.05);
   sfx.upgrade(); shake(0.35);
   for(let i=0;i<22;i++){ const a=rand(0,Math.PI*2),sp=rand(1.5,4); blobs.spawn(p.x,0.8,p.z,Math.cos(a)*sp,rand(3,7),Math.sin(a)*sp,rand(0.5,0.9),0.16,0.05,WHITE,GOLD,C(0xff8a3d),-1,1,false,rand(1,4)); }
+  if(!hasAbility('moneymaker')){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0',tl('Buy Money Maker in the Armory to fill chests')); return; }
   const reward=!c.gold&&needsPaybackCoins()?POWERUPS.find(u=>u.id==='cash'):rollChest(c.gold);
   grantItem(reward,p,c.gold);
   if(c.gold) grantItem(rollChest(true),p,true);

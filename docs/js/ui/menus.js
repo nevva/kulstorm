@@ -1,7 +1,9 @@
 'use strict';
 // ---------- menu, shop, lab, options
 const PANELS=['main','shop','armory','lab','opts','heroprog'];
-function showMenu(which){
+let armoryAfterRun=false,boughtThisVisit=[];
+function showMenu(which,afterRun){
+  armoryAfterRun=which==='armory'&&!!afterRun; boughtThisVisit=[];
   if(mode==='menu'){ menuSky=true; labRun=false; }
   PANELS.forEach(p=>{ $('menu-'+p).hidden=p!==which; });
   menuEl.hidden=false; menuEl.scrollTop=0;
@@ -49,26 +51,40 @@ function armoryItems(){ return ABILITIES.filter(u=>abilityEnabled(u.id)).concat(
 const lockedItems=()=>armoryItems().filter(u=>unlocked.indexOf(u.id)<0).sort((a,b)=>itemPrice(a)-itemPrice(b));
 const affordableUnlocks=()=>lockedItems().filter(u=>bank>=itemPrice(u)).length;
 const KIND_NAME={ability:'Ability',power:'Power-up',gubbe:'Squad member',team:'Team perk',pet:'Helper'};
-function renderArmory(){
-  $('armorycoins').textContent=tl('{0} coins in the bank',fmt(bank));
+let shownBank=0,bankTween=0;
+// Rolls the bank chip from the old amount to the new one, so a purchase visibly costs coins.
+function showBank(animate){
+  const el=$('armorycoins'),from=shownBank,to=bank; shownBank=bank; cancelAnimationFrame(bankTween);
+  if(!animate){ el.textContent=fmt(to); return; }
+  el.classList.remove('spend'); void el.offsetWidth; el.classList.add('spend');
+  const t0=performance.now(),step=now=>{ const k=Math.min(1,(now-t0)/450); el.textContent=fmt(Math.round(from+(to-from)*(1-Math.pow(1-k,3)))); if(k<1) bankTween=requestAnimationFrame(step); };
+  bankTween=requestAnimationFrame(step);
+}
+function armoryCard(u,bought){
+  const own=unlocked.indexOf(u.id)>=0,price=itemPrice(u);
+  const card=document.createElement('div'); card.className='hero'+(own?' own':'')+(u.id===bought?' bought':'');
+  const sw=document.createElement('div'); sw.className='sw'; sw.style.background=WALL_CSS[u.rarity]; card.appendChild(sw);
+  const t=document.createElement('h4'); t.textContent=u.name; card.appendChild(t);
+  const r=document.createElement('span'); r.className='rar'; r.textContent=(u.id==='payback'&&!own?tl('First upgrade')+' · ':'')+RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
+  const p=document.createElement('p'); p.textContent=u.desc+(u.kind==='gubbe'?' · '+tl('Base health: {0} HP',memberBaseHealth(u)):''); card.appendChild(p);
+  const b=document.createElement('button'); b.type='button';
+  if(own){ b.textContent='✓ '+tl(u.kind==='ability'?'Unlocked':'In the chests'); b.disabled=true; }
+  else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); boughtThisVisit.push(u.id); saveBank(); sfx.init(); sfx.resume(); sfx.unlock(); renderArmory(u.id); }); }
+  else { b.textContent=tl('Costs {0} · {1} short',fmt(price),fmt(price-bank)); b.disabled=true; }
+  card.appendChild(b); return card;
+}
+// Affordable unlocks, and what was just bought from them, sit at the top; the category lists below hold everything else.
+function renderArmory(bought){
+  showBank(!!bought);
+  $('armoryrun').hidden=!armoryAfterRun; $('armoryruncoins').textContent=tl('+{0} coins this run',fmt(coinsRun));
   const all=armoryItems(),have=all.filter(u=>unlocked.indexOf(u.id)>=0).length;
   $('armorycount').textContent=tl('{0} of {1} items unlocked',have,all.length);
-  $('armorystack').textContent=stackMax()<5?tl('Enemies drop coins in stacks of up to {0}. The stacks grow the more runs you play.',stackMax()):tl('Enemies drop coins in full stacks of up to 5.');
+  $('armorystack').textContent=!hasAbility('moneymaker')?tl('Enemies drop single coins and chests are empty until you buy Money Maker.'):stackMax()<5?tl('Enemies drop coins in stacks of up to {0}. The stacks grow the more runs you play.',stackMax()):tl('Enemies drop coins in full stacks of up to 5.');
+  const ready=all.filter(u=>boughtThisVisit.indexOf(u.id)>=0||(unlocked.indexOf(u.id)<0&&bank>=itemPrice(u))).sort((a,b)=>itemPrice(a)-itemPrice(b));
+  $('ar-readybox').hidden=!ready.length; $('ar-ready').innerHTML=''; ready.forEach(u=>$('ar-ready').appendChild(armoryCard(u,bought)));
   [['ar-ability',['ability']],['ar-power',['power']],['ar-gubbe',['gubbe']],['ar-team',['team','pet']]].forEach(([id,kinds])=>{
     const box=$(id); box.innerHTML='';
-    all.filter(u=>kinds.indexOf(u.kind)>=0).sort((a,b)=>itemPrice(a)-itemPrice(b)).forEach(u=>{
-      const own=unlocked.indexOf(u.id)>=0,price=itemPrice(u);
-      const card=document.createElement('div'); card.className='hero'+(own?' own':'');
-      const sw=document.createElement('div'); sw.className='sw'; sw.style.background=WALL_CSS[u.rarity]; card.appendChild(sw);
-      const t=document.createElement('h4'); t.textContent=u.name; card.appendChild(t);
-      const r=document.createElement('span'); r.className='rar'; r.textContent=(u.id==='payback'&&!own?tl('First upgrade')+' · ':'')+RARITY[u.rarity]+' · '+tl(KIND_NAME[u.kind]); card.appendChild(r);
-      const p=document.createElement('p'); p.textContent=u.desc+(u.kind==='gubbe'?' · '+tl('Base health: {0} HP',memberBaseHealth(u)):''); card.appendChild(p);
-      const b=document.createElement('button'); b.type='button';
-      if(own){ b.textContent='✓ '+tl(u.kind==='ability'?'Unlocked':'In the chests'); b.disabled=true; }
-      else if(bank>=price){ b.textContent=tl('Unlock')+' · '+fmt(price); b.addEventListener('click',()=>{ if(bank<price) return; bank-=price; unlocked.push(u.id); saveBank(); sfx.init(); sfx.upgrade(); renderArmory(); }); }
-      else { b.textContent=tl('Costs {0} · {1} short',fmt(price),fmt(price-bank)); b.disabled=true; }
-      card.appendChild(b); box.appendChild(card);
-    });
+    all.filter(u=>kinds.indexOf(u.kind)>=0&&ready.indexOf(u)<0).sort((a,b)=>itemPrice(a)-itemPrice(b)).forEach(u=>box.appendChild(armoryCard(u,bought)));
   });
 }
 const lab={hero:'rookie',dist:0,counts:{},perks:{},off:{}};

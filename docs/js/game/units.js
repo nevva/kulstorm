@@ -25,7 +25,7 @@ let benched=load('kulstorm_bench',[]);
 // Items unlocked in the Armory: only these come out of chests and walls. Lab runs, and play without coins, have everything.
 let unlocked=load('kulstorm_unlocked',STARTER_ITEMS.slice()),runsDone=load('kulstorm_runs',0);
 const isUnlocked=id=>labRun||!OPT.coins||unlocked.indexOf(id)>=0;
-const abilityEnabled=id=>id==='payback'||id==='bulletproof'||(id==='pound'?OPT.obstacles:OPT[id]);
+const abilityEnabled=id=>id==='payback'||id==='moneymaker'||id==='bulletproof'||(id==='pound'?OPT.obstacles:OPT[id]);
 const hasAbility=id=>abilityEnabled(id)&&isUnlocked(id);
 const memberBaseHealth=def=>Math.max(1,Math.round((def.hp||60)*STARTING_HEALTH_MULTIPLIER*(hasAbility('bulletproof')?2:1)));
 const stackMax=()=>labRun||!OPT.coins?5:coinStackMax(runsDone);

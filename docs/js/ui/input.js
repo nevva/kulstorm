@@ -63,4 +63,6 @@ $('mute').addEventListener('click',()=>{ sfx.enabled=!sfx.enabled; const on=sfx.
 $('play').addEventListener('click',()=>startGame());
 $('again').addEventListener('click',()=>startGame(lastCfg));
 $('to-menu').addEventListener('click',()=>{ overEl.hidden=true; clearRun(); mode='menu'; showMenu('main'); });
-$('o-armory').addEventListener('click',()=>{ overEl.hidden=true; clearRun(); mode='menu'; showMenu('main'); showMenu('armory'); });
+$('o-armory').addEventListener('click',openArmoryAfterRun);
+$('ar-again').addEventListener('click',()=>startGame(lastCfg));
+$('ar-results').addEventListener('click',()=>{ overEl.hidden=false; overEl.scrollTop=0; });

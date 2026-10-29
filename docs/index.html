@@ -6,7 +6,7 @@
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.28-2249">
+<link rel="stylesheet" href="css/style.css?v=2026.10.29-1312">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -75,7 +75,18 @@
 
   <div class="panel" id="menu-armory" hidden>
     <h2 class="ph">Armory</h2>
-    <p class="coins" id="armorycoins"></p>
+    <div class="chip coin bank" id="armorycoins">0</div>
+    <div id="armoryrun" hidden>
+      <p class="coins" id="armoryruncoins"></p>
+      <div class="btnrow">
+        <button class="btn" id="ar-again" type="button">Again!</button>
+        <button class="btn small ghost" id="ar-results" type="button">Run results</button>
+      </div>
+    </div>
+    <div id="ar-readybox" hidden>
+      <h3 class="sh">Available now</h3>
+      <div class="heroes" id="ar-ready"></div>
+    </div>
     <p class="sub">Every chest can hold any item in the game, but only unlocked items come out as they are: a locked one turns into a few coins. Unlocking an item adds it to what chests and walls can give you. It is a chance, not a guarantee.</p>
     <p class="best" id="armorycount"></p>
     <p class="sub" id="armorystack"></p>
@@ -210,8 +221,8 @@
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.28-2249"></script>
+<script src="js/version.js?v=2026.10.29-1312"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.28-2249"></script>
+<script src="js/main.js?v=2026.10.29-1312"></script>
 </body>
 </html>

@@ -23,6 +23,7 @@ const POWERUPS=[
 // Permanent Armory purchases; these do not drop from chests.
 const ABILITIES=[
   {id:'payback',kind:'ability',rarity:'common',name:'Payback Time',desc:'Start every run with double fire rate.',color:0xff8a3d},
+  {id:'moneymaker',kind:'ability',rarity:'common',name:'Money Maker',desc:'Enemies drop full coin stacks, chests give rewards, and coins are picked up from further away.',color:0xffc83d},
   {id:'bulletproof',kind:'ability',rarity:'common',name:'Bullet Proof',desc:'Double base health for the whole squad in every run.',color:0x49c3ff},
   {id:'dbljump',kind:'ability',rarity:'common',name:'Double Jump',desc:'Jump again in the air. Tall spike barricades need it',color:0x8fd3ff},
   {id:'pound',kind:'ability',rarity:'common',name:'Ground Pound',desc:'Duck in the air to slam down, hurting and knocking back enemies near the front',color:0xfff3c4},
@@ -35,7 +36,7 @@ const coinStackMax=runs=>Math.min(5,1+Math.floor(runs/2));
 // Unlocking buys a chance: the item can then come out of chests and walls.
 const STARTER_ITEMS=['cash','patch'];
 const RARITY_PRICE={common:60,rare:150,epic:320};
-const ITEM_PRICE={payback:5,bulletproof:10,dbljump:15,pound:20,overdrive:30,frenzy:25,recruit:30,power:35,steel:40,medic:45,fastload:45,bubble:80,bomb:90,battery:110,line:70,slowmo:100,nade:120,divine:300,jackpot:220};
+const ITEM_PRICE={payback:5,moneymaker:8,bulletproof:10,dbljump:15,pound:20,overdrive:30,frenzy:25,recruit:30,power:35,steel:40,medic:45,fastload:45,bubble:80,bomb:90,battery:110,line:70,slowmo:100,nade:120,divine:300,jackpot:220};
 const itemPrice=u=>ITEM_PRICE[u.id]||RARITY_PRICE[u.rarity];
 // Coins a chest pays out instead when it rolls an item you have not unlocked.
 const LOCKED_COINS={common:5,rare:9,epic:16};
