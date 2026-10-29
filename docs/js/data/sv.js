@@ -509,6 +509,8 @@ const SV={
   'Start every run with double fire rate.':'Börja varje runda med dubbel eldhastighet.',
   'First upgrade':'Första uppgraderingen',
   'Run results':'Rundans resultat',
+  'Fever dream':'Feberdröm',
+  'Fever dream!':'Feberdröm!',
   'Available now':'Kan köpas nu',
   '+{0} coins this run':'+{0} mynt den här rundan',
   'Empty chest':'Tom kista',

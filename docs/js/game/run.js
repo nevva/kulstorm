@@ -16,6 +16,14 @@ function clearRun(){
   VIEW.scale=1; VIEW.fogNear=44; VIEW.fogFar=96; VIEW.spawn=-78; camK=0.78;
   setZone(0,true); rebuildTiles();
 }
+// Fever dream: a practice run (no coins or records) with everything unlocked, a full squad and every team perk maxed.
+function feverDream(){
+  const gubbes=shuffle(UPGRADES.filter(u=>u.kind==='gubbe')),extras=[];
+  for(let i=0;extras.length<MAX_SQUAD-1&&i<gubbes.length*3;i++){ const u=gubbes[i%gubbes.length]; if(!(u.unique&&extras.indexOf(u.id)>=0)) extras.push(u.id); }
+  const perks=[]; UPGRADES.forEach(u=>{ if(u.kind==='team') for(let i=0;i<(u.max||1);i++) perks.push(u.id); else if(u.kind==='pet') perks.push(u.id,u.id); });
+  startGame({hero:heroId,extras,perks,dist:0,lab:true,odFull:true,fever:true});
+  toast(tl('Fever dream!'));
+}
 function startGame(cfg){
   cfg=cfg||{hero:heroId,extras:[],perks:[],dist:0,lab:false};
   lastCfg=cfg; labRun=!!cfg.lab; menuSky=false;
