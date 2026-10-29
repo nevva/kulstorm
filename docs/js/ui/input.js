@@ -66,6 +66,6 @@ $('again').addEventListener('click',()=>startGame(lastCfg));
 $('to-menu').addEventListener('click',()=>{ overEl.hidden=true; clearRun(); mode='menu'; showMenu('main'); });
 $('o-armory').addEventListener('click',openArmoryAfterRun);
 $('ar-again').addEventListener('click',()=>startGame(lastCfg));
-$('ar-fever').addEventListener('click',feverDream);
-$('o-fever').addEventListener('click',feverDream);
+$('ar-fever').addEventListener('click',()=>feverDream());
+$('o-fever').addEventListener('click',()=>feverDream());
 $('ar-results').addEventListener('click',()=>{ overEl.hidden=false; overEl.scrollTop=0; });
