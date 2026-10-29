@@ -97,9 +97,10 @@ function breakWall(w){
   removeWall(w);
   if(w.gid) for(const o of walls){ if(o!==w&&!o.dead&&o.gid===w.gid){ o.dead=true; fxShatter(o.g.position.x,o.g.position.z,wallPieceMat(o),o.boss?wallGoldMat:wallPostMat,0.7); removeWall(o); } }
   if(OPT.coins) spawnCoin(p.x+rand(-0.5,0.5),p.z,Math.min(3,stackMax()));
+  // A locked wall pauses like an empty chest: buy its item, gamble on a mystery item, or take free coins.
   if(w.cost){
-    if(coinsRun<w.cost){ sayAt(p.x,2.6,p.z,tl('Not enough coins'),'#b9bde0',tl('{0} costs {1} coins',w.u.name,w.cost)); sfx.hurt(); return; }
-    coinsRun-=w.cost; hudCoins=-1; pushDmg(p.x,3.4,p.z,'-'+w.cost,'#ffc83d',true); sfx.buy();
+    if(mode==='playing') openItemShop(w.u.name,[{type:'item',u:w.u,cost:w.cost},{type:'mystery',cost:MYSTERY_PRICE*(w.boss?2:1),gold:w.boss,p:p.clone()},{type:'coins',cost:0,gold:w.boss,p:p.clone()}]);
+    return;
   }
   if(w.u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }
   else if(w.u.kind==='gubbe'){ const m=addMember(w.u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(w.u.shirt)); toast(tl('{0} joins!',w.u.name)); }

@@ -84,6 +84,11 @@ function offerMystery(c){
   if(mode!=='playing'){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0'); return; }
   openItemShop(c.gold?tl('Empty golden chest'):tl('Empty chest'),[{type:'mystery',cost:MYSTERY_PRICE*(c.gold?2:1),gold:c.gold,p},{type:'coins',cost:0,gold:c.gold,p}]);
 }
+// Won coins go straight into the run's purse, the same as picking them up.
+function collectCoins(n){
+  const h=headMember(); coinsRun+=n*S.T.coinMult; hudCoins=-1; sfx.coin();
+  if(h){ const p=h.g.position; fxSparkle(p.x,1.6,p.z,GOLD); pushDmg(p.x,2.8,p.z,'+'+n,'#ffc83d',true); }
+}
 // Slot-machine reveal on the offer card: names flicker past, slow down and land on what was won, then the shop closes.
 function spinMystery(o){
   const coins=o.type==='coins',n=coins?chestCoinRoll(o.gold):0,pool=chestPool().filter(powerUsable),won=coins?[]:[rollChest(o.gold,pool)]; if(o.gold&&!coins) won.push(rollChest(true,pool));
@@ -98,7 +103,7 @@ function spinMystery(o){
     if(coins){ h.textContent=coinText(n); p.textContent=''; }
     else { h.textContent=won.map(u=>u.name).join(' + '); sw.style.background=css(won[0]); p.textContent=won.map(u=>u.desc).join(' · '); }
     pr.textContent=tl('You won!'); card.classList.remove('spinning'); card.classList.add('won'); sfx.unlock();
-    setTimeout(()=>{ R.spinning=false; won.forEach(u=>grantItem(u,o.p)); closeShop(); if(coins) spawnCoins(S.x,-1.5,n,1.2); },1100);
+    setTimeout(()=>{ R.spinning=false; won.forEach(u=>grantItem(u,o.p)); closeShop(); if(coins) collectCoins(n); },1100);
   };
   tick();
 }

@@ -518,8 +518,6 @@ const SV={
   'You won!':'Du vann!',
   'This run only.':'Bara den här rundan.',
   '{0} COINS · THIS RUN ONLY':'{0} MYNT · BARA DENNA RUNDA',
-  'Not enough coins':'För lite mynt',
-  '{0} costs {1} coins':'{0} kostar {1} mynt',
   'Money Maker':'Pengamaskin',
   'Enemies drop full coin stacks, chests give rewards, and coins are picked up from further away.':'Fiender släpper hela myntstaplar, kistor ger belöningar och mynt plockas upp på längre avstånd.',
   'Empty':'Tom',
