@@ -96,15 +96,22 @@ function spinMystery(o){
   const card=$('offer'+R.offers.indexOf(o)),h=card.querySelector('h4'),sw=card.querySelector('.sw'),p=card.querySelector('p'),pr=card.querySelector('.price');
   const css=u=>u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
   R.spinning=true; card.classList.add('spinning'); p.textContent=''; pr.textContent=tl('Spinning…');
-  let t=0,delay=45;
-  const tick=()=>{
-    if(mode!=='shop'){ R.spinning=false; return; }
-    if(t++<22){ if(coins) h.textContent=coinText(Math.max(1,Math.round(n*rand(0.3,1.8)))); else { const u=pick(pool); h.textContent=u.name; sw.style.background=css(u); } sfx.coin(); delay*=1.12; setTimeout(tick,delay); return; }
+  let t=0,delay=45,timer=0,landed=false;
+  const finish=()=>{ clearTimeout(timer); R.spinning=false; R.skipSpin=null; won.forEach(u=>grantItem(u,o.p)); closeShop(); if(coins) collectCoins(n); };
+  const land=()=>{
+    landed=true;
     if(coins){ h.textContent=coinText(n); p.textContent=''; }
     else { h.textContent=won.map(u=>u.name).join(' + '); sw.style.background=css(won[0]); p.textContent=won.map(u=>u.desc).join(' · '); }
     pr.textContent=tl('You won!'); card.classList.remove('spinning'); card.classList.add('won'); sfx.unlock();
-    setTimeout(()=>{ R.spinning=false; won.forEach(u=>grantItem(u,o.p)); closeShop(); if(coins) collectCoins(n); },1100);
+    timer=setTimeout(finish,1100);
   };
+  const tick=()=>{
+    if(mode!=='shop'){ R.spinning=false; R.skipSpin=null; return; }
+    if(t++<22){ if(coins) h.textContent=coinText(Math.max(1,Math.round(n*rand(0.3,1.8)))); else { const u=pick(pool); h.textContent=u.name; sw.style.background=css(u); } sfx.coin(); delay*=1.12; timer=setTimeout(tick,delay); return; }
+    land();
+  };
+  // A tap or key press during the spin jumps to the result; another one closes right away.
+  R.skipSpin=()=>{ if(landed) finish(); else { clearTimeout(timer); land(); } };
   tick();
 }
 function grantItem(u,p){

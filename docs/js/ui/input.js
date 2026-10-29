@@ -38,7 +38,7 @@ canvas.addEventListener('pointerup',e=>{
 canvas.addEventListener('pointercancel',()=>{ drag=null; });
 window.addEventListener('keydown',e=>{
   if(mode==='shop'){
-    if(R.spinning){ e.preventDefault(); e.stopImmediatePropagation(); return; }
+    if(R.spinning){ e.preventDefault(); e.stopImmediatePropagation(); if(!e.repeat&&R.skipSpin) R.skipSpin(); return; }
     const n=R.offers.length,k=e.key;
     if(k==='ArrowLeft'||k==='a'||k==='A'){ e.preventDefault(); R.sel=(R.sel-1+n)%n; renderBuy(); sfx.duck(); }
     else if(k==='ArrowRight'||k==='d'||k==='D'){ e.preventDefault(); R.sel=(R.sel+1)%n; renderBuy(); sfx.duck(); }

@@ -89,7 +89,7 @@ function renderBuy(){
   const rr=$('shop-reroll'); rr.hidden=!!R.title; rr.textContent=tl('New offers')+' · '+R.reroll; rr.disabled=coinsRun<R.reroll;
 }
 function buyOffer(o){
-  if(R.spinning) return false;
+  if(R.spinning){ if(R.skipSpin) R.skipSpin(); return false; }
   const btn=$('offer'+R.offers.indexOf(o));
   if(o.bought||!btn||btn.disabled){ if(!o.bought){ $('shopwallet').textContent=(coinsRun<o.cost?tl("Can't afford"):tl("Can't buy"))+' · '+tl('{0} coins this run',fmt(Math.floor(coinsRun))); sfx.hurt(); } return false; }
   coinsRun-=o.cost; o.bought=true; hudCoins=-1;
@@ -124,5 +124,7 @@ function closeShop(){
   updateHUD();
 }
 $('shop-done').addEventListener('click',closeShop);
+// Taps anywhere on the shop screen during a spin skip it (offer buttons skip through buyOffer).
+shopEl.addEventListener('pointerdown',e=>{ if(R.spinning&&R.skipSpin&&!e.target.closest('.offer')) R.skipSpin(); });
 function shopReroll(){ if(R.title) return; if(coinsRun<R.reroll){ $('shopwallet').textContent=tl("Can't afford new offers")+' · '+tl('{0} coins this run',fmt(Math.floor(coinsRun))); sfx.hurt(); return; } coinsRun-=R.reroll; R.reroll+=5; hudCoins=-1; buildOffers(); R.sel=clamp(R.sel,0,R.offers.length-1); renderBuy(); sfx.buy(); }
 $('shop-reroll').addEventListener('click',shopReroll);
