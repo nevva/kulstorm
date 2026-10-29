@@ -63,9 +63,17 @@ window.addEventListener('deviceorientation',e=>{
   if(tilt.bx==null||Math.abs(x-tilt.bx)>60||Math.abs(y-tilt.by)>60){ tilt.bx=x; tilt.by=y; }
   tilt.x=x; tilt.y=y;
 });
-// iOS only reports orientation after the player allows it, which must be asked from a tap.
-function askTilt(){ const D=window.DeviceOrientationEvent; if(OPT.gyro&&D&&typeof D.requestPermission==='function') D.requestPermission().catch(()=>{}); }
-['touchend','click'].forEach(ev=>window.addEventListener(ev,askTilt,{once:true}));
+// iOS only reports orientation after the player allows it. We never ask out of the blue: after a few runs the menu
+// explains what the motion data is for (and that the game is the same without it), and only "Turn on" asks.
+const tiltNeedsAsk=()=>{ const D=window.DeviceOrientationEvent; return !!(D&&typeof D.requestPermission==='function'); };
+function askTilt(){ if(tiltNeedsAsk()) DeviceOrientationEvent.requestPermission().catch(()=>{}); }
+const TILT_ASK_RUNS=3;
+function maybeOfferTilt(){
+  if(!OPT.gyro||!tiltNeedsAsk()||runsDone<TILT_ASK_RUNS||load('kulstorm_tiltasked',false)) return;
+  store('kulstorm_tiltasked',true); $('tiltask').hidden=false; $('tilt-yes').focus({preventScroll:true});
+}
+$('tilt-yes').addEventListener('click',()=>{ $('tiltask').hidden=true; askTilt(); });
+$('tilt-no').addEventListener('click',()=>{ $('tiltask').hidden=true; OPT.gyro=false; saveOpts(); });
 function updateTilt(dt){
   let tx=0,ty=0;
   if(OPT.gyro&&tilt.bx!=null){

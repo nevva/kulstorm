@@ -139,7 +139,7 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 #toast.boss{color:var(--coral)}
 #flash{position:fixed;inset:0;background:var(--coral);opacity:0;pointer-events:none;transition:opacity .4s}
 #flash.on{opacity:.45;transition:none}
-#pause,#shop,#over{background:rgba(13,16,48,.86)}
+#pause,#shop,#over,#tiltask{background:rgba(13,16,48,.86)}
 #flash2{position:fixed;inset:0;background:#f4f8ff;opacity:0;pointer-events:none;transition:opacity .5s}
 #flash2.on{opacity:.75;transition:none}
 .hb-col{display:flex;flex-direction:column;align-items:center;gap:10px}

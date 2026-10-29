@@ -7,7 +7,7 @@ function showMenu(which,afterRun){
   if(mode==='menu'){ menuSky=true; labRun=false; }
   PANELS.forEach(p=>{ $('menu-'+p).hidden=p!==which; });
   menuEl.hidden=false; menuEl.scrollTop=0;
-  if(which==='main') renderMain(); if(which==='shop') renderShop(); if(which==='armory') renderArmory(); if(which==='lab') renderLab(); if(which==='opts') renderOpts(); if(which==='heroprog') renderHeroProg(); if(which==='outfit') renderOutfit(); else outfitStop();
+  if(which==='main'){ renderMain(); maybeOfferTilt(); } if(which==='shop') renderShop(); if(which==='armory') renderArmory(); if(which==='lab') renderLab(); if(which==='opts') renderOpts(); if(which==='heroprog') renderHeroProg(); if(which==='outfit') renderOutfit(); else outfitStop();
 }
 function leaderDef(h){ return {id:'leader',kind:'gubbe',name:tl('You'),short:tl('You'),weapon:h.weapon||'pistol',hp:h.hp||100,shirt:h.shirt,outfit:heroOutfit(h.id)}; }
 function renderMain(){

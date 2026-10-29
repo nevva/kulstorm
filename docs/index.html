@@ -6,7 +6,7 @@
 <title>Kulstorm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026.10.29-2222">
+<link rel="stylesheet" href="css/style.css?v=2026.10.29-2225">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -221,6 +221,18 @@
   </div>
 </div>
 
+<div id="tiltask" class="screen" hidden>
+  <div class="panel">
+    <h2 class="ph">Tilt for depth?</h2>
+    <p class="sub">Kulstorm can use your phone's motion sensor to move the camera a little when you tilt the phone, for a subtle 3D effect. It only reads which way the phone is tilted, and nothing is stored or sent anywhere.</p>
+    <p class="sub">The game plays exactly the same without it. You can change this any time under Settings → Tilt parallax.</p>
+    <div class="btnrow">
+      <button class="btn" id="tilt-yes" type="button">Turn on</button>
+      <button class="btn small ghost" id="tilt-no" type="button">No thanks</button>
+    </div>
+  </div>
+</div>
+
 <div id="vet" class="screen" hidden>
   <div class="panel">
     <h2 class="ph">Promotion ceremony</h2>
@@ -259,8 +271,8 @@
   </div>
 </div>
 
-<script src="js/version.js?v=2026.10.29-2222"></script>
+<script src="js/version.js?v=2026.10.29-2225"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="js/main.js?v=2026.10.29-2222"></script>
+<script src="js/main.js?v=2026.10.29-2225"></script>
 </body>
 </html>
