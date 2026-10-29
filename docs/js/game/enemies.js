@@ -166,7 +166,7 @@ function spawnEnemy(type,lane,z){
   let e=pools[type]&&pools[type].pop();
   if(!e){ const g=def.build(); e={type,g,u:g.userData,mats:g.userData.mats,colorL:g.userData.mats[0].color}; }
   e.isBoss=!!def.boss; e.dead=false; e.flash=0; e.flashOn=false; e.sq=0; e.lunge=0; e.atkCd=0.4; e.t=rand(0,100); e.phase=rand(0,6.3); e.fireCd=rand(1,2.2); e.burst=0; e.burstT=0; e.pattern=0; e.hold=false;
-  e.accDmg=0; e.accTier=0; e.accT=-1; e.burn=0; e.burnDps=0; e.burnOwner=null; e.burnFx=0; e.slow=0; e.kb=0; e.tilt=0; e.stun=0; e.pull=0; if(e.u.gm) e.u.gm.opacity=0.2;
+  e.accDmg=0; e.accTier=0; e.accT=-1; e.dmgN=null; e.burn=0; e.burnDps=0; e.burnOwner=null; e.burnFx=0; e.slow=0; e.kb=0; e.tilt=0; e.stun=0; e.pull=0; if(e.u.gm) e.u.gm.opacity=0.2;
   e.under=false; e.shieldHp=0; e.gen=0; e.base=1; e.state=0; e.stateT=0; e.rise=0; e.riseMax=1; e.revived=false; e.raiseT=3.5;
   if(type==='mole'){ e.under=true; e.popZ=rand(-17,-11); e.u.body.visible=false; e.u.mound.visible=true; }
   e.r=def.r; e.speed=def.speed*DIFF.speed*(isW('rain')?rand(0.85,1.15):1)*(isW('heat')?1.15:1); e.dmg=def.dmg; e.maxHp=e.hp=def.hp*DIFF.hp*PF; e.lane=lane;
@@ -216,21 +216,20 @@ function killEnemy(e,byPlayer){
   if(e.type==='bomber') explodeAt(p.x,0.5,p.z,3,45*DIFF.hp,45*DIFF.hp,byPlayer,null,1);
   if(e.isBoss){ boss=null; bossDefeated(p); }
 }
-// While many hit numbers are up, a new one adds into the nearest one instead, so a crowd shows a few growing totals.
-const DMG_CROWD=6,DMG_MERGE_R2=2.5*2.5;
-function pushNum(x,y,z,val,tier){
+// Each enemy or wall keeps one hit number: new damage adds into it and keeps it hovering above the target until the hits stop.
+function pushNum(t,x,y,z,val,tier){
   if(!OPT.numbers) return;
-  const nums=dmgLive.filter(n=>n.num!=null&&n.life>0.25);
-  if(nums.length>=DMG_CROWD){
-    let best=null,bd=DMG_MERGE_R2; for(const n of nums){ const d=(n.x-x)**2+(n.z-z)**2; if(d<bd){ bd=d; best=n; } }
-    if(best){ best.num+=val; best.tier=Math.max(best.tier,tier); best.el.textContent=String(Math.round(best.num)); best.el.style.color=TIER_CSS[best.tier]; best.el.classList.toggle('big',best.tier===4); best.life=Math.max(best.life,best.max*0.8); return; }
+  const n=t.dmgN;
+  if(n&&n.life>0&&dmgLive.indexOf(n)>=0){
+    n.num+=val; n.tier=Math.max(n.tier,tier); n.el.textContent=String(Math.round(n.num)); n.el.style.color=TIER_CSS[n.tier]; n.el.classList.toggle('big',n.tier===4);
+    n.x=x; n.y=y; n.z=z; n.life=n.max; return;
   }
   const before=dmgLive.length; pushDmg(x,y,z,String(Math.round(val)),TIER_CSS[tier],tier===4);
-  if(dmgLive.length>before){ const n=dmgLive[dmgLive.length-1]; n.num=val; n.tier=tier; }
+  if(dmgLive.length>before){ const m=dmgLive[dmgLive.length-1]; m.num=val; m.tier=tier; m.vx=0; t.dmgN=m; }
 }
 function flushDmg(t,x,y,z){
   if(t.accDmg<=0){ t.accT=-1; return; }
-  pushNum(x+rand(-0.3,0.3),y,z,t.accDmg,t.accTier);
+  pushNum(t,x,y,z,t.accDmg,t.accTier);
   t.accDmg=0; t.accTier=0; t.accT=-1;
 }
 function flushEnemyDmg(e){ const p=e.g.position; flushDmg(e,p.x,p.y+e.r*1.7+0.5,p.z); }
