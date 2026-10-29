@@ -13,7 +13,7 @@ const ZONES=[
 const WEATHER={
   clear:{id:'clear',name:'Clear'},
   rain:{id:'rain',name:'Rain',tint:0x5a6b80,tintAmt:0.45,light:0.7},
-  fog:{id:'fog',name:'Fog',tint:0xc8ccd4,tintAmt:0.65,light:0.85,fogNear:6,fogFar:36},
+  fog:{id:'fog',name:'Fog',tint:0xc8ccd4,tintAmt:0.5,light:0.85,fogNear:16,fogFar:58},
   storm:{id:'storm',name:'Storm',tint:0x4a5260,tintAmt:0.5,light:0.65},
   snow:{id:'snow',name:'Snow',tint:0xe8f2ff,tintAmt:0.5,light:0.95,ground:0xf4f8ff},
   thunder:{id:'thunder',name:'Thunder',tint:0x2c3040,tintAmt:0.6,light:0.5},
