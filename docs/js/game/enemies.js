@@ -216,9 +216,21 @@ function killEnemy(e,byPlayer){
   if(e.type==='bomber') explodeAt(p.x,0.5,p.z,3,45*DIFF.hp,45*DIFF.hp,byPlayer,null,1);
   if(e.isBoss){ boss=null; bossDefeated(p); }
 }
+// While many hit numbers are up, a new one adds into the nearest one instead, so a crowd shows a few growing totals.
+const DMG_CROWD=6,DMG_MERGE_R2=2.5*2.5;
+function pushNum(x,y,z,val,tier){
+  if(!OPT.numbers) return;
+  const nums=dmgLive.filter(n=>n.num!=null&&n.life>0.25);
+  if(nums.length>=DMG_CROWD){
+    let best=null,bd=DMG_MERGE_R2; for(const n of nums){ const d=(n.x-x)**2+(n.z-z)**2; if(d<bd){ bd=d; best=n; } }
+    if(best){ best.num+=val; best.tier=Math.max(best.tier,tier); best.el.textContent=String(Math.round(best.num)); best.el.style.color=TIER_CSS[best.tier]; best.el.classList.toggle('big',best.tier===4); best.life=Math.max(best.life,best.max*0.8); return; }
+  }
+  const before=dmgLive.length; pushDmg(x,y,z,String(Math.round(val)),TIER_CSS[tier],tier===4);
+  if(dmgLive.length>before){ const n=dmgLive[dmgLive.length-1]; n.num=val; n.tier=tier; }
+}
 function flushDmg(t,x,y,z){
   if(t.accDmg<=0){ t.accT=-1; return; }
-  pushDmg(x+rand(-0.3,0.3),y,z,String(Math.round(t.accDmg)),TIER_CSS[t.accTier],t.accTier===4);
+  pushNum(x+rand(-0.3,0.3),y,z,t.accDmg,t.accTier);
   t.accDmg=0; t.accTier=0; t.accT=-1;
 }
 function flushEnemyDmg(e){ const p=e.g.position; flushDmg(e,p.x,p.y+e.r*1.7+0.5,p.z); }

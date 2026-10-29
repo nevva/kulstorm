@@ -67,8 +67,8 @@ function setWeather(id,quiet){
   if(W.id===id) return;
   W.id=id; W.mix=0; W.hailT=2; W.boltT=3;
   W.wind=id==='storm'?(Math.random()<0.5?-1:1)*rand(4,6):0;
-  if(!quiet&&id!=='clear'){ toast(tl('Weather')+': '+WEATHER[id].name); sfx.zone(); }
-  else if(!quiet) toast(tl('Weather')+': '+WEATHER.clear.name);
+  if(!quiet&&id!=='clear') sfx.zone();
+  hudWeather='';
 }
 function rollWeather(){
   if(W.fixed){ setWeather(W.fixed); return; }

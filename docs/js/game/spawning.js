@@ -44,7 +44,7 @@ function checkEvents(){
   if(dist>=zoneDistNext){
     zoneDistNext+=400;
     let i; do{ i=ri(0,ZONES.length-1); }while(i===zoneIdx);
-    setZone(i,false); toast(tl('Zone')+': '+ZONES[i].name+(OPT.music&&MUSIC.zones[ZONES[i].props]?' · '+GENRES[MUSIC.zones[ZONES[i].props].genre].name:'')); sfx.zone();
+    setZone(i,false); sfx.zone();
     weatherZoneCheck();
   }
   if(OPT.weather&&dist>=W.next){ W.next+=300; rollWeather(); }

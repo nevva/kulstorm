@@ -18,7 +18,27 @@ speedBtn.addEventListener('click',e=>{
   if(e.detail>0) speedBtn.blur();
 });
 updateSpeedButton();
+// Weather icon among the round HUD buttons; clear weather shows a sun by day and a moon at night.
+const WEATHER_ICON={
+  sun:'<circle cx="12" cy="12" r="4.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/>',
+  rain:'<path d="M7 15a4 4 0 0 1 .5-8A5.5 5.5 0 0 1 18 8.5 3.5 3.5 0 0 1 17.5 15z" fill="currentColor"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',
+  fog:'<path d="M4 8h16M2 12h20M4 16h16M7 20h10"/>',
+  storm:'<path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/>',
+  snow:'<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5"/>',
+  thunder:'<path d="M7 13a4 4 0 0 1 .5-8A5.5 5.5 0 0 1 18 6.5 3.5 3.5 0 0 1 17.5 13z" fill="currentColor"/><path d="M13 13l-3 5h4l-3 5" fill="none"/>',
+  heat:'<path d="M12 3v11"/><circle cx="12" cy="17" r="3.5" fill="currentColor"/><path d="M17 5c1 1.2 1 2.3 0 3.5s-1 2.3 0 3.5M20 5c1 1.2 1 2.3 0 3.5s-1 2.3 0 3.5"/>'};
+let hudWeather='';
+function updateWeatherIcon(){
+  const el=$('weathericon'),id=W.id==='clear'?(DN.nightF>0.5?'moon':'sun'):W.id;
+  el.hidden=!OPT.weather; if(id===hudWeather) return;
+  const changed=!!hudWeather; hudWeather=id;
+  el.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(WEATHER_ICON[id]||WEATHER_ICON.sun)+'</svg>';
+  const name=W.id==='clear'?WEATHER.clear.name:WEATHER[W.id].name; el.setAttribute('aria-label',tl('Weather')+': '+name); el.title=name;
+  if(changed){ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+}
 function updateHUD(){
+  updateWeatherIcon();
   const d=Math.floor(dist); if(d!==hudDist){ hudDist=d; distEl.textContent=fmt(d); }
   const L=squad[0];
   if(L){ const hp=Math.ceil(L.hp); if(hp!==hudHp){ hudHp=hp; hpEl.style.width=(100*L.hp/L.maxHp)+'%'; hpEl.classList.toggle('low',L.hp/L.maxHp<0.3); hpTextEl.textContent=hp+' / '+L.maxHp; } }

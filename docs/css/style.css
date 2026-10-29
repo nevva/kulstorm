@@ -34,6 +34,12 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 .dist small{font-size:.42em;margin-left:5px;color:var(--paper);text-shadow:0 2px 0 rgba(0,0,0,.4)}
 .topright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .hudbtns{display:flex;gap:8px}
+#weathericon{width:42px;height:42px;border-radius:50%;background:rgba(13,16,48,.6);color:var(--accent);display:flex;align-items:center;justify-content:center}
+#weathericon[hidden]{display:none}
+#weathericon svg{width:22px;height:22px}
+#weathericon.pop{animation:wpop .6s ease-out}
+@keyframes wpop{0%{transform:scale(1)}35%{transform:scale(1.3);box-shadow:0 0 0 4px rgba(255,210,31,.5)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){#weathericon.pop{animation:none}}
 #mute,#pausebtn,#speedbtn{pointer-events:auto;width:42px;height:42px;border-radius:50%;border:0;background:rgba(13,16,48,.6);color:var(--paper);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 #speedbtn{font-family:var(--font-display);font-size:11px;font-variant-numeric:tabular-nums}
 #mute svg,#pausebtn svg{width:22px;height:22px}
