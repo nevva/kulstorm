@@ -98,7 +98,7 @@ function breakWall(w){
   if(OPT.coins) spawnCoin(p.x+rand(-0.5,0.5),p.z,Math.min(3,stackMax()));
   // A locked wall pauses like an empty chest: gamble for a chance at its perk, or take free coins.
   if(w.locked){
-    if(mode==='playing') openItemShop(w.u.name,[{type:'mystery',cost:MYSTERY_PRICE*(w.boss?2:1),gold:w.boss,target:w.u,p:p.clone()},{type:'coins',cost:0,gold:w.boss,p:p.clone()}]);
+    if(mode==='playing') openItemShop(w.u.name,[{type:'mystery',cost:mysteryCost(w.boss),gold:w.boss,target:w.u,p:p.clone()},{type:'coins',cost:0,gold:w.boss,p:p.clone()}]);
     return;
   }
   if(w.u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }

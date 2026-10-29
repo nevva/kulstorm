@@ -72,7 +72,9 @@ function openChest(c){
   grantItem(reward,p);
   if(c.gold) grantItem(rollChest(true,pool),p);
 }
-const MYSTERY_PRICE=10,WALL_GAMBLE_WIN=0.5;
+const MYSTERY_PRICE=10,MYSTERY_STEP=5,WALL_GAMBLE_WIN=0.5;
+// Each mystery item bought in a run makes the next one cost MYSTERY_STEP more (doubled for golden chests and boss walls).
+const mysteryCost=gold=>(MYSTERY_PRICE+MYSTERY_STEP*R.mysteries)*(gold?2:1);
 // Free coins from an empty chest follow the same boosts as enemy drops: Gold Rush, the Banker and the heat wave.
 function chestCoinRoll(gold){
   const k=(S.combos.has('goldrush')?2:1)*(hasPart('banker')?1.5:1)*(isW('heat')?1.5:1)*(gold?3:1);
@@ -82,7 +84,7 @@ function chestCoinRoll(gold){
 function offerMystery(c){
   const p=c.g.position.clone();
   if(mode!=='playing'){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0'); return; }
-  openItemShop(c.gold?tl('Empty golden chest'):tl('Empty chest'),[{type:'mystery',cost:MYSTERY_PRICE*(c.gold?2:1),gold:c.gold,p},{type:'coins',cost:0,gold:c.gold,p}]);
+  openItemShop(c.gold?tl('Empty golden chest'):tl('Empty chest'),[{type:'mystery',cost:mysteryCost(c.gold),gold:c.gold,p},{type:'coins',cost:0,gold:c.gold,p}]);
 }
 // Won coins go straight into the run's purse, the same as picking them up.
 function collectCoins(n){

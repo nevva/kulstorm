@@ -1,6 +1,6 @@
 'use strict';
 // ---------- XP crystals, run levels and the buy screen
-const R={xp:0,lvl:1,need:14,pending:0,reroll:5,offers:[],sel:0,title:'',spinning:false};
+const R={xp:0,lvl:1,need:14,pending:0,reroll:5,offers:[],sel:0,title:'',spinning:false,mysteries:0,coinsSpun:false};
 const xpOn=()=>OPT.xpshop&&OPT.coins;
 let xpGems=[]; const xpPool=[]; const xpMat=mat(0xb07cff,{e:0.6,r:0.2});
 function spawnXp(x,z,v){
@@ -48,7 +48,7 @@ function addXp(v){
   R.xp+=v; hudXp=-1;
   while(R.xp>=R.need){ R.xp-=R.need; R.lvl++; R.need=Math.round(R.need*1.35+4); R.pending++; }
 }
-function clearXp(){ xpGems.forEach(c=>{ scene.remove(c.g); xpPool.push(c.g); }); xpGems=[]; kiosk.active=false; kiosk.g.visible=false; R.xp=0; R.lvl=1; R.need=14; R.pending=0; R.reroll=5; hudXp=-1; }
+function clearXp(){ xpGems.forEach(c=>{ scene.remove(c.g); xpPool.push(c.g); }); xpGems=[]; kiosk.active=false; kiosk.g.visible=false; R.xp=0; R.lvl=1; R.need=14; R.pending=0; R.reroll=5; R.mysteries=0; R.coinsSpun=false; hudXp=-1; }
 const shopEl=$('shop');
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=ri(0,i); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function buildOffers(){
@@ -60,7 +60,7 @@ function buildOffers(){
   if(lockedUps.length&&Math.random()<0.5){ const u=pick(lockedUps); pool.push({type:'item',u,cost:runPrice(u)}); }
   if(!pool.length) pool.push({type:'heal',cost:15});
   // The chest gamble is always one of the three offers.
-  R.offers=shuffle(shuffle(pool).slice(0,2).concat({type:'mystery',cost:MYSTERY_PRICE,gold:false,p:{x:S.x,z:-2}}));
+  R.offers=shuffle(shuffle(pool).slice(0,2).concat({type:'mystery',cost:mysteryCost(false),gold:false,p:{x:S.x,z:-2}}));
 }
 function offerInfo(o){
   if(o.type==='lvl') return {col:hexCss(o.m.def.shirt),title:o.m.def.name+' → '+tl('lv {0}',o.m.lvl+1),desc:tl('+20% damage and +20% max HP, fully healed. Now level {0}.',o.m.lvl)};
@@ -99,7 +99,9 @@ function buyOffer(o){
   if(o.type==='lvl'){ const m=o.m; m.lvl++; m.maxHp=Math.round(m.maxHp*1.2); m.hp=m.maxHp; fxSparkle(m.g.position.x,1.4,m.g.position.z,C(m.def.shirt)); }
   else if(o.type==='heal'){ squad.forEach(m=>{ m.hp=m.maxHp; }); }
   else if(o.type==='item') grantItem(o.u,{x:S.x,z:-2});
-  else if(o.type==='mystery'||o.type==='coins'){ updatePower(0,true); $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun))); spinMystery(o); return false; }
+  // Only the first coin pick of a run spins; later ones pay out at once.
+  else if(o.type==='coins'&&R.coinsSpun){ collectCoins(chestCoinRoll(o.gold)); return true; }
+  else if(o.type==='mystery'||o.type==='coins'){ if(o.type==='coins') R.coinsSpun=true; else R.mysteries++; updatePower(0,true); $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun))); spinMystery(o); return false; }
   else { addMember(defById('banker')); }
   sfx.buy(); updatePower(0,true); renderBuy();
   return true;
