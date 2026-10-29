@@ -1,7 +1,7 @@
 'use strict';
 // ---------- chests: turn up on the road now and then; shoot one open or run into it for a random item.
 // The roll covers every item in the game (squad members, team perks, the unicorn and the power-ups in POWERUPS).
-// An item unlocked in the Armory comes out as it is; a locked one pays out coins instead and shows what you could have had.
+// Only items unlocked in the Armory come out. Before Money Maker chests are empty, but run coins can buy a mystery item from them.
 // Golden chests drop after a boss when there is no boss reward wall to pick, and roll with boss odds.
 let chests=[],nextChestAt=60;
 const needsPaybackCoins=()=>!labRun&&OPT.coins&&!isUnlocked('payback')&&bank+coinsRun<ITEM_PRICE.payback;
@@ -40,13 +40,14 @@ function hitChest(c,dmg,x,y,z){
 }
 // Power-ups that need an option that is off (Overdrive, jumping and rolling) never drop and are hidden in the Armory.
 const powerOn=u=>(OPT.overdrive||(u.id!=='battery'&&u.id!=='divine'))&&(OPT.obstacles||(u.id!=='nade'&&u.id!=='slowmo'));
-// Battery and Divine Touch only drop for real once Overdrive is unlocked; until then they are coin teasers like any locked item.
+// Battery and Divine Touch only drop once Overdrive is unlocked.
 const powerUsable=u=>hasAbility('overdrive')||(u.id!=='battery'&&u.id!=='divine');
 function chestPool(){
   return UPGRADES.filter(upgradeFits).concat(POWERUPS.filter(u=>(OPT.coins||(u.id!=='cash'&&u.id!=='jackpot'))&&powerOn(u)));
 }
-function rollChest(gold){
-  const pool=chestPool(),ws=pool.map(u=>rarityW(u,gold)*(u.kind==='power'?1.4:u.kind==='team'?0.7:1));
+const freeChestPool=()=>chestPool().filter(u=>isUnlocked(u.id)&&powerUsable(u));
+function rollChest(gold,pool){
+  const ws=pool.map(u=>rarityW(u,gold)*(u.kind==='power'?1.4:u.kind==='team'?0.7:1));
   let r=Math.random()*ws.reduce((a,b)=>a+b,0),i=0;
   for(;i<ws.length-1;i++){ r-=ws[i]; if(r<=0) break; }
   return pool[i];
@@ -56,19 +57,24 @@ function openChest(c){
   c.openT=0; addOD(0.05);
   sfx.upgrade(); shake(0.35);
   for(let i=0;i<22;i++){ const a=rand(0,Math.PI*2),sp=rand(1.5,4); blobs.spawn(p.x,0.8,p.z,Math.cos(a)*sp,rand(3,7),Math.sin(a)*sp,rand(0.5,0.9),0.16,0.05,WHITE,GOLD,C(0xff8a3d),-1,1,false,rand(1,4)); }
-  if(!hasAbility('moneymaker')){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0',tl('Buy Money Maker in the Armory to fill chests')); return; }
-  const reward=!c.gold&&needsPaybackCoins()?POWERUPS.find(u=>u.id==='cash'):rollChest(c.gold);
-  grantItem(reward,p,c.gold);
-  if(c.gold) grantItem(rollChest(true),p,true);
+  if(!hasAbility('moneymaker')){ offerMystery(c); return; }
+  const pool=freeChestPool(),reward=!c.gold&&needsPaybackCoins()?POWERUPS.find(u=>u.id==='cash'):rollChest(c.gold,pool);
+  grantItem(reward,p);
+  if(c.gold) grantItem(rollChest(true,pool),p);
 }
-function grantItem(u,p,gold){
-  if(!isUnlocked(u.id)||(u.kind==='power'&&!powerUsable(u))){
-    const n=Math.round(LOCKED_COINS[u.rarity]*(gold?3:1)*(1+dist/1500));
-    spawnCoins(p.x,p.z,n,1.2);
-    sayAt(p.x,2.6,p.z,u.name,'#b9bde0',tl('Locked · unlock it in the Armory'));
-    toast(tl('Locked: {0}',u.name));
-    return;
-  }
+const mysteryPrice=gold=>runPrice({rarity:gold?'rare':'common'});
+// An empty chest: if the run's coins cover it, pause and offer a random item (locked or not) for this run.
+function offerMystery(c){
+  const p=c.g.position.clone(),cost=mysteryPrice(c.gold);
+  if(mode!=='playing'||coinsRun<cost){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0',tl('Carry {0} coins to buy a mystery item',cost)); return; }
+  openItemShop(c.gold?tl('Empty golden chest'):tl('Empty chest'),[{type:'mystery',cost,gold:c.gold,p}]);
+}
+function grantMystery(o){
+  const pool=chestPool().filter(powerUsable);
+  grantItem(rollChest(o.gold,pool),o.p);
+  if(o.gold) grantItem(rollChest(true,pool),o.p);
+}
+function grantItem(u,p){
   const css=u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
   sayAt(p.x,2.6,p.z,u.name,css,u.desc);
   if(u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }

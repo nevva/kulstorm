@@ -1,6 +1,6 @@
 'use strict';
 // ---------- XP crystals, run levels and the buy screen
-const R={xp:0,lvl:1,need:14,pending:0,reroll:5,offers:[],sel:0};
+const R={xp:0,lvl:1,need:14,pending:0,reroll:5,offers:[],sel:0,title:''};
 const xpOn=()=>OPT.xpshop&&OPT.coins;
 let xpGems=[]; const xpPool=[]; const xpMat=mat(0xb07cff,{e:0.6,r:0.2});
 function spawnXp(x,z,v){
@@ -56,16 +56,20 @@ function buildOffers(){
   shuffle(squad.filter(m=>m.lvl<5)).slice(0,3).forEach(m=>pool.push({type:'lvl',m,cost:LVL_COST[m.lvl]}));
   if(squad.some(m=>m.hp<m.maxHp*0.95)) pool.push({type:'heal',cost:15});
   if(isUnlocked('banker')&&!hasPart('banker')&&squad.length<MAX_SQUAD&&Math.random()<0.45) pool.push({type:'banker',cost:30});
+  const lockedUps=UPGRADES.filter(u=>upgradeFits(u)&&!isUnlocked(u.id));
+  if(lockedUps.length&&Math.random()<0.5){ const u=pick(lockedUps); pool.push({type:'item',u,cost:runPrice(u)}); }
   if(!pool.length) pool.push({type:'heal',cost:15});
   R.offers=shuffle(pool).slice(0,3);
 }
 function offerInfo(o){
   if(o.type==='lvl') return {col:hexCss(o.m.def.shirt),title:o.m.def.name+' → '+tl('lv {0}',o.m.lvl+1),desc:tl('+20% damage and +20% max HP, fully healed. Now level {0}.',o.m.lvl)};
   if(o.type==='heal') return {col:'#ff5c7a',title:tl('Full Heal'),desc:tl('Heals the whole squad to full health.')};
+  if(o.type==='item') return {col:o.u.kind==='gubbe'?hexCss(o.u.shirt):WALL_CSS[o.u.rarity],title:o.u.name,desc:o.u.desc+' · '+tl('This run only.')};
+  if(o.type==='mystery') return {col:'#ffc83d',title:tl('Mystery item'),desc:o.gold?tl('Two random items from the chest, for this run only.'):tl('A random item from the chest, for this run only.')};
   return {col:'#ffc83d',title:tl('The Banker'),desc:tl('New squad member: damage rises 1% per coin you carry, up to ×4.')};
 }
 function renderBuy(){
-  $('shoptitle').textContent=tl('Level {0}!',R.lvl);
+  $('shoptitle').textContent=R.title||tl('Level {0}!',R.lvl);
   $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun)));
   const box=$('shopcards'); box.innerHTML='';
   R.offers.forEach((o,i)=>{
@@ -74,13 +78,13 @@ function renderBuy(){
     const h=document.createElement('h4'); h.textContent=inf.title; b.appendChild(h);
     const p=document.createElement('p'); p.textContent=inf.desc; b.appendChild(p);
     const pr=document.createElement('span'); pr.className='price'; pr.textContent=o.bought?tl('Bought'):(i+1)+' · '+tl('{0} coins',o.cost); b.appendChild(pr);
-    const stale=o.type==='lvl'&&(o.m.dead||squad.indexOf(o.m)<0||o.m.lvl>=5);
+    const stale=(o.type==='lvl'&&(o.m.dead||squad.indexOf(o.m)<0||o.m.lvl>=5))||(o.type==='item'&&!upgradeFits(o.u));
     b.disabled=!!o.bought||stale||coinsRun<o.cost||(o.type==='banker'&&(hasPart('banker')||squad.length>=MAX_SQUAD));
     if(i===R.sel) b.classList.add('sel');
     b.addEventListener('click',()=>{ R.sel=i; if(buyOffer(o)) closeShop(); });
     box.appendChild(b);
   });
-  const rr=$('shop-reroll'); rr.textContent=tl('New offers')+' · '+R.reroll; rr.disabled=coinsRun<R.reroll;
+  const rr=$('shop-reroll'); rr.hidden=!!R.title; rr.textContent=tl('New offers')+' · '+R.reroll; rr.disabled=coinsRun<R.reroll;
 }
 function buyOffer(o){
   const btn=$('offer'+R.offers.indexOf(o));
@@ -88,6 +92,8 @@ function buyOffer(o){
   coinsRun-=o.cost; o.bought=true; hudCoins=-1;
   if(o.type==='lvl'){ const m=o.m; m.lvl++; m.maxHp=Math.round(m.maxHp*1.2); m.hp=m.maxHp; fxSparkle(m.g.position.x,1.4,m.g.position.z,C(m.def.shirt)); }
   else if(o.type==='heal'){ squad.forEach(m=>{ m.hp=m.maxHp; }); }
+  else if(o.type==='item') grantItem(o.u,{x:S.x,z:-2});
+  else if(o.type==='mystery') grantMystery(o);
   else { addMember(defById('banker')); }
   sfx.buy(); updatePower(0,true); renderBuy();
   return true;
@@ -96,8 +102,15 @@ let shopRelock=false;
 function openShop(){
   shopRelock=locked(); unlockMouse();
   if(mode!=='playing'||!xpOn()) { R.pending=0; return; }
-  R.pending--; mode='shop'; keys.l=keys.r=false; drag=null;
+  R.pending--; mode='shop'; keys.l=keys.r=false; drag=null; R.title='';
   buildOffers(); R.sel=Math.max(0,R.offers.findIndex(o=>coinsRun>=o.cost)); renderBuy(); shopEl.hidden=false; sfx.level();
+  $('shop-done').focus({preventScroll:true});
+}
+// The same pause screen, with fixed offers and no rerolls (an empty chest uses it).
+function openItemShop(title,offers){
+  shopRelock=locked(); unlockMouse();
+  mode='shop'; keys.l=keys.r=false; drag=null; R.title=title; R.offers=offers; R.sel=0;
+  renderBuy(); shopEl.hidden=false; sfx.level();
   $('shop-done').focus({preventScroll:true});
 }
 function closeShop(){
@@ -108,5 +121,5 @@ function closeShop(){
   updateHUD();
 }
 $('shop-done').addEventListener('click',closeShop);
-function shopReroll(){ if(coinsRun<R.reroll){ $('shopwallet').textContent=tl("Can't afford new offers")+' · '+tl('{0} coins this run',fmt(Math.floor(coinsRun))); sfx.hurt(); return; } coinsRun-=R.reroll; R.reroll+=5; hudCoins=-1; buildOffers(); R.sel=clamp(R.sel,0,R.offers.length-1); renderBuy(); sfx.buy(); }
+function shopReroll(){ if(R.title) return; if(coinsRun<R.reroll){ $('shopwallet').textContent=tl("Can't afford new offers")+' · '+tl('{0} coins this run',fmt(Math.floor(coinsRun))); sfx.hurt(); return; } coinsRun-=R.reroll; R.reroll+=5; hudCoins=-1; buildOffers(); R.sel=clamp(R.sel,0,R.offers.length-1); renderBuy(); sfx.buy(); }
 $('shop-reroll').addEventListener('click',shopReroll);

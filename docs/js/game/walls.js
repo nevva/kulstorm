@@ -8,13 +8,13 @@ function upgradeFits(u){
   return !(u.unique&&hasPart(u.id))&&!(u.max&&S.perks.filter(q=>q.id===u.id).length>=u.max)&&!(squad.length>=MAX_SQUAD&&u.kind==='gubbe')&&!(!OPT.team&&u.kind==='team')&&!(u.kind==='pet'&&(!OPT.unicorns||unicorns.length>=2));
 }
 const rarityW=(u,boss)=>boss?(u.rarity==='common'?10:u.rarity==='rare'?35:55):(u.rarity==='common'?60:u.rarity==='rare'?30:11);
-// Walls only offer what is unlocked in the Armory, so a new player's first run has none.
+// Walls offer any upgrade, unlocked ones more often. A locked one costs run coins (see wallCost) and lasts this run.
 function rollUpgrades(n,boss){
-  const pool=UPGRADES.filter(u=>upgradeFits(u)&&isUnlocked(u.id));
+  const pool=UPGRADES.filter(upgradeFits);
   const picks=[];
   if(boss){ const ep=pool.filter(u=>u.rarity==='epic'); if(ep.length){ const u=pick(ep); picks.push(u); pool.splice(pool.indexOf(u),1); } }
   while(picks.length<n&&pool.length){
-    const ws=pool.map(u=>rarityW(u,boss)*(u.kind==='team'?0.7:1));
+    const ws=pool.map(u=>rarityW(u,boss)*(u.kind==='team'?0.7:1)*(isUnlocked(u.id)?1:0.5));
     let r=Math.random()*ws.reduce((a,b)=>a+b,0),idx=0;
     for(;idx<ws.length-1;idx++){ r-=ws[idx]; if(r<=0) break; }
     picks.push(pool.splice(idx,1)[0]);
@@ -27,14 +27,15 @@ function wrapText(x,text,maxW){
   if(line) lines.push(line);
   return lines;
 }
-function signTexture(u,boss){
+const wallCost=u=>isUnlocked(u.id)?0:runPrice(u);
+function signTexture(u,boss,cost){
   const c=document.createElement('canvas'); c.width=512; c.height=384; const x=c.getContext('2d');
   x.fillStyle='#fff8e6'; x.fillRect(0,0,512,384);
   x.fillStyle=boss?'#ffc83d':WALL_CSS[u.rarity]; x.fillRect(0,0,512,72);
   if(boss){ x.strokeStyle='#ffc83d'; x.lineWidth=14; x.strokeRect(7,7,498,370); }
   x.textAlign='center'; x.textBaseline='middle';
   x.fillStyle='#0d1030'; x.font='800 30px Nunito, sans-serif';
-  x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
+  if(cost) x.fillText(tl('{0} COINS · THIS RUN ONLY',cost),256,38); else x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
   let fs=54; x.font=fs+'px Bungee, Impact, sans-serif';
   while(x.measureText(u.name).width>470&&fs>28){ fs-=4; x.font=fs+'px Bungee, Impact, sans-serif'; }
   x.fillStyle=u.kind==='gubbe'?hexCss(u.shirt):'#0d1030';
@@ -45,14 +46,14 @@ function signTexture(u,boss){
   const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=4; return t;
 }
 const wallGoldMat=mat(0xffc83d,{r:0.2,m:0.6,e:0.35});
-function buildWall(u,boss){
+function buildWall(u,boss,cost){
   const g=new THREE.Group(),post=boss?wallGoldMat:wallPostMat;
   const m=new THREE.MeshStandardMaterial({color:C(WALL_COL[u.rarity]),roughness:0.28,flatShading:true,emissive:new THREE.Color(0),emissiveIntensity:1});
   g.add(M(G.box,m,[3.6,2.3,0.5],[0,1.15,0]));
   [-1,1].forEach(s=>g.add(M(G.box,post,[0.22,2.65,0.62],[s*1.8,1.32,0])));
   g.add(M(G.box,post,[3.82,0.22,0.62],[0,2.54,0]));
   if(boss) [-1,1].forEach(s=>g.add(M(G.ico0,wallGoldMat,[0.3,0.3,0.3],[s*1.8,2.85,0],false)));
-  const tex=signTexture(u,boss),sm=new THREE.MeshBasicMaterial({map:tex});
+  const tex=signTexture(u,boss,cost),sm=new THREE.MeshBasicMaterial({map:tex});
   const sign=new THREE.Mesh(G.plane,sm); sign.scale.set(2.8,2.1,1); sign.position.set(0,1.15,0.26); g.add(sign);
   g.add(M(G.box,wallBarBg,[3.2,0.16,0.16],[0,2.92,0],false));
   const bar=M(G.box,wallBarFg,[3.2,0.12,0.2],[0,2.92,0],false); g.add(bar);
@@ -65,8 +66,8 @@ function spawnWalls(lanes,boss){
   const hp=60*DIFF.hp*PF*(isW('heat')?1.3:1)*(boss?0.5:1),gid=boss?++wallGroupId:0;
   picks.forEach((u,i)=>{
     const lane=lanes[i];
-    const g=buildWall(u,boss); g.position.set(LANE_X[lane],0,VIEW.spawn); scene.add(g);
-    walls.push({u,g,lane,hp,maxHp:hp,dead:false,flash:0,sq:0,colL:g.userData.m.color,accDmg:0,accTier:0,accT:-1,boss:!!boss,gid});
+    const cost=wallCost(u),g=buildWall(u,boss,cost); g.position.set(LANE_X[lane],0,VIEW.spawn); scene.add(g);
+    walls.push({u,cost,g,lane,hp,maxHp:hp,dead:false,flash:0,sq:0,colL:g.userData.m.color,accDmg:0,accTier:0,accT:-1,boss:!!boss,gid});
   });
   if(boss){ toast(tl('Boss reward! Pick one')); sfx.combo(); }
   else { toast(picks.length>1?tl('Upgrades!'):tl('Upgrade!')); sfx.zone(); }
@@ -96,6 +97,10 @@ function breakWall(w){
   removeWall(w);
   if(w.gid) for(const o of walls){ if(o!==w&&!o.dead&&o.gid===w.gid){ o.dead=true; fxShatter(o.g.position.x,o.g.position.z,wallPieceMat(o),o.boss?wallGoldMat:wallPostMat,0.7); removeWall(o); } }
   if(OPT.coins) spawnCoin(p.x+rand(-0.5,0.5),p.z,Math.min(3,stackMax()));
+  if(w.cost){
+    if(coinsRun<w.cost){ sayAt(p.x,2.6,p.z,tl('Not enough coins'),'#b9bde0',tl('{0} costs {1} coins',w.u.name,w.cost)); sfx.hurt(); return; }
+    coinsRun-=w.cost; hudCoins=-1; pushDmg(p.x,3.4,p.z,'-'+w.cost,'#ffc83d',true); sfx.buy();
+  }
   if(w.u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }
   else if(w.u.kind==='gubbe'){ const m=addMember(w.u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(w.u.shirt)); toast(tl('{0} joins!',w.u.name)); }
   else { applyTeamPerk(w.u); toast(w.u.name+'!'); }

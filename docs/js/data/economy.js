@@ -38,5 +38,6 @@ const STARTER_ITEMS=['cash','patch'];
 const RARITY_PRICE={common:60,rare:150,epic:320};
 const ITEM_PRICE={payback:5,moneymaker:8,bulletproof:10,dbljump:15,pound:20,overdrive:30,frenzy:25,recruit:30,power:35,steel:40,medic:45,fastload:45,bubble:80,bomb:90,battery:110,line:70,slowmo:100,nade:120,divine:300,jackpot:220};
 const itemPrice=u=>ITEM_PRICE[u.id]||RARITY_PRICE[u.rarity];
-// Coins a chest pays out instead when it rolls an item you have not unlocked.
-const LOCKED_COINS={common:5,rare:9,epic:16};
+// Coins from the run it costs to take a locked item (or a mystery item from an empty chest) for that run only.
+const RUN_PRICE={common:10,rare:20,epic:35};
+const runPrice=u=>Math.round(RUN_PRICE[u.rarity]*(1+dist/1500));
