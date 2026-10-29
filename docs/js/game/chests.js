@@ -5,7 +5,21 @@
 // Golden chests drop after a boss when there is no boss reward wall to pick, and roll with boss odds.
 let chests=[],nextChestAt=60;
 const needsPaybackCoins=()=>!labRun&&OPT.coins&&!isUnlocked('payback')&&bank+coinsRun<ITEM_PRICE.payback;
-const chestWood=mat(0x9a6238,{r:0.6}),chestBand=mat(0xffc83d,{r:0.25,m:0.6,e:0.25}),chestGold=mat(0xffd21f,{r:0.2,m:0.7,e:0.45}),chestIn=mat(0x2a160c,{r:0.8});
+const chestWood=mat(0x9a6238,{r:0.6}),chestBand=mat(0xffc83d,{r:0.25,m:0.6,e:0.25}).clone(),chestGold=mat(0xffd21f,{r:0.2,m:0.7,e:0.45}).clone(),chestIn=mat(0x2a160c,{r:0.8});
+// Soft additive glow: a halo behind the chest and a pool of light on the road, pulsing so chests stand out as pickups.
+const chestGlowTex=(function(){
+  const c=document.createElement('canvas'); c.width=c.height=128; const x=c.getContext('2d'),gr=x.createRadialGradient(64,64,0,64,64,64);
+  gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(0.35,'rgba(255,255,255,.45)'); gr.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=gr; x.fillRect(0,0,128,128); return new THREE.CanvasTexture(c);
+})();
+const glowOpts=col=>({map:chestGlowTex,color:C(col),transparent:true,blending:THREE.AdditiveBlending,depthWrite:false});
+const chestHalo=[new THREE.SpriteMaterial(glowOpts(0xffb84a)),new THREE.SpriteMaterial(glowOpts(0xffe066))];
+const chestFloorGlow=[new THREE.MeshBasicMaterial(glowOpts(0xffb84a)),new THREE.MeshBasicMaterial(glowOpts(0xffe066))];
+function pulseChestGlow(){
+  const k=0.5+0.5*Math.sin(time*4);
+  chestHalo.forEach((m,i)=>m.opacity=(i?0.75:0.55)+0.25*k); chestFloorGlow.forEach((m,i)=>m.opacity=(i?0.7:0.5)+0.25*k);
+  chestBand.emissiveIntensity=0.4+0.8*k; chestGold.emissiveIntensity=0.5+0.6*k;
+}
 function buildChest(gold){
   const g=new THREE.Group(),body=gold?chestGold:chestWood,band=gold?chestWood:chestBand;
   g.add(M(G.box,body,[1.3,0.66,0.86],[0,0.33,0]));
@@ -17,6 +31,8 @@ function buildChest(gold){
   [-0.42,0.42].forEach(x=>lid.add(M(G.box,band,[0.14,0.32,0.94],[x,0.15,0.43],false)));
   lid.add(M(G.box,chestBand,[0.24,0.28,0.08],[0,0.02,0.9],false));
   g.add(lid);
+  const halo=new THREE.Sprite(chestHalo[gold?1:0]); halo.scale.set(3.2,2.6,1); halo.position.set(0,0.6,-0.3); halo.renderOrder=-1; g.add(halo);
+  const pool=new THREE.Mesh(G.plane,chestFloorGlow[gold?1:0]); pool.rotation.x=-Math.PI/2; pool.scale.set(3.4,3.4,1); pool.position.y=0.03; g.add(pool);
   if(gold) g.scale.setScalar(1.25);
   g.userData={lid};
   return g;
@@ -103,6 +119,7 @@ function applyPowerup(u,p){
 function updateChests(dt){
   if(mode==='playing') for(const k of ['pwRate','pwDmg','pwLine','pwNade','pwSlow']) if(S[k]>0){ S[k]=Math.max(0,S[k]-dt); if(k==='pwLine'&&!S[k]) layoutSquad(); }
   updateNades(dt);
+  if(chests.length) pulseChestGlow();
   for(const c of chests){
     const p=c.g.position,s0=c.gold?1.25:1; p.z+=scroll*dt;
     if(c.openT>=0){
