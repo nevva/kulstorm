@@ -157,7 +157,9 @@ function updateDmg(dt){
   for(let i=dmgLive.length-1;i>=0;i--){
     const n=dmgLive[i]; n.life-=dt;
     if(n.life<=0){ n.el.hidden=true; dmgPool.push(n.el); dmgLive.splice(i,1); continue; }
-    n.y+=1.4*dt; n.x+=n.vx*dt; n.z+=scroll*dt;
+    // a stacked number holds still over its target while hits keep coming, then floats away
+    if(!(n.num!=null&&n.life>n.max-0.2)) n.y+=1.4*dt;
+    n.x+=n.vx*dt; n.z+=scroll*dt;
     tmpV.set(n.x,n.y-curveDrop(n.x,n.z),n.z).project(camera);
     if(tmpV.z>1){ n.el.style.opacity='0'; continue; }
     const t=n.life/n.max;

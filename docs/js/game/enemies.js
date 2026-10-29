@@ -224,7 +224,7 @@ const msLevel=v=>{ let i=0; while(i<DMG_MILESTONES.length&&v>=DMG_MILESTONES[i])
 function restartAnim(el,cls){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
 function dmgMilestone(n,lv,x,y,z){
   const el=n.el; el.style.fontSize=Math.min(44,(n.tier===4?27:15)+lv*4)+'px';
-  restartAnim(el,lv>=4?'ms-hi':'ms'); n.life=n.max+0.4;
+  el.classList.remove('bump'); restartAnim(el,lv>=4?'ms-hi':'ms'); n.life=n.max+0.4;
   fxSparkle(x,y-0.4,z,GOLD); for(let i=0;i<6+lv*3;i++){ const a=rand(0,Math.PI*2),sp=rand(2,4+lv); blobs.spawn(x,y-0.5,z,Math.cos(a)*sp,rand(1,4),Math.sin(a)*sp,rand(0.4,0.7),0.12,0.05,WHITE,GOLD,C(0xff8a3d),-1,1,false,rand(1,4)); }
   sfx.milestone(lv); if(lv>=3) shake(0.15+0.05*lv);
 }
@@ -234,7 +234,9 @@ function pushNum(t,x,y,z,val,tier){
   if(n&&n.life>0&&dmgLive.indexOf(n)>=0){
     const lv0=msLevel(n.num); n.num+=val; n.tier=Math.max(n.tier,tier); n.el.textContent=String(Math.round(n.num)); n.el.style.color=TIER_CSS[n.tier]; n.el.classList.toggle('big',n.tier===4);
     n.x=x; n.y=y; n.z=z; n.life=n.max;
-    const lv=msLevel(n.num); if(lv>lv0) dmgMilestone(n,lv,x,y,z); else restartAnim(n.el,'bump');
+    const lv=msLevel(n.num);
+    if(lv>lv0){ dmgMilestone(n,lv,x,y,z); n.popAt=time; }
+    else if(time-(n.popAt||0)>0.25){ restartAnim(n.el,'bump'); n.popAt=time; }
     return;
   }
   const before=dmgLive.length; pushDmg(x,y,z,String(Math.round(val)),TIER_CSS[tier],tier===4);
