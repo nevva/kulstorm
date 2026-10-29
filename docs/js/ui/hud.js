@@ -65,12 +65,12 @@ window.addEventListener('deviceorientation',e=>{
 });
 // iOS only reports orientation after the player allows it, which must be asked from a tap.
 function askTilt(){ const D=window.DeviceOrientationEvent; if(OPT.gyro&&D&&typeof D.requestPermission==='function') D.requestPermission().catch(()=>{}); }
-window.addEventListener('touchend',askTilt,{once:true});
+['touchend','click'].forEach(ev=>window.addEventListener(ev,askTilt,{once:true}));
 function updateTilt(dt){
   let tx=0,ty=0;
   if(OPT.gyro&&tilt.bx!=null){
-    const k=1-Math.exp(-dt*0.35); tilt.bx+=(tilt.x-tilt.bx)*k; tilt.by+=(tilt.y-tilt.by)*k;
-    tx=clamp((tilt.x-tilt.bx)/22,-1,1); ty=clamp((tilt.y-tilt.by)/22,-1,1);
+    const k=1-Math.exp(-dt*0.15); tilt.bx+=(tilt.x-tilt.bx)*k; tilt.by+=(tilt.y-tilt.by)*k;
+    tx=clamp((tilt.x-tilt.bx)/15,-1,1); ty=clamp((tilt.y-tilt.by)/15,-1,1);
   }
   const s=1-Math.exp(-dt*8); tilt.ox+=(tx-tilt.ox)*s; tilt.oy+=(ty-tilt.oy)*s;
 }
@@ -82,6 +82,6 @@ function updateCamera(dt){
   camX+=(px*0.35-camX)*(1-Math.exp(-dt*4));
   const want=(OPT.dyncam?clamp(0.78+0.065*(squad.length-1),0.78,1.32):1)*VIEW.scale*(S.odT>0?0.9:1);
   camK+=(want-camK)*(1-Math.exp(-dt*1.5));
-  camera.position.set(camX+sx+tilt.ox*1.1,CAM0.y*camK+sy-tilt.oy*0.7,CAM0.z*camK);
+  camera.position.set(camX+sx+tilt.ox*2.6,CAM0.y*camK+sy-tilt.oy*1.6,CAM0.z*camK);
   camera.lookAt(camX*0.6+sx,0.9+sy,CAM0.look*camK);
 }

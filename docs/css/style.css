@@ -20,7 +20,7 @@ body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font-body)
 *{touch-action:manipulation}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;background:#8ecbff}
 #dmgs{position:fixed;inset:0;pointer-events:none;overflow:hidden}
-.dmg{position:absolute;left:0;top:0;font-family:var(--font-display);font-size:15px;color:#fff;text-shadow:0 2px 0 var(--ink),0 0 6px rgba(0,0,0,.5);will-change:transform,opacity;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dmg{position:absolute;left:0;top:0;font-family:var(--font-display);font-size:15px;color:#fff;text-shadow:0 2px 0 var(--ink),0 0 6px rgba(0,0,0,.5);will-change:translate,scale,opacity;white-space:nowrap;font-variant-numeric:tabular-nums}
 .dmg.big{font-size:27px}
 .dmg.bump{animation:dmgbump .16s ease-out}
 .dmg.ms{animation:dmgms .45s cubic-bezier(.2,1.6,.4,1)}

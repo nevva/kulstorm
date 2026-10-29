@@ -162,7 +162,8 @@ function updateDmg(dt){
     if(tmpV.z>1){ n.el.style.opacity='0'; continue; }
     const t=n.life/n.max;
     n.el.style.opacity=String(t<0.4?t/0.4:1);
-    n.el.style.transform='translate(-50%,-50%) translate('+((tmpV.x+1)/2*w).toFixed(1)+'px,'+((1-tmpV.y)/2*h).toFixed(1)+'px)';
+    // the translate property (not transform) keeps the pop animation's scale centred on the number
+    n.el.style.translate='calc('+((tmpV.x+1)/2*w).toFixed(1)+'px - 50%) calc('+((1-tmpV.y)/2*h).toFixed(1)+'px - 50%)';
   }
 }
 function clearDmg(){ dmgLive.forEach(n=>{ n.el.hidden=true; dmgPool.push(n.el); }); dmgLive.length=0; }

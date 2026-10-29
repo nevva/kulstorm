@@ -242,7 +242,7 @@ function renderOpts(boxId){
   OPT_DEFS.forEach(o=>{
     const l=document.createElement('label'); l.className='tog';
     const i=document.createElement('input'); i.type='checkbox'; i.id=(boxId||'opts')+'-'+o[0]; i.checked=OPT[o[0]];
-    i.addEventListener('change',()=>{ OPT[o[0]]=i.checked; saveOpts(); if(S&&S.A&&o[0]==='combos') recomputeAuras(); if(o[0]==='front'||o[0]==='snake') layoutSquad(); if(o[0]==='planet') applyCurve(); if(o[0]==='weather'){ if(!OPT.weather){ W.fixed=null; setWeather('clear',true); } } hudCoins=-1; });
+    i.addEventListener('change',()=>{ OPT[o[0]]=i.checked; saveOpts(); if(S&&S.A&&o[0]==='combos') recomputeAuras(); if(o[0]==='front'||o[0]==='snake') layoutSquad(); if(o[0]==='planet') applyCurve(); if(o[0]==='gyro'&&OPT.gyro) askTilt(); if(o[0]==='weather'){ if(!OPT.weather){ W.fixed=null; setWeather('clear',true); } } hudCoins=-1; });
     const s=document.createElement('span'); s.textContent=o[1]; const sm=document.createElement('small'); sm.textContent=o[2]; s.appendChild(sm);
     l.append(i,s); box.appendChild(l);
   });
