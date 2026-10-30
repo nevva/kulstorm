@@ -55,6 +55,7 @@ function updateSquad(dt){
   }
   squad.forEach(m=>{
     const g=m.g,u=g.userData,t=time*13+m.phase;
+    m.blinkT=(m.blinkT===undefined?rand(1,4):m.blinkT)-dt; if(u.eyes){ const shut=m.blinkT<0.12; u.eyes.forEach(e=>e.scale.y=shut?0.15:1); } if(m.blinkT<0) m.blinkT=rand(2,5);
     g.rotation.z=clamp((g.position.x-S.x)*0.12,-0.3,0.3);
     u.legL.rotation.x=Math.sin(t)*0.9; u.legR.rotation.x=-Math.sin(t)*0.9;
     const air=m.jy||0;

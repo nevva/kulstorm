@@ -30,12 +30,12 @@ function buildHairHat(g,fem,hair,skin,leader,o){
   const hat=o?o.hat:!leader&&Math.random()<0.4?pick(HATS):null;
   const hc=arr=>o?HAT_COL[o.hatCol]:pick(arr);
   if(hat&&!HAT_OK.has(style)) style=o?(fem?'long':'short'):fem?pick(['long','ponytail','bob']):pick(['short','buzz','bald']);
-  const top=()=>g.add(M(G.box,hair,[0.5,0.16,0.5],[0,1.72,0])),back=(h)=>g.add(M(G.box,hair,[0.5,h||0.22,0.1],[0,1.67-(h||0.22)/2,0.22],false));
-  const dome=()=>g.add(M(G.sph,skin,[0.235,0.1,0.235],[0,1.67,0]));
+  const top=()=>g.add(M(G.rsph,hair,[0.268,0.17,0.268],[0,1.58,0.01])),back=(h)=>g.add(M(G.rsph,hair,[0.25,(h||0.22)*0.75,0.13],[0,1.62-(h||0.22)/2,0.15],false));
+  const dome=()=>{};
   switch(style){
     case 'short': top(); back(); break;
     case 'pixie': top(); back(0.3); g.add(M(G.box,hair,[0.3,0.08,0.14],[-0.08,1.77,-0.18],false)); break;
-    case 'buzz': g.add(M(G.box,hair,[0.48,0.06,0.48],[0,1.69,0])); g.add(M(G.box,hair,[0.48,0.14,0.04],[0,1.6,0.235],false)); break;
+    case 'buzz': g.add(M(G.rsph,hair,[0.258,0.12,0.258],[0,1.6,0.01])); break;
     case 'spiky': g.add(M(G.box,hair,[0.48,0.08,0.48],[0,1.7,0])); for(const [x,z] of [[-0.14,-0.12],[0.14,-0.12],[0,0],[-0.14,0.13],[0.14,0.13]]) g.add(M(G.cone4,hair,[0.1,0.24,0.1],[x,1.85,z],false)); back(0.18); break;
     case 'mohawk': g.add(M(G.box,hair,[0.12,0.24,0.5],[0,1.78,0.01])); break;
     case 'afro': g.add(M(G.sph,hair,[0.36,0.3,0.36],[0,1.72,0.05])); break;
@@ -66,39 +66,81 @@ function buildHairHat(g,fem,hair,skin,leader,o){
   return 1.84;
 }
 function ponytailOn(g,hair){ g.add(M(G.box,hair,[0.14,0.1,0.1],[0,1.6,0.27],false)); const t=M(G.box,hair,[0.16,0.44,0.14],[0,1.42,0.36],false); t.rotation.x=-0.25; g.add(t); }
+// Squad members are built from rounded, smoothly shaded pieces. The face points to -z (the camera mostly sees the back),
+// so role gear and medal ribbons sit on the back where they show in play.
 function buildGubbe(def){
   const g=new THREE.Group();
   const ninja=def.id==='ninja',o=def.outfit,fem=o?o.fem:Math.random()<0.5;
-  const skin=mat(o?o.skin:SKIN_COL[0],{r:0.45}),shirt=mat(o?o.shirt:def.shirt,{r:0.28}),pants=ninja?mat(0x1c1c24,{r:0.5}):mat(o?o.pants:PANTS_COL[0],{r:0.4}),boots=mat(0x263238,{r:0.3}),hair=mat(o?o.hairCol:pick(HAIR_COL),{r:0.5});
+  const S_=c=>mat(c,{r:0.45,s:true});
+  const skin=S_(o?o.skin:SKIN_COL[0]),shirt=mat(o?o.shirt:def.shirt,{r:0.32,s:true}),pants=ninja?S_(0x1c1c24):S_(o?o.pants:PANTS_COL[0]),boots=mat(0x263238,{r:0.3,s:true}),hair=S_(o?o.hairCol:pick(HAIR_COL));
   const legL=new THREE.Group(),legR=new THREE.Group();
-  legL.position.set(-0.15,0.55,0); legR.position.set(0.15,0.55,0);
-  [legL,legR].forEach(l=>{ l.add(M(G.box,pants,[0.22,0.45,0.22],[0,-0.22,0])); l.add(M(G.box,boots,[0.24,0.14,0.32],[0,-0.5,-0.04])); g.add(l); });
-  g.add(M(G.box,shirt,[fem?0.56:0.62,0.62,0.38],[0,0.9,0]));
-  g.add(M(G.box,skin,[0.46,0.44,0.46],[0,1.45,0]));
+  legL.position.set(-0.14,0.55,0); legR.position.set(0.14,0.55,0);
+  [legL,legR].forEach(l=>{ l.add(M(G.rcyl,pants,[0.11,0.42,0.11],[0,-0.2,0])); l.add(M(G.rsph,boots,[0.13,0.09,0.18],[0,-0.47,-0.04])); g.add(l); });
+  const tr=fem?0.26:0.29;
+  g.add(M(G.rsph,pants,[tr*0.95,0.13,tr*0.72],[0,0.62,0]));
+  g.add(M(G.rcyl,shirt,[tr,0.46,tr*0.74],[0,0.86,0]));
+  g.add(M(G.rsph,shirt,[tr,0.14,tr*0.74],[0,1.09,0]));
+  g.add(M(G.rcyl,skin,[0.09,0.1,0.09],[0,1.2,0],false));
+  g.add(M(G.rsph,skin,[0.25,0.24,0.25],[0,1.45,0]));
   let band=null,hatTop=0;
-  if(def.id==='tank'){ g.add(M(G.sph,mat(0x37474f,{r:0.3,m:0.3}),[0.3,0.26,0.3],[0,1.6,0])); if(fem) ponytailOn(g,hair); }
+  if(def.id==='tank'){ g.add(M(G.rsph,mat(0x37474f,{r:0.3,m:0.3,s:true}),[0.29,0.22,0.29],[0,1.56,0.01])); if(fem) ponytailOn(g,hair); }
   else if(ninja){
-    const hood=mat(0x1c1c24,{r:0.5}),red=mat(0xe53935,{r:0.35});
-    g.add(M(G.box,hood,[0.5,0.5,0.5],[0,1.47,0.01])); g.add(M(G.box,hood,[0.48,0.24,0.06],[0,1.36,-0.24],false));
-    g.add(M(G.box,red,[0.52,0.09,0.52],[0,1.66,0]));
-    band=new THREE.Group(); band.position.set(0,1.66,0.27); band.add(M(G.box,red,[0.06,0.06,0.42],[-0.06,0,0.2],false)); band.add(M(G.box,red,[0.06,0.06,0.36],[0.06,-0.03,0.17],false)); g.add(band);
+    const hood=S_(0x1c1c24),red=S_(0xe53935);
+    g.add(M(G.rsph,hood,[0.27,0.27,0.27],[0,1.46,0.01])); g.add(M(G.box,hood,[0.4,0.16,0.06],[0,1.38,-0.22],false));
+    g.add(M(G.rcyl,red,[0.275,0.08,0.275],[0,1.6,0]));
+    band=new THREE.Group(); band.position.set(0,1.6,0.26); band.add(M(G.box,red,[0.06,0.06,0.42],[-0.06,0,0.2],false)); band.add(M(G.box,red,[0.06,0.06,0.36],[0.06,-0.03,0.17],false)); g.add(band);
   }
   else hatTop=buildHairHat(g,fem,hair,skin,def.id==='leader',o);
-  if(def.id==='medic'){ const red=mat(0xff1744,{r:0.3}); g.add(M(G.box,red,[0.08,0.26,0.04],[0,0.95,-0.2],false)); g.add(M(G.box,red,[0.26,0.08,0.04],[0,0.95,-0.2],false)); }
-  if(def.id==='leader'&&!(o&&o.hat)){ g.add(M(G.box,mat(0xffd21f,{r:0.3}),[0.54,0.1,0.54],[0,1.82,0],false)); }
-  const w=mat(0xffffff,{r:0.2}),b=mat(0x111111,{r:0.2});
-  [-1,1].forEach(s=>{ g.add(M(G.box,w,[0.1,0.1,0.04],[s*0.11,1.47,-0.235],false)); g.add(M(G.box,b,[0.05,0.06,0.03],[s*0.11,1.46,-0.255],false)); });
+  if(def.id==='leader'&&!(o&&o.hat)) g.add(M(G.rcyl,mat(0xffd21f,{r:0.3,m:0.4,s:true}),[0.27,0.08,0.27],[0,1.62,0],false));
+  // face: eyes (they blink), brows and a small mouth
+  const w=mat(0xffffff,{r:0.2,s:true}),b=mat(0x111111,{r:0.2,s:true}),eyes=[];
+  [-1,1].forEach(s=>{ const e=new THREE.Group(); e.position.set(s*0.09,1.48,-0.21); e.add(M(G.rsph,w,[0.055,0.065,0.035],[0,0,0],false)); e.add(M(G.rsph,b,[0.032,0.04,0.02],[0,-0.005,-0.025],false)); g.add(e); eyes.push(e);
+    const br=M(G.box,hair,[0.08,0.022,0.02],[s*0.09,1.565,-0.215],false); br.rotation.z=-s*0.15; g.add(br); });
+  g.add(M(G.box,mat(0x7b3b2b,{r:0.5}),[0.08,0.022,0.02],[0,1.36,-0.24],false));
   const armL=new THREE.Group(),armR=new THREE.Group();
-  const ax=fem?0.37:0.4; armL.position.set(-ax,1.12,0); armR.position.set(ax,1.12,0);
-  [armL,armR].forEach(a=>{ a.add(M(G.box,shirt,[0.18,0.5,0.18],[0,-0.25,0])); a.add(M(G.box,skin,[0.19,0.14,0.19],[0,-0.55,0])); a.rotation.x=1.35; g.add(a); });
+  const ax=tr+0.08; armL.position.set(-ax,1.08,0); armR.position.set(ax,1.08,0);
+  [armL,armR].forEach(a=>{ a.add(M(G.rcyl,shirt,[0.085,0.42,0.085],[0,-0.2,0])); a.add(M(G.rsph,skin,[0.09,0.09,0.09],[0,-0.46,0])); a.rotation.x=1.35; g.add(a); });
+  roleGear(g,def,tr);
+  medalRibbons(g,def,tr);
   const {gun,tip}=buildGun(def,g);
   const bar=new THREE.Group(); bar.position.set(0,Math.max(2.12,hatTop+0.14),0);
   bar.add(M(G.box,barBg,[0.74,0.12,0.1],[0,0,0],false));
   const fg=M(G.box,barGreen,[0.7,0.09,0.14],[0,0,0],false); bar.add(fg);
   g.add(bar);
   if(def.id==='tank') g.scale.setScalar(1.22);
-  g.userData={legL,legR,armL,armR,gun,tip,barFg:fg,band};
+  g.userData={legL,legR,armL,armR,gun,tip,barFg:fg,band,eyes};
   return g;
+}
+// Back-mounted gear so every recruit type reads at a glance from behind.
+function roleGear(g,def,tr){
+  const zb=tr*0.74,S_=(c,o)=>mat(c,Object.assign({r:0.4,s:true},o||{})),add=(geo,m,s,p,rot)=>{ const x=M(geo,m,s,p,false); if(rot) x.rotation.set(rot[0],rot[1],rot[2]); g.add(x); return x; };
+  const red=S_(0xff1744),white=S_(0xfafafa),gold=S_(0xffd21f,{m:0.5,r:0.3}),steel=S_(0x90a4ae,{m:0.5,r:0.3}),brown=S_(0x6d4c41),dark=S_(0x37474f);
+  const pack=(c,w,h)=>add(G.box,S_(c),[w||0.34,h||0.38,0.16],[0,0.9,zb+0.08]);
+  switch(def.id){
+    case 'medic': pack(0xfafafa); add(G.box,red,[0.06,0.2,0.02],[0,0.92,zb+0.17]); add(G.box,red,[0.2,0.06,0.02],[0,0.92,zb+0.17]); break;
+    case 'magnet': { const m=S_(0xe53935); [-1,1].forEach(s=>{ add(G.rcyl,m,[0.05,0.3,0.05],[s*0.1,0.95,zb+0.1]); add(G.rcyl,steel,[0.052,0.08,0.052],[s*0.1,0.77,zb+0.1]); }); add(G.rcyl,m,[0.05,0.25,0.05],[0,1.1,zb+0.1],[0,0,Math.PI/2]); break; }
+    case 'banker': add(G.rsph,S_(0x7cb342),[0.17,0.19,0.13],[0.18,0.78,zb+0.08]); add(G.rcyl,gold,[0.05,0.06,0.05],[0.18,0.97,zb+0.08]); break;
+    case 'tank': [-1,1].forEach(s=>add(G.rsph,dark,[0.17,0.11,0.16],[s*(tr+0.04),1.12,0])); break;
+    case 'shield': add(G.rcyl,S_(0x1e88e5),[0.24,0.05,0.24],[0,0.92,zb+0.06],[Math.PI/2,0,0]); add(G.rcyl,gold,[0.08,0.06,0.08],[0,0.92,zb+0.09],[Math.PI/2,0,0]); break;
+    case 'smg': case 'minigun': add(G.box,brown,[0.08,0.62,0.04],[0,0.88,zb+0.02],[0,0,0.6]); break;
+    case 'rocket': add(G.rcyl,S_(0x558b2f),[0.09,0.5,0.09],[0.12,1.02,zb+0.08],[0,0,0.2]); add(G.cone,red,[0.09,0.16,0.09],[0.17,1.33,zb+0.08],[0,0,0.2]); break;
+    case 'laser': pack(0xeceff1,0.26,0.32); add(G.rcyl,S_(0x18ffff,{e:1.4}),[0.05,0.24,0.05],[0,0.92,zb+0.17]); break;
+    case 'firerate': [-1,1].forEach(s=>[0,1].forEach(i=>add(G.box,gold,[0.1,0.025,0.03],[s*(tr+0.09),0.98-i*0.05,0.06],[0,0,s*0.5]))); break;
+    case 'damage': pack(0x5d4037,0.36,0.3); add(G.box,gold,[0.3,0.04,0.02],[0,0.95,zb+0.17]); break;
+    case 'multishot': [-1,1].forEach(s=>add(G.box,brown,[0.07,0.66,0.04],[0,0.88,zb+0.02],[0,0,s*0.6])); break;
+    case 'pierce': [-1,1].forEach(s=>{ add(G.rsph,steel,[0.15,0.1,0.15],[s*(tr+0.04),1.12,0]); add(G.cone,steel,[0.04,0.14,0.04],[s*(tr+0.06),1.24,0]); }); break;
+    case 'crit': add(G.rcyl,red,[0.262,0.05,0.262],[0,1.5,0]); break;
+    case 'speed': add(G.rcyl,S_(0xffffff),[0.262,0.05,0.262],[0,1.56,0]); break;
+    case 'bounce': for(let i=0;i<3;i++) add(G.ring,steel,[0.1,0.1,0.1],[0,0.78+i*0.1,zb+0.1],[Math.PI/2,0,0]); break;
+    case 'bigbullets': add(G.rsph,S_(0x212121,{m:0.4,r:0.3}),[0.2,0.2,0.2],[0,0.92,zb+0.12]); break;
+    case 'veteran': add(G.box,S_(0x2e7d32),[0.08,0.6,0.04],[0,0.88,zb+0.02],[0,0,-0.6]); break;
+    case 'glass': add(G.rsph,new THREE.MeshStandardMaterial({color:C(0xb3f0ff),transparent:true,opacity:0.35,roughness:0.1}),[0.31,0.3,0.31],[0,1.47,0]); break;
+  }
+}
+// Earned medals as a little row of coloured ribbons on the upper back.
+function medalRibbons(g,def,tr){
+  const key=def.id==='leader'?'hero_'+((lastCfg&&lastCfg.hero)||heroId):def.id,r=vetRank(key);
+  for(let i=0;i<r;i++) g.add(M(G.box,mat(parseInt(MEDALS[i].color.slice(1),16),{r:0.3,e:MEDALS[i].epic?0.4:0}),[0.06,0.05,0.02],[-0.15+i*0.07,1.04,tr*0.74+0.01],false));
 }
 let squad=[];
 function headMember(){ return (S.frontM&&!S.frontM.dead&&squad.indexOf(S.frontM)>=0)?S.frontM:squad[0]; }

@@ -3,11 +3,12 @@
 const matCache=new Map();
 function mat(hex,o){
   o=o||{};
+  // o.s: smooth shading, for the rounded characters
   const r=o.r!==undefined?o.r:0.35,m=o.m||0,e=o.e||0;
-  const key=hex+'/'+r+'/'+m+'/'+e;
+  const key=hex+'/'+r+'/'+m+'/'+e+(o.s?'/s':'');
   let mm=matCache.get(key);
   if(!mm){
-    mm=new THREE.MeshStandardMaterial({color:C(hex),roughness:r,metalness:m,flatShading:true,emissive:e?C(hex):new THREE.Color(0),emissiveIntensity:e||1});
+    mm=new THREE.MeshStandardMaterial({color:C(hex),roughness:r,metalness:m,flatShading:!o.s,emissive:e?C(hex):new THREE.Color(0),emissiveIntensity:e||1});
     matCache.set(key,mm);
   }
   return mm;
@@ -34,6 +35,9 @@ function M(geo,material,s,p,shadow){
 const G={
   box:new THREE.BoxGeometry(1,1,1),
   sph:new THREE.SphereGeometry(1,10,8),
+  // smoother pieces for the characters
+  rsph:new THREE.SphereGeometry(1,16,12),
+  rcyl:new THREE.CylinderGeometry(1,1,1,16),
   ico:new THREE.IcosahedronGeometry(1,1),
   ico0:new THREE.IcosahedronGeometry(1,0),
   dod:new THREE.DodecahedronGeometry(1,0),
