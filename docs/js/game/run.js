@@ -1,7 +1,7 @@
 'use strict';
 // ---------- run control
 let lastCfg=null;
-function clearSquad(){ squad.forEach(m=>{ scene.remove(m.g); m.beams.forEach(b=>scene.remove(b)); }); squad=[]; }
+function clearSquad(){ squad.forEach(m=>{ scene.remove(m.g); m.beams.forEach(b=>scene.remove(b)); }); squad=[]; clearFallen(); }
 function clearRun(){
   enemies.forEach(e=>{ scene.remove(e.g); e.mats.forEach(m=>m.emissive.setRGB(0,0,0)); (pools[e.type]||(pools[e.type]=[])).push(e); }); enemies=[]; boss=null;
   bullets.clear(); ebullets.clear(); clearStars(); delayed.length=0; blobs.clear(); chunks.clear();

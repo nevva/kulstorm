@@ -292,9 +292,9 @@ function blastSquad(x,z,radius,dmg){
 }
 function killMember(m){
   m.dead=true; const p=m.g.position;
-  fxExplosion(p.x,1,p.z,1.1,C(m.def.shirt));
-  scene.remove(m.g); m.beams.forEach(b=>scene.remove(b));
-  if(m===squad[0]){ die(); return; }
+  m.beams.forEach(b=>scene.remove(b));
+  if(m===squad[0]){ fxExplosion(p.x,1,p.z,1.1,C(m.def.shirt)); scene.remove(m.g); die(); return; }
+  m.g.userData.bar=null; fallen.push({g:m.g,t:0,vx:rand(-2,2),vy:rand(5,7),vz:rand(2,4),spin:rand(8,12)*(Math.random()<0.5?-1:1),col:m.def.shirt}); fxSpark(p.x,1,p.z,C(m.def.shirt));
   squad=squad.filter(x=>x!==m); if(S.frontM===m){ S.frontM=null; } layoutSquad(); recomputeAuras();
   toast(tl('{0} has fallen!',m.def.name)); sfx.explode(1.2);
 }

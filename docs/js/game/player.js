@@ -27,7 +27,7 @@ function updatePlayer(dt){
     if(m.jumpDelay>=0){ m.jumpDelay-=dt; if(m.jumpDelay<0) doJump(m); }
     if(m.duckDelay>=0){ m.duckDelay-=dt; if(m.duckDelay<0){ m.duckT=DUCK_T; m.slide=(m.jy||0)<=0.05&&slideAhead(m); if(m.slide){ m.butt=0; m.tackled=new Set(); } if((m.jy||0)>0.05&&!m.pound&&hasAbility('pound')){ m.pound=true; m.poundSpin=POUND_SPIN; m.flip=1; m.flipSpd=1/POUND_SPIN; m.vy=0; } } }
     if(m.poundSpin>0){ m.poundSpin-=dt; m.vy=m.poundSpin>0?0:POUND_V; } else m.vy=(m.vy||0)-GRAV*dt;
-    m.jy=(m.jy||0)+m.vy*dt; if(m.jy<=0){ m.jy=0; m.vy=0; m.dbUsed=false; if(m.pound){ m.pound=false; groundPound(m); } }
+    m.jy=(m.jy||0)+m.vy*dt; if(m.jy<=0){ if(m.vy<-4) m.land=0.22; m.jy=0; m.vy=0; m.dbUsed=false; if(m.pound){ m.pound=false; groundPound(m); } }
     if(m.duckT>0) m.duckT=Math.max(0,m.duckT-dt);
     m.invuln=Math.max(0,m.invuln-dt); if(m.safeT>0) m.safeT-=dt;
     if(A.regen>0) m.hp=Math.min(m.maxHp,m.hp+A.regen*dt);
@@ -35,7 +35,18 @@ function updatePlayer(dt){
     if(recharge&&m.def.id==='shield'&&m.charges<3){ m.rt+=dt; if(m.rt>=12){ m.rt=0; m.charges++; hudShield=-1; sfx.shield(); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(0xffd21f)); } }
   }
 }
+// Fallen squad members tumble away in an arc before they vanish.
+const fallen=[];
+function updateFallen(dt){
+  for(let i=fallen.length-1;i>=0;i--){
+    const f=fallen[i],p=f.g.position; f.t+=dt; f.vy-=20*dt; p.x+=f.vx*dt; p.y=Math.max(0,p.y+f.vy*dt); p.z+=(f.vz+scroll)*dt; f.g.rotation.x+=f.spin*dt; f.g.rotation.z+=f.spin*0.4*dt;
+    if(f.t>0.9){ fxExplosion(p.x,0.6,p.z,0.7,C(f.col)); scene.remove(f.g); fallen.splice(i,1); }
+  }
+}
+function clearFallen(){ fallen.forEach(f=>scene.remove(f.g)); fallen.length=0; }
 function updateSquad(dt){
+  updateFallen(dt);
+  if(S.victoryT>0) S.victoryT=Math.max(0,S.victoryT-dt);
   const k=1-Math.exp(-dt*10),kf=1-Math.exp(-dt*7);
   for(const m of squad) if(m.boff){ m.g.position.z-=m.boff; m.boff=0; }
   if(S.pwLine>0&&mode==='playing'){
@@ -78,6 +89,11 @@ function updateSquad(dt){
     m.recoil*=Math.exp(-dt*18);
     u.gun.position.z=-0.62+m.recoil;
     u.armL.rotation.x=u.armR.rotation.x=1.35-m.recoil*0.8;
+    // landing squash, a jolt back when hit, and arms up in a victory hop after a boss falls
+    if(m.land>0){ m.land=Math.max(0,m.land-dt); const q=m.land/0.22; g.scale.y*=1-0.28*q; g.scale.x*=1+0.18*q; g.scale.z*=1+0.18*q; }
+    if(m.hurtT>0){ const q=Math.min(1,m.hurtT/0.3),off=0.28*q; g.position.z+=off; m.boff=(m.boff||0)+off; }
+    if(S.victoryT>0&&air<=0&&!ball){ const q=Math.abs(Math.sin(S.victoryT*7+m.phase)); g.position.y+=q*0.35; u.armL.rotation.x=u.armR.rotation.x=Math.PI*0.95; u.armL.rotation.z=-0.3; u.armR.rotation.z=0.3; }
+    else { u.armL.rotation.z=u.armR.rotation.z=0; }
     if(m.hurtT>0){ m.hurtT-=dt; g.rotation.z+=(Math.random()-0.5)*0.5*m.hurtT; }
     const f=clamp(m.hp/m.maxHp,0,1); u.barFg.scale.x=0.7*f; u.barFg.position.x=-0.35*(1-f); u.barFg.material=f<0.3?barRed:barGreen;
     // headbutt: lean back and crouch, snap forward head first, spring back
