@@ -144,12 +144,14 @@ function laserMember(m,w,A,dt){
     sfx.laser();
   }
 }
+// Shots take their weapon's colour of the moment, so a stream of fire shows the weapon's fade as a moving gradient.
+function weaponShotCol(d,w){ const m=weaponMats[w.id]; if(!m) return w.colorL; return (d.colBuf||(d.colBuf=new THREE.Color())).copy(m.color); }
 function spawnBullet(o){
   const k=bullets.take(); if(k<0) return;
   const d=bullets.d[k],A=o.A,w=o.w,crit=Math.random()<A.crit;
   d.x=o.x; d.y=o.y; d.z=o.z; d.vx=Math.sin(o.angle)*w.speed; d.vz=-Math.cos(o.angle)*w.speed;
   d.base=o.base; d.dmg=o.base*(o.mult||1)*varyDmg(0.75,1.25)*(crit?(o.owner&&o.owner.def.id==='glass'&&S.combos.has('crystal')?3:2):1); d.pierce=S.odT>0&&!w.rocket?99:(o.pierce!==undefined?o.pierce:(w.rocket?0:A.pierce)); d.size=w.size*A.bullet*(crit?1.4:1)*(o.gen?0.8:1)*(S.odT>0?1.4:1);
-  d.col=crit?SPARK:(S.odT>0?OD_COL:(S.flowT>0&&!o.gen?FLOW_COL:w.colorL)); d.rocket=!!w.rocket; d.aoe=w.aoe||0; d.bounce=A.bounce; d.hits=[]; d.trail=0; d.crit=crit; d.gen=o.gen||0; d.owner=o.owner||null; d.wid=w.id||''; d.tgt=null; d.ht=0; d.homed=false; d.x0=d.x; d.z0=d.z; d.dxz=d.vx/d.vz; d.pin=1; d.cry=crit&&!!o.owner&&o.owner.def.id==='glass'&&S.combos.has('crystal'); d.cp=o.cp||null; d.p0=A.pierce;
+  d.col=crit?SPARK:(S.odT>0?OD_COL:(S.flowT>0&&!o.gen?FLOW_COL:weaponShotCol(d,w))); d.rocket=!!w.rocket; d.aoe=w.aoe||0; d.bounce=A.bounce; d.hits=[]; d.trail=0; d.crit=crit; d.gen=o.gen||0; d.owner=o.owner||null; d.wid=w.id||''; d.tgt=null; d.ht=0; d.homed=false; d.x0=d.x; d.z0=d.z; d.dxz=d.vx/d.vz; d.pin=1; d.cry=crit&&!!o.owner&&o.owner.def.id==='glass'&&S.combos.has('crystal'); d.cp=o.cp||null; d.p0=A.pierce;
 }
 function fireFrom(m,w,A){
   m.g.userData.tip.getWorldPosition(tipV);
@@ -166,7 +168,7 @@ function fireFrom(m,w,A){
     spawnBullet({x:tipV.x,y:tipV.y,z:tipV.z,angle:a,w,A,base,gen:0,mult:1,owner:m,pierce,cp});
   }
   m.recoil=w.rocket?0.25:0.12;
-  fxMuzzle(tipV.x,tipV.y,tipV.z,w.colorL);
+  fxMuzzle(tipV.x,tipV.y,tipV.z,weaponMats[w.id]?weaponMats[w.id].color:w.colorL);
   sfx.shoot(w);
 }
 // Målsökare (homing combo): the nearest enemy ahead of a bullet, within 25 m.

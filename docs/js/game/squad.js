@@ -10,7 +10,7 @@ const weaponMat=w=>weaponMats[w]||(weaponMats[w]=new THREE.MeshStandardMaterial(
 const fadeA=new THREE.Color(),fadeB=new THREE.Color();
 function updateWeaponFades(){
   for(const w in weaponMats){ const pal=WEAPON_FADES[w],t=time*0.45+w.length,i=Math.floor(t)%pal.length,k=t-Math.floor(t),e=k*k*(3-2*k);
-    fadeA.set(pal[i]).lerp(fadeB.set(pal[(i+1)%pal.length]),e); const m=weaponMats[w]; m.color.copy(fadeA).convertSRGBToLinear(); m.emissive.copy(m.color); }
+    fadeA.set(pal[i]).lerp(fadeB.set(pal[(i+1)%pal.length]),e); const m=weaponMats[w]; m.color.copy(fadeA).convertSRGBToLinear(); m.emissive.copy(m.color); if(w==='laser') beamOuter.color.copy(m.color); }
 }
 function buildGun(def,g){
   const w=def.weapon||'pistol',gunM=weaponMat(WEAPON_FADES[w]?w:'pistol'),gunA=mat(0xffd21f,{r:0.3}),wood=mat(0x8d6e63,{r:0.5});
