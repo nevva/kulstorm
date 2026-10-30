@@ -3,8 +3,17 @@
 const FORM=[[0,0],[-1,0.85],[1,0.85],[0,1.7],[-1,1.7],[1,1.7],[-0.5,2.55],[0.5,2.55],[0,3.4]];
 const FRONT_SLOT=[0,-0.75];
 const barBg=mat(0x0d1030,{r:0.5}),barGreen=mat(0x36e2b4,{e:0.5,r:0.3}),barRed=mat(0xff5c7a,{e:0.5,r:0.3});
+// Each weapon type's metal slowly fades through its own colours; one shared material per type, animated in updateSquad.
+const WEAPON_FADES={pistol:[0xff5c7a,0xffd21f,0x36e2b4],smg:[0x18ffff,0x2979ff,0xb388ff],shotgun:[0xff6d00,0xff1744,0xffd21f],minigun:[0xff1744,0xff9100,0xffea00],rocket:[0x76ff03,0x00bfa5,0xffd21f],laser:[0x18ffff,0xffffff,0xff4fd8],shuriken:[0xcfd8dc,0x80d8ff,0xb388ff]};
+const weaponMats={};
+const weaponMat=w=>weaponMats[w]||(weaponMats[w]=new THREE.MeshStandardMaterial({color:C(WEAPON_FADES[w][0]),roughness:0.3,metalness:0.45,flatShading:true,emissive:C(WEAPON_FADES[w][0]),emissiveIntensity:0.35}));
+const fadeA=new THREE.Color(),fadeB=new THREE.Color();
+function updateWeaponFades(){
+  for(const w in weaponMats){ const pal=WEAPON_FADES[w],t=time*0.45+w.length,i=Math.floor(t)%pal.length,k=t-Math.floor(t),e=k*k*(3-2*k);
+    fadeA.set(pal[i]).lerp(fadeB.set(pal[(i+1)%pal.length]),e); const m=weaponMats[w]; m.color.copy(fadeA).convertSRGBToLinear(); m.emissive.copy(m.color); }
+}
 function buildGun(def,g){
-  const w=def.weapon||'pistol',gunM=mat(0x546e7a,{r:0.3,m:0.4}),gunA=mat(0xffd21f,{r:0.3}),wood=mat(0x8d6e63,{r:0.5});
+  const w=def.weapon||'pistol',gunM=weaponMat(WEAPON_FADES[w]?w:'pistol'),gunA=mat(0xffd21f,{r:0.3}),wood=mat(0x8d6e63,{r:0.5});
   const gun=new THREE.Group(); gun.position.set(0.12,1.0,-0.62);
   let tipZ=-0.74;
   if(w==='shotgun'){ gun.add(M(G.box,wood,[0.16,0.2,0.6],[0,0,0.1])); const b=M(G.cyl,gunM,[0.08,0.8,0.08],[0,0.05,-0.5]); b.rotation.x=Math.PI/2; gun.add(b); const b2=M(G.cyl,gunM,[0.08,0.8,0.08],[0.12,0.05,-0.5]); b2.rotation.x=Math.PI/2; gun.add(b2); tipZ=-0.95; }

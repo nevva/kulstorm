@@ -45,7 +45,7 @@ function updateFallen(dt){
 }
 function clearFallen(){ fallen.forEach(f=>scene.remove(f.g)); fallen.length=0; }
 function updateSquad(dt){
-  updateFallen(dt);
+  updateFallen(dt); updateWeaponFades();
   if(S.victoryT>0) S.victoryT=Math.max(0,S.victoryT-dt);
   const k=1-Math.exp(-dt*10),kf=1-Math.exp(-dt*7);
   for(const m of squad) if(m.boff){ m.g.position.z-=m.boff; m.boff=0; }
