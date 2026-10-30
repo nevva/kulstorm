@@ -557,6 +557,7 @@ const SV={
   'Fever dream':'Feberdröm',
   'Fever dream!':'Feberdröm!',
   'FEVER':'FEBER',
+  'Elite down!':'Elit nedlagd!',
   'Pickup':'Upplockning',
   'Available now':'Kan köpas nu',
   '+{0} coins this run':'+{0} mynt den här rundan',

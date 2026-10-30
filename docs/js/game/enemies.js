@@ -161,11 +161,22 @@ for(const k in ENEMY) ENEMY[k].build=ENEMY_BUILD[k];
 let LABOFF=new Set();
 let enemies=[]; const pools={}; let necroSeen=false;
 const pendSpawn=[],DEATHS=[],puddles=[];
+// Elites: a rare tougher, bigger, gold-tinted version with a crown that drops three times the loot.
+const ELITE_CHANCE=0.04,ELITE_HP=3,ELITE_SIZE=1.3,NO_ELITE=new Set(['swarm','bats','spiderling','mole']);
+function makeElite(e){
+  e.elite=true; e.maxHp=e.hp=e.maxHp*ELITE_HP; e.r*=ELITE_SIZE; e.base*=ELITE_SIZE; e.g.scale.setScalar(e.base);
+  if(!e.crown){
+    e.crown=new THREE.Group(); const top=new THREE.Box3().setFromObject(e.g).max.y/e.base,gold=mat(0xffd21f,{r:0.25,m:0.6,e:0.4});
+    e.crown.add(M(G.cyl,gold,[0.2,0.1,0.2],[0,0,0],false)); for(let i=0;i<5;i++){ const a=i/5*Math.PI*2; e.crown.add(M(G.cone,gold,[0.05,0.14,0.05],[Math.cos(a)*0.17,0.11,Math.sin(a)*0.17],false)); }
+    e.crown.position.y=top+0.08; e.g.add(e.crown);
+  }
+  e.crown.visible=true;
+}
 function spawnEnemy(type,lane,z){
   const def=ENEMY[type];
   let e=pools[type]&&pools[type].pop();
   if(!e){ const g=def.build(); e={type,g,u:g.userData,mats:g.userData.mats,colorL:g.userData.mats[0].color}; }
-  e.isBoss=!!def.boss; e.dead=false; e.flash=0; e.flashOn=false; e.sq=0; e.lunge=0; e.atkCd=0.4; e.t=rand(0,100); e.phase=rand(0,6.3); e.fireCd=rand(1,2.2); e.burst=0; e.burstT=0; e.pattern=0; e.hold=false;
+  e.isBoss=!!def.boss; e.dead=false; e.flash=0; e.flashOn=false; e.sq=0; e.lunge=0; e.atkCd=0.4; e.t=rand(0,100); e.phase=rand(0,6.3); e.fireCd=rand(1,2.2); e.burst=0; e.burstT=0; e.pattern=0; e.hold=false; e.windup=0; e.elite=false; e.emi=-1; if(e.crown) e.crown.visible=false;
   e.accDmg=0; e.accTier=0; e.accT=-1; e.dmgN=null; e.burn=0; e.burnDps=0; e.burnOwner=null; e.burnFx=0; e.slow=0; e.kb=0; e.tilt=0; e.stun=0; e.pull=0; if(e.u.gm) e.u.gm.opacity=0.2;
   e.under=false; e.shieldHp=0; e.gen=0; e.base=1; e.state=0; e.stateT=0; e.rise=0; e.riseMax=1; e.revived=false; e.raiseT=3.5;
   if(type==='mole'){ e.under=true; e.popZ=rand(-17,-11); e.u.body.visible=false; e.u.mound.visible=true; }
@@ -173,6 +184,7 @@ function spawnEnemy(type,lane,z){
   const lim=Math.max(0,LANE_W/2-def.r-0.3);
   const x=def.boss?0:LANE_X[lane]+rand(-lim,lim);
   e.g.position.set(x,0,z); e.g.scale.set(1,1,1); e.g.rotation.x=0; e.g.rotation.z=0; e.roam=false; e.g.visible=true; scene.add(e.g); enemies.push(e);
+  if(!def.boss&&!NO_ELITE.has(type)&&dist>150&&Math.random()<ELITE_CHANCE) makeElite(e);
   if(type==='knight'){ e.shieldHp=e.maxHp*0.9; e.u.shield.visible=true; e.u.sbar.visible=true; e.u.sfg.scale.x=1; e.u.sfg.position.x=0; }
   if(def.boss) bossInit(e);
   if(type==='necro'&&!necroSeen){ necroSeen=true; sayAt(x,2.6,z,tl('Necromancer!'),'#b07cff',tl('Kill him first')); }
@@ -213,9 +225,22 @@ function killEnemy(e,byPlayer){
       if(n) spawnCoins(p.x,p.z,hasAbility('moneymaker')?n*(S.combos.has('goldrush')?2:1):1);
     }
   }
+  if(byPlayer) deathFx(e,p);
+  if(byPlayer&&e.elite){ sayAt(p.x,2.4,p.z,tl('Elite down!'),'#ffd21f'); if(OPT.coins) spawnCoins(p.x,p.z,hasAbility('moneymaker')?3*stackMax():3,1.2); if(!labRun) runHeroXp+=2*(XP_VAL[e.type]||1); }
   if(e.type==='bomber') explodeAt(p.x,0.5,p.z,3,45*DIFF.hp,45*DIFF.hp,byPlayer,null,1);
   if(e.isBoss){ boss=null; bossDefeated(p); }
 }
+// Death flourishes: small fry pop into confetti, big ones leave a squashed pancake on the road, ghosts drift up as wisps.
+const CONFETTI=new Set(['swarm','bats','spiderling','blob','runner','crawler','splitter']),PANCAKE=new Set(['tank','bloater','charger','knight','shambler','wolf']);
+const pancakes=[];
+for(let i=0;i<8;i++){ const m=new THREE.Mesh(G.cyl,new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,roughness:0.8,flatShading:true,depthWrite:false})); m.visible=false; scene.add(m); pancakes.push({m,t:0}); }
+function deathFx(e,p){
+  if(CONFETTI.has(e.type)) for(let i=0;i<14;i++){ const a=rand(0,6.28),sp=rand(2,5); chunks.spawn(p.x,p.y+e.r*0.6,p.z,Math.cos(a)*sp,rand(3,6),Math.sin(a)*sp,rand(0.6,1),0.09,0.05,pick(RAINBOW),pick(RAINBOW),WHITE,14,0.5,false,rand(5,14)); }
+  else if(PANCAKE.has(e.type)){ const c=pancakes.reduce((a,b)=>a.t<=b.t?a:b); c.t=1.8; c.m.material.color.copy(e.colorL); c.m.material.opacity=0.9; c.m.scale.set(e.r*1.5,0.03,e.r*1.3); c.m.position.set(p.x,0.03,p.z); c.m.visible=true; }
+  else if(e.type==='ghost') for(let i=0;i<10;i++) blobs.spawn(p.x+rand(-0.4,0.4),p.y+rand(0.3,1.2),p.z,rand(-0.3,0.3),rand(1,2.5),rand(-0.3,0.3),rand(0.8,1.4),0.25,0.02,WHITE,C(0xd1c4e9),C(0x9575cd),-1,0,false,0);
+}
+function updateDeathFx(dt){ for(const c of pancakes){ if(c.t<=0) continue; c.t-=dt; c.m.position.z+=scroll*dt; c.m.material.opacity=Math.min(0.9,c.t); if(c.t<=0) c.m.visible=false; } }
+function clearDeathFx(){ pancakes.forEach(c=>{ c.t=0; c.m.visible=false; }); }
 // Each enemy or wall keeps one hit number: new damage adds into it and keeps it hovering above the target until the hits stop.
 // Really big stacked totals celebrate each milestone (1 000, 2 500, 5 000 …): the number grows, punches and flashes
 // through hot colours, and a chime climbs in pitch.
@@ -411,10 +436,11 @@ function updateEnemies(dt){
       else e.g.rotation.z*=Math.exp(-dt*6);
       let target=null,bd=1e9;
       if(playing) for(const m of squad){ const mp=m.g.position; if(laneOf(mp.x)!==e.lane&&Math.abs(mp.x-p.x)>reach) continue; const dx=mp.x-p.x,dz=mp.z-p.z,d2=dx*dx+dz*dz; if(d2<bd){ bd=d2; target=m; } }
+      // wind-up tell: the last 0.35 s before a hit it rears back and glows red, so the hit (and a parry) can be timed
       if(target&&!(e.stun>0)){
-        e.atkCd-=dt;
-        if(e.atkCd<=0){ e.atkCd=(e.type==='tank'||e.type==='charger')?1.2:0.8; e.lunge=1; if(tryParry(target)) e.stun=0.6; else hurtMember(target,e.dmg*0.5*DIFF.dmg); fxSpark(target.g.position.x+rand(-0.3,0.3),1,target.g.position.z-0.2,e.colorL); }
-      } else e.atkCd=Math.min(e.atkCd,0.3);
+        e.atkCd-=dt; e.windup=clamp(1-e.atkCd/0.35,0,1);
+        if(e.atkCd<=0){ e.windup=0; e.atkCd=(e.type==='tank'||e.type==='charger')?1.2:0.8; e.lunge=1; if(tryParry(target)) e.stun=0.6; else hurtMember(target,e.dmg*0.5*DIFF.dmg); fxSpark(target.g.position.x+rand(-0.3,0.3),1,target.g.position.z-0.2,e.colorL); }
+      } else { e.atkCd=Math.min(e.atkCd,0.3); e.windup=0; }
     }
     else if(e.g.rotation.z) e.g.rotation.z*=Math.exp(-dt*6);
     if(e.burn>0){
@@ -425,10 +451,14 @@ function updateEnemies(dt){
     }
     if(e.accT>=0){ e.accT+=dt; if(e.accT>0.12) flushEnemyDmg(e); }
     if(e.kb>0.002){ p.z=Math.max(VIEW.spawn,p.z-e.kb*dt*9); e.kb*=Math.exp(-dt*9); } else e.kb=0;
-    if(e.lunge>0||e.tilt>0){ e.lunge*=Math.exp(-dt*8); e.tilt*=Math.exp(-dt*7); if(e.lunge<0.01) e.lunge=0; if(e.tilt<0.01) e.tilt=0; e.g.rotation.x=0.45*e.lunge-e.tilt; }
+    if(e.lunge>0||e.tilt>0||e.windup>0){ e.lunge*=Math.exp(-dt*8); e.tilt*=Math.exp(-dt*7); if(e.lunge<0.01) e.lunge=0; if(e.tilt<0.01) e.tilt=0; e.g.rotation.x=0.45*e.lunge-e.tilt-0.35*e.windup; }
     if(e.sq>0){ e.sq*=Math.exp(-dt*10); const k=(1-0.24*e.sq)*e.base; e.g.scale.set(k*(1+0.06*e.sq),k,k*(1+0.06*e.sq)); if(e.sq<0.01){ e.sq=0; e.g.scale.setScalar(e.base); } }
     if(e.flash>0){ e.flash-=dt; if(!e.flashOn){ e.flashOn=true; e.mats.forEach(m=>{ m.emissive.setRGB(1,1,1); m.emissiveIntensity=0.9; }); } }
-    else if(e.flashOn){ e.flashOn=false; e.mats.forEach(m=>m.emissive.setRGB(0,0,0)); }
+    else{
+      // resting glow: red during a wind-up, a gold tint for elites
+      const w=Math.round(e.windup*10)/10,key=w+(e.elite?10:0);
+      if(e.flashOn||key!==e.emi){ e.flashOn=false; e.emi=key; e.mats.forEach(m=>{ m.emissive.setRGB(w*0.9+(e.elite?0.28:0),e.elite?0.18:0,0); m.emissiveIntensity=1; }); }
+    }
     if(p.z>6) killEnemy(e,false);
   }
   // Separation: the horde jostles into a pile instead of stacking inside each other.
