@@ -8,7 +8,7 @@ function updatePlayer(dt){
   S.targetX=clamp(S.targetX,-HALF+0.5,HALF-0.5);
   S.x+=(S.targetX-S.x)*(1-Math.exp(-dt*9*A.speed*flowK()*(isW('snow')?0.8:1)));
   if(S.parryT>0) S.parryT=Math.max(0,S.parryT-dt);
-  if(!labRun) trackVeterans(dt);
+  if(!labRun&&!(S.feverT>0)) trackVeterans(dt);
   if(S.flowT>0){ S.flowT-=dt; if(S.flowT<=0){ S.flow=0; hudFlow=-1; } else if(squad.length){ const m=pick(squad),pp=m.g.position; blobs.spawn(pp.x+rand(-0.25,0.25),0.15,pp.z+0.3,rand(-0.3,0.3),rand(0.3,0.8),rand(0.5,1.5),0.4,0.18,0.03,WHITE,FLOW_COL,C(0xff8a3d),0,1,false,0); } }
   // Automatic front: once a second, the toughest gubbe (HP + 25 per shield charge) takes the front if clearly tougher.
   S.frontT-=dt; S.frontHold-=dt;
@@ -106,7 +106,7 @@ function updateFire(dt){
   for(const m of squad){
     const w=WEAPONS[m.def.weapon||'pistol'];
     if(w.laser){ laserMember(m,w,A,dt); continue; }
-    const rate=w.rate*A.rate*formRate(m)*flowK()*odRate()*pwRate();
+    const rate=w.rate*A.rate*formRate(m)*flowK()*odRate()*pwRate()*feverRate();
     m.cd-=dt;
     if(m.cd<=0){ m.cd+=1/rate; fireFrom(m,w,A); }
   }
@@ -118,7 +118,7 @@ function laserMember(m,w,A,dt){
   m.laserTick-=dt;
   if(m.laserTick<=0){
     m.laserTick=0.1;
-    const base=w.dps*A.dmg*A.rate*formRate(m)*0.1*memberMult(m)*flowK()*flowK()*odK()*odRate()*pwK()*pwRate()*parryK(),burn=S.combos.has('burn');
+    const base=w.dps*A.dmg*A.rate*formRate(m)*0.1*memberMult(m)*flowK()*flowK()*odK()*odRate()*pwK()*pwRate()*parryK()*feverK()*feverRate(),burn=S.combos.has('burn');
     m.beams.forEach(b=>{
       if(!b.visible) return; const bx=b.position.x;
       for(const e of enemies){ if(e.dead||e.under) continue; const p=e.g.position; if(p.z<0.5&&Math.abs(p.x-bx)<e.r+0.15){ const crit=Math.random()<A.crit,dv=base*varyDmg(0.75,1.25)*(crit?2:1),tier=dmgTier(dv/base,crit); hitEnemy(e,dv,crit,tier,m,true); fxDamage(bx,p.y+e.r*0.8,p.z+e.r*0.5,tier); if(burn&&!e.dead){ e.burn=3; e.burnDps=base*4; e.burnOwner=m; e.burnSrc='c:burn'; } if(crit&&S.combos.has('chain')&&!e.dead) chainFrom(e,dv,m); } }
@@ -138,7 +138,7 @@ function fireFrom(m,w,A){
   m.g.userData.tip.getWorldPosition(tipV);
   const n=w.bullets+A.extra;
   const spread=w.spread+(n>1?0.07*(n-1):0);
-  const base=w.dmg*A.dmg*memberMult(m)*flowK()*odK()*pwK()*parryK();
+  const base=w.dmg*A.dmg*memberMult(m)*flowK()*odK()*pwK()*parryK()*feverK();
   const cp=S.combos.has('spike')&&w.id==='shotgun'?'c:spike':w.id==='minigun'&&S.combos.has('leadrain')?'c:leadrain':null;
   const pierce=(S.combos.has('spike')&&w.id==='shotgun')?99:w.id==='shuriken'?A.pierce+2:(w.id==='minigun'&&S.combos.has('leadrain'))?A.pierce+1:undefined;
   // Light close-range aim assist: bend shots up to ~8° toward the nearest enemy within 6 m in this gubbe's lane.

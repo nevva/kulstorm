@@ -35,6 +35,7 @@ function creditDamage(dmg,owner){
   if(S.flowT>0) f.push({key:'a:flow',k:flowK()*flowK()});
   if(S.pwDmg>0||S.pwRate>0) f.push({key:'a:power',k:pwK()*pwRate()});
   if(S.parryT>0) f.push({key:'a:parry',k:parryK()});
+  if(S.feverT>0) f.push({key:'a:fever',k:feverK()*feverRate()});
   if(hitBoost) f.push(...hitBoost);
   let K=1; for(const b of f) K*=b.k;
   if(K>1.0001){ const bonus=dmg-dmg/K,L=Math.log(K); for(const b of f) if(b.k>1) credit(b.key,bonus*Math.log(b.k)/L); dmg/=K; }
@@ -52,6 +53,7 @@ function runSummary(){
   if(src['a:flow']) rows.push({name:'Flow',kind:tl('Ability'),dmg:src['a:flow']});
   if(src['a:power']) rows.push({name:tl('Power-ups'),kind:tl('Chest'),dmg:src['a:power']});
   if(src['a:tackle']) rows.push({name:tl('Slide Tackle'),kind:tl('Ability'),dmg:src['a:tackle']});
+  if(src['a:fever']) rows.push({name:tl('Fever dream'),kind:tl('Pickup'),dmg:src['a:fever']});
   if(src['a:parry']) rows.push({name:tl('Parry'),kind:tl('Ability'),dmg:src['a:parry']});
   if(src['a:nade']) rows.push({name:tl('Grenade Jump'),kind:tl('Chest'),dmg:src['a:nade']});
   if(src['a:divine']) rows.push({name:tl('Divine Touch'),kind:tl('Chest'),dmg:src['a:divine']});

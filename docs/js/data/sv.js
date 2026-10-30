@@ -556,6 +556,8 @@ const SV={
   'next {0}/{1} min':'nästa {0}/{1} min',
   'Fever dream':'Feberdröm',
   'Fever dream!':'Feberdröm!',
+  'FEVER':'FEBER',
+  'Pickup':'Upplockning',
   'Available now':'Kan köpas nu',
   '+{0} coins this run':'+{0} mynt den här rundan',
   'Empty chest':'Tom kista',

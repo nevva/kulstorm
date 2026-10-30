@@ -62,3 +62,39 @@ function updateCoins(dt){
   }
   coins=coins.filter(c=>!c.dead);
 }
+
+// ---------- Fever dream: a rare floating orb on the road. Running into it fills the squad with extra members for 8 s,
+// who hit twice as hard and fire 50% faster, under a spooky overlay. Coins picked up meanwhile count; time in the squad
+// does not earn medals.
+const FEVER_T=8,FEVER_K=2,FEVER_RATE=1.5;
+const feverK=()=>S.feverT>0?FEVER_K:1,feverRate=()=>S.feverT>0?FEVER_RATE:1;
+let feverOrb=null,nextFeverAt=400;
+function spawnFeverOrb(){
+  const g=new THREE.Group(),m=new THREE.MeshStandardMaterial({color:C(0x7c4dff),emissive:C(0xb388ff),emissiveIntensity:1.4,flatShading:true});
+  g.add(new THREE.Mesh(G.ico,m)); g.children[0].scale.setScalar(0.5);
+  const ring=new THREE.Mesh(G.ring,new THREE.MeshBasicMaterial({color:0x69f0ae,transparent:true,opacity:0.7,depthWrite:false})); ring.scale.setScalar(0.9); g.add(ring);
+  g.position.set(LANE_X[ri(0,LANES-1)],1.2,VIEW.spawn); scene.add(g); feverOrb={g,ring};
+}
+function removeFeverOrb(){ if(!feverOrb) return; scene.remove(feverOrb.g); feverOrb.g.traverse(o=>{ if(o.material) o.material.dispose(); }); feverOrb=null; }
+function startFever(){
+  S.feverT=FEVER_T; document.body.classList.add('fever-on'); sfx.odStart(); sfx.combo(); shake(0.8); toast(tl('Fever dream!'));
+  const pool=UPGRADES.filter(u=>u.kind==='gubbe'&&!u.unique);
+  while(squad.length<MAX_SQUAD){ const m=addMember(pick(pool)); m.fever=true; const p=m.g.position; fxSparkle(p.x,1.2,p.z,C(0xb388ff)); }
+  recomputeAuras(); updatePower(0,true);
+}
+function endFever(){
+  S.feverT=0; document.body.classList.remove('fever-on');
+  for(const m of squad) if(m.fever){ const p=m.g.position; fxSparkle(p.x,1.2,p.z,C(0x69f0ae)); scene.remove(m.g); m.beams.forEach(b=>scene.remove(b)); m.dead=true; if(S.frontM===m) S.frontM=null; }
+  squad=squad.filter(m=>!m.fever); layoutSquad(); recomputeAuras(); updatePower(0,true);
+}
+function updateFever(dt){
+  if(mode==='playing'&&!feverOrb&&dist>=nextFeverAt){ nextFeverAt=dist+rand(700,1200); if(Math.random()<0.6&&!(S.feverT>0)) spawnFeverOrb(); }
+  if(feverOrb){
+    const p=feverOrb.g.position; p.z+=scroll*dt; p.y=1.2+Math.sin(time*3)*0.2; feverOrb.g.rotation.y+=dt*2.5; feverOrb.ring.rotation.x=time*1.7; feverOrb.ring.rotation.y=time*1.1;
+    if(Math.random()<dt*20) blobs.spawn(p.x+rand(-0.4,0.4),p.y,p.z,0,rand(0.3,1),0,0.6,0.12,0.02,WHITE,C(0xb388ff),C(0x69f0ae),-1,1,false,0);
+    if(mode==='playing'&&squad.some(m=>Math.abs(m.g.position.x-p.x)<1&&Math.abs(m.g.position.z-p.z)<0.9)){ removeFeverOrb(); startFever(); }
+    else if(p.z>4) removeFeverOrb();
+  }
+  if(S.feverT>0&&mode==='playing'){ S.feverT-=dt; if(S.feverT<=0) endFever(); }
+}
+function clearFever(){ removeFeverOrb(); document.body.classList.remove('fever-on'); nextFeverAt=400; }
