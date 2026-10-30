@@ -102,7 +102,7 @@ function spinMystery(o){
   const css=u=>u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
   R.spinning=true; card.classList.add('spinning'); p.textContent=''; pr.textContent=tl('Spinning…');
   let t=0,delay=45,timer=0,landed=false;
-  const finish=()=>{ clearTimeout(timer); R.spinning=false; R.skipSpin=null; won.forEach(u=>grantItem(u,o.p)); closeShop(); if(coins) collectCoins(n); };
+  const finish=()=>{ clearTimeout(timer); R.spinning=false; R.skipSpin=null; won.forEach(u=>grantItem(u,o.p)); if(afterPick()) closeShop(); if(coins) collectCoins(n); };
   const land=()=>{
     landed=true;
     if(coins){ h.textContent=coinText(n); p.textContent=''; }
