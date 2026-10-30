@@ -14,6 +14,7 @@ const tutWants=id=>OPT.tutorial&&!tutSeen[id];
 function tutShow(id,o){
   tutObs=o||null; tutShownAt=performance.now(); tutEl.classList.add('wait'); setTimeout(()=>tutEl.classList.remove('wait'),TUT_MIN);
   const c=TUTORIAL[id]; tutCur=id; tutSeen[id]=true; store('kulstorm_tut',tutSeen); tutNext=null;
+  $('tut-demo').dataset.g=TUT_GESTURE[id]||''; $('tut-demo').hidden=!TUT_GESTURE[id];
   $('tut-title').textContent=c.title; $('tut-how').textContent=c.how; $('tut-text').textContent=c.text;
   $('tut-foot').textContent=c.do==='ok'?tl('Tap to continue'):tl('The game waits until you do it');
   keys.l=keys.r=false; if(c.do==='steer') S.targetX=S.x; tutEl.hidden=false; sfx.zone();

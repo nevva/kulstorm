@@ -15,3 +15,5 @@ const TUTORIAL={
   chest:{title:'Chests',how:'Run into it',text:'A chest holds a random item you have unlocked in the Armory. Before you buy Money Maker it is empty, but you can pay coins from the run for a mystery item.',do:'ok'},
   od:{title:'OVERDRIVE ready!',how:'E · middle click · the button',text:'6 seconds of triple damage, double fire rate, shots that pierce everything and no damage to you. The meter charges from enemies, obstacles and walls.',do:'od'},
 };
+// The gesture each card acts out in its little demo: drag sideways, swipe up or down, or tap.
+const TUT_GESTURE={steer:'drag',jump:'up',duck:'down',tall:'up',tall2:'up',pound:'up',pound2:'down',wall:'drag',chest:'drag',od:'tap'};
