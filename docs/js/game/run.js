@@ -77,6 +77,7 @@ function frame(now){
 }
 function update(dt){
   time+=dt;
+  if(mode==='menu'||mode==='dead') aimRing.visible=false;
   if(mode==='playing'){ dist+=scroll*dt; updatePower(dt); updateDifficulty(); bossHaltStep(dt); checkEvents(); spawner(dt); }
   else if(mode==='menu'){ scroll=5; }
   else if(mode==='dead'){ deadT+=dt; scroll+=(0-scroll)*(1-Math.exp(-dt*1.5)); if(deadT>1.4&&!overShown) showOver(); }

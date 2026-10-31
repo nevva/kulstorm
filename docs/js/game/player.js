@@ -2,11 +2,18 @@
 // ---------- player control, squad animation, firing
 const keys={l:false,r:false};
 const varyDmg=(a,b)=>OPT.variance?rand(a,b):1;
+// Aim point: AIM_DIST up the road, shown as a small ring. Each gubbe's shots lean by how far the aim is ahead of the squad.
+const AIM_DIST=12;
+const aimRing=new THREE.Mesh(G.ring,new THREE.MeshBasicMaterial({color:0xfff8e6,transparent:true,opacity:0.55,depthWrite:false}));
+aimRing.rotation.x=Math.PI/2; aimRing.visible=false; scene.add(aimRing);
 function updatePlayer(dt){
   const A=S.A;
   if(keys.l) S.targetX-=12*dt; if(keys.r) S.targetX+=12*dt;
   S.targetX=clamp(S.targetX,-HALF+0.5,HALF-0.5);
-  S.x+=(S.targetX-S.x)*(1-Math.exp(-dt*9*A.speed*flowK()*(isW('snow')?0.8:1)));
+  // the aim snaps to where you steer and the squad walks after it, so shots swing over first
+  S.aimX+=(S.targetX-S.aimX)*(1-Math.exp(-dt*20));
+  S.x+=(S.targetX-S.x)*(1-Math.exp(-dt*5*A.speed*flowK()*(isW('snow')?0.8:1)));
+  aimRing.visible=true; aimRing.position.set(S.aimX,0.06,-AIM_DIST); aimRing.scale.setScalar(0.45+0.04*Math.sin(time*6));
   if(S.parryT>0) S.parryT=Math.max(0,S.parryT-dt);
   if(!labRun&&!(S.feverT>0)) trackVeterans(dt);
   if(S.flowT>0){ S.flowT-=dt; if(S.flowT<=0){ S.flow=0; hudFlow=-1; } else if(squad.length){ const m=pick(squad),pp=m.g.position; blobs.spawn(pp.x+rand(-0.25,0.25),0.15,pp.z+0.3,rand(-0.3,0.3),rand(0.3,0.8),rand(0.5,1.5),0.4,0.18,0.03,WHITE,FLOW_COL,C(0xff8a3d),0,1,false,0); } }
@@ -188,8 +195,8 @@ function fireFrom(m,w,A){
   const cp=S.combos.has('spike')&&w.id==='shotgun'?'c:spike':w.id==='minigun'&&S.combos.has('leadrain')?'c:leadrain':null;
   const pierce=(S.combos.has('spike')&&w.id==='shotgun')?99:w.id==='shuriken'?A.pierce+2:(w.id==='minigun'&&S.combos.has('leadrain'))?A.pierce+1:undefined;
   // Light close-range aim assist: bend shots up to ~8° toward the nearest enemy within 6 m in this gubbe's lane.
-  let aim=0; { const ln=laneOf(tipV.x); let best=null,bz=-1e9; for(const e of enemies){ if(e.dead||e.under||e.isBoss) continue; const ep=e.g.position; if(ep.z<tipV.z-0.2&&ep.z>tipV.z-6&&laneOf(ep.x)===ln&&ep.z>bz){ bz=ep.z; best=e; } }
-    if(best){ const ep=best.g.position; aim=clamp(Math.atan2(ep.x-tipV.x,tipV.z-ep.z),-0.14,0.14)*(m===headMember()?1:0.6); } }
+  let aim=Math.atan2(S.aimX-S.x,AIM_DIST); { const ln=laneOf(tipV.x); let best=null,bz=-1e9; for(const e of enemies){ if(e.dead||e.under||e.isBoss) continue; const ep=e.g.position; if(ep.z<tipV.z-0.2&&ep.z>tipV.z-6&&laneOf(ep.x)===ln&&ep.z>bz){ bz=ep.z; best=e; } }
+    if(best){ const ep=best.g.position; aim+=clamp(Math.atan2(ep.x-tipV.x,tipV.z-ep.z),-0.14,0.14)*(m===headMember()?1:0.6); } }
   for(let i=0;i<n;i++){
     let a=(n===1?0:-spread/2+spread*(i/(n-1)))+aim; a+=rand(-w.jitter,w.jitter);
     spawnBullet({x:tipV.x,y:tipV.y,z:tipV.z,angle:a,w,A,base,gen:0,mult:1,owner:m,pierce,cp});
