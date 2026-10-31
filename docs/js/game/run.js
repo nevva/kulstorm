@@ -65,7 +65,8 @@ function startGame(cfg){
 let last=performance.now();
 function frame(now){
   requestAnimationFrame(frame);
-  let dt=(now-last)/1000; last=now; if(dt>0.05) dt=0.05;
+  // Firefox can repeat a frame timestamp; a zero dt divides by zero in the squad code and turns positions into NaN.
+  let dt=(now-last)/1000; if(dt<=0) return; last=now; if(dt>0.05) dt=0.05;
   if(mode==='playing'||mode==='divine') dt*=playSpeed();
   if(mode==='divine'){ updateDivine(dt); renderer.render(scene,camera); updateDmg(dt); return; }
   dt*=slowK();
