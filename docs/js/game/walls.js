@@ -27,14 +27,33 @@ function wrapText(x,text,maxW){
   if(line) lines.push(line);
   return lines;
 }
+// A locked wall is a 50/50, so its sign is cut diagonally: the perk on the upper-left half, coins on the lower-right.
+function splitSign(x,u){
+  const tri=(pts,fill)=>{ x.beginPath(); x.moveTo(pts[0],pts[1]); for(let i=2;i<pts.length;i+=2) x.lineTo(pts[i],pts[i+1]); x.closePath(); x.fillStyle=fill; x.fill(); };
+  tri([0,0,512,0,0,384],'#fff8e6'); tri([0,0,512,0,0,96],WALL_CSS[u.rarity]);
+  tri([512,0,512,384,0,384],'#ffc83d');
+  x.strokeStyle='#0d1030'; x.lineWidth=10; x.beginPath(); x.moveTo(512,0); x.lineTo(0,384); x.stroke();
+  x.textAlign='center'; x.textBaseline='middle';
+  x.fillStyle='#0d1030'; x.font='800 26px Nunito, sans-serif'; x.fillText('50%',90,40);
+  let fs=46; x.font=fs+'px Bungee, Impact, sans-serif'; while(x.measureText(u.name).width>260&&fs>22){ fs-=3; x.font=fs+'px Bungee, Impact, sans-serif'; }
+  x.fillStyle=u.kind==='gubbe'?hexCss(u.shirt):'#0d1030';
+  if(u.kind==='gubbe'){ x.strokeStyle='#0d1030'; x.lineWidth=5; x.lineJoin='round'; x.strokeText(u.name,165,130); }
+  x.fillText(u.name,165,130);
+  x.fillStyle='#3b4075'; x.font='800 22px Nunito, sans-serif'; x.fillText(tl('THIS RUN'),130,178);
+  // a little stack of coins
+  for(let i=0;i<4;i++){ x.fillStyle='#b8860b'; x.beginPath(); x.ellipse(392,300-i*18,46,16,0,0,6.283); x.fill(); x.fillStyle='#ffe082'; x.beginPath(); x.ellipse(392,294-i*18,46,16,0,0,6.283); x.fill(); }
+  x.fillStyle='#0d1030'; x.font='40px Bungee, Impact, sans-serif'; x.fillText(tl('COINS'),370,355);
+  x.font='800 26px Nunito, sans-serif'; x.fillText('50%',450,230);
+}
 function signTexture(u,boss,locked){
   const c=document.createElement('canvas'); c.width=512; c.height=384; const x=c.getContext('2d');
+  if(locked){ splitSign(x,u); const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=4; return t; }
   x.fillStyle='#fff8e6'; x.fillRect(0,0,512,384);
   x.fillStyle=boss?'#ffc83d':WALL_CSS[u.rarity]; x.fillRect(0,0,512,72);
   if(boss){ x.strokeStyle='#ffc83d'; x.lineWidth=14; x.strokeRect(7,7,498,370); }
   x.textAlign='center'; x.textBaseline='middle';
   x.fillStyle='#0d1030'; x.font='800 30px Nunito, sans-serif';
-  if(locked) x.fillText(tl('LOCKED · 50% CHANCE'),256,38); else x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
+  x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
   let fs=54; x.font=fs+'px Bungee, Impact, sans-serif';
   while(x.measureText(u.name).width>470&&fs>28){ fs-=4; x.font=fs+'px Bungee, Impact, sans-serif'; }
   x.fillStyle=u.kind==='gubbe'?hexCss(u.shirt):'#0d1030';
