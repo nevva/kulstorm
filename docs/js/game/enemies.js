@@ -1,8 +1,23 @@
 'use strict';
 // ---------- enemies
+// Big, slightly cartoonish eyes with a pupil and a highlight.
 function eyes(g,y,z,r,spread,pupil){
-  const w=enemyEyeMat,b=pupil||mat(0x111111,{r:0.2});
-  [-1,1].forEach(s=>{ g.add(M(G.sph,w,[r,r,r],[s*spread,y,z],false)); g.add(M(G.sph,b,[r*0.5,r*0.5,r*0.5],[s*spread,y,z+r*0.65],false)); });
+  const w=enemyEyeMat,b=pupil||mat(0x111111,{r:0.2}),hl=mat(0xffffff,{r:0.1,e:0.6});r*=1.25;
+  [-1,1].forEach(s=>{ g.add(M(G.sph,w,[r,r*1.08,r*0.9],[s*spread,y,z],false)); g.add(M(G.sph,b,[r*0.55,r*0.6,r*0.5],[s*spread,y-r*0.05,z+r*0.62],false)); g.add(M(G.sph,hl,[r*0.18,r*0.18,r*0.12],[s*spread+r*0.22,y+r*0.25,z+r*0.85],false)); });
+}
+// Enemies are modelled with simple shapes; smoothing swaps them for rounded, smoothly shaded versions (spiky ico0 and
+// cone parts stay sharp on purpose). Shared materials get one smooth twin each.
+const SMOOTH_GEO=new Map([[G.box,G.rbox],[G.sph,G.rsph],[G.ico,G.rsph],[G.dod,G.rsph],[G.cyl,G.rcyl]]),smoothTwin=new Map();
+function smoothEnemy(g){
+  const own=new Set(g.userData.mats||[]);
+  g.traverse(o=>{
+    if(!o.isMesh) return;
+    const sg=SMOOTH_GEO.get(o.geometry); if(sg) o.geometry=sg;
+    const m=o.material; if(!m||!m.flatShading) return;
+    if(own.has(m)){ m.flatShading=false; m.needsUpdate=true; return; }
+    // night-glow materials are animated by reference, so their twin joins the glow list too
+    let t=smoothTwin.get(m); if(!t){ t=m.clone(); t.flatShading=false; smoothTwin.set(m,t); const gl=NIGHT_GLOW.find(q=>q.m===m); if(gl) NIGHT_GLOW.push({m:t,base:gl.base}); } o.material=t;
+  });
 }
 function buildBlob(){ const g=new THREE.Group(),m=matV(0x66bb6a); const body=M(G.ico,m,[0.65,0.55,0.65],[0,0.5,0]); g.add(body); eyes(g,0.65,0.45,0.13,0.22); g.userData={body,mats:[m]}; return g; }
 function buildRunner(){
@@ -175,7 +190,7 @@ function makeElite(e){
 function spawnEnemy(type,lane,z){
   const def=ENEMY[type];
   let e=pools[type]&&pools[type].pop();
-  if(!e){ const g=def.build(); e={type,g,u:g.userData,mats:g.userData.mats,colorL:g.userData.mats[0].color}; }
+  if(!e){ const g=def.build(); smoothEnemy(g); e={type,g,u:g.userData,mats:g.userData.mats,colorL:g.userData.mats[0].color}; }
   e.isBoss=!!def.boss; e.dead=false; e.flash=0; e.flashOn=false; e.sq=0; e.lunge=0; e.atkCd=0.4; e.t=rand(0,100); e.phase=rand(0,6.3); e.fireCd=rand(1,2.2); e.burst=0; e.burstT=0; e.pattern=0; e.hold=false; e.windup=0; e.elite=false; e.emi=-1; if(e.crown) e.crown.visible=false;
   e.accDmg=0; e.accTier=0; e.accT=-1; e.dmgN=null; e.burn=0; e.burnDps=0; e.burnOwner=null; e.burnFx=0; e.slow=0; e.kb=0; e.tilt=0; e.stun=0; e.pull=0; if(e.u.gm) e.u.gm.opacity=0.2;
   e.under=false; e.shieldHp=0; e.gen=0; e.base=1; e.state=0; e.stateT=0; e.rise=0; e.riseMax=1; e.revived=false; e.raiseT=3.5;

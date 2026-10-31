@@ -32,12 +32,19 @@ function M(geo,material,s,p,shadow){
   mesh.receiveShadow=false;
   return mesh;
 }
+// A unit box with rounded edges and corners (radius r), with normals pointing out of the rounding so it shades smoothly.
+function roundedBox(r,seg){
+  const g=new THREE.BoxGeometry(1,1,1,seg,seg,seg),p=g.attributes.position,n=g.attributes.normal,v=new THREE.Vector3(),c=new THREE.Vector3(),k=0.5-r;
+  for(let i=0;i<p.count;i++){ v.fromBufferAttribute(p,i); c.set(Math.max(-k,Math.min(k,v.x)),Math.max(-k,Math.min(k,v.y)),Math.max(-k,Math.min(k,v.z))); v.sub(c).normalize(); n.setXYZ(i,v.x,v.y,v.z); v.multiplyScalar(r).add(c); p.setXYZ(i,v.x,v.y,v.z); }
+  return g;
+}
 const G={
   box:new THREE.BoxGeometry(1,1,1),
   sph:new THREE.SphereGeometry(1,10,8),
   // smoother pieces for the characters
   rsph:new THREE.SphereGeometry(1,16,12),
   rcyl:new THREE.CylinderGeometry(1,1,1,16),
+  rbox:roundedBox(0.22,3),
   ico:new THREE.IcosahedronGeometry(1,1),
   ico0:new THREE.IcosahedronGeometry(1,0),
   dod:new THREE.DodecahedronGeometry(1,0),
