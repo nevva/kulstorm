@@ -51,6 +51,9 @@ const MAX_SQUAD=9;
 // Veteran medals: a squad member type earns them by time spent in the squad over real runs (VET_NEED, cumulative seconds).
 // Each medal adds its own boost for every member of that type, in every run.
 // The steps grow steeply (3 min, 10 min, 25 min, 1 h, 2 h in total) so the last two medals are rare and worth a ceremony of their own.
+// Training: coins buy a hero or recruit type a higher starting level in every run (each step +1 level, so +20% damage
+// and health). It is the long-term coin sink once everything else is bought.
+const TRAIN_COST=[300,800,2000];
 const VET_NEED=[180,600,1500,3600,7200];
 const MEDALS=[
   {name:'Bronze Star',color:'#cd7f32',desc:'+10% max HP',hp:1.1},

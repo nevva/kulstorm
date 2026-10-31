@@ -20,11 +20,19 @@ function renderMain(){
   const n=affordableUnlocks(); $('open-armory').hidden=!OPT.coins; $('open-armory').textContent=tl('Armory')+(n>0?' ('+n+')':'');
   if(mode==='menu'){ clearSquad(); S=freshState(); addMember(leaderDef(heroById(heroId))); startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD) addMember(companionDef(h)); }); }
 }
+// Training row on a Barracks card: shows the starting level and sells the next step.
+function trainRow(card,key,rerender){
+  const lv=trainLvl(key),row=document.createElement('button'); row.type='button'; row.className='lead train';
+  if(lv>=TRAIN_COST.length){ row.textContent=tl('Fully trained · starts at lv {0}',1+lv); row.disabled=true; }
+  else{ const price=TRAIN_COST[lv]; row.textContent=tl('Train · starts at lv {0}',2+lv)+' · '+fmt(price); row.disabled=bank<price;
+    row.addEventListener('click',()=>{ if(bank<price) return; bank-=price; TRAIN[key]=lv+1; store('kulstorm_train',TRAIN); saveBank(); sfx.init(); sfx.resume(); sfx.levelUp(); rerender(key); }); }
+  card.appendChild(row);
+}
 // Barracks: heroes (bought, always in the run) and recruits (unlocked into what chests and walls can give).
 function renderShop(bought){
   showBank(!!bought,'shopcoins');
   const rb=$('ar-gubbe'); rb.innerHTML='';
-  armoryItems().filter(u=>u.kind==='gubbe').sort((a,b)=>itemPrice(a)-itemPrice(b)).forEach(u=>rb.appendChild(armoryCard(u,bought,renderShop)));
+  armoryItems().filter(u=>u.kind==='gubbe').sort((a,b)=>itemPrice(a)-itemPrice(b)).forEach(u=>{ const c=armoryCard(u,bought,renderShop); if(unlocked.indexOf(u.id)>=0) trainRow(c,u.id,renderShop); rb.appendChild(c); });
   const box=$('heroes'); box.innerHTML='';
   HEROES.forEach(h=>{
     const own=owned.indexOf(h.id)>=0,sel=heroId===h.id;
@@ -47,6 +55,7 @@ function renderShop(bought){
     else { b.textContent=tl('Costs {0} · {1} short',fmt(h.price),fmt(h.price-bank)); b.disabled=true; }
     card.appendChild(b);
     if(own){ const ob=document.createElement('button'); ob.type='button'; ob.className='lead'; ob.textContent=tl('Outfit')+(heroOutfit(h.id)?' ✓':''); ob.addEventListener('click',()=>{ outfitHero=h.id; outfitFrom='shop'; outfitTrial=null; showMenu('outfit'); }); card.appendChild(ob); }
+    if(own) trainRow(card,'hero_'+h.id,renderShop);
     if(joins){ const l=document.createElement('button'); l.type='button'; l.className='lead'; l.textContent=tl('Make starting hero'); l.addEventListener('click',()=>{ heroId=h.id; saveBank(); sfx.init(); sfx.pickup(); renderShop(); }); card.appendChild(l); }
     box.appendChild(card);
   });
@@ -307,7 +316,7 @@ $('reset-tut').addEventListener('click',()=>{
   const b=$('reset-tut'); tutReset(); OPT.tutorial=true; saveOpts(); renderOpts(); b.textContent=tl('Tutorial will show again'); setTimeout(()=>{ b.textContent=tl('Show tutorial again'); },1500);
 });
 // Reset save: wipe all progress (coins, heroes, Armory unlocks, hero levels, record, seen tutorials) and reload as a new player. Settings, volume and language stay.
-const SAVE_KEYS=['kulstorm_wardrobe','kulstorm_outfits','kulstorm_vet','kulstorm_coins','kulstorm_owned','kulstorm_hero','kulstorm_bench','kulstorm_unlocked','kulstorm_runs','kulstorm_heroprog','kulstorm_best','kulstorm_tut'];
+const SAVE_KEYS=['kulstorm_train','kulstorm_wardrobe','kulstorm_outfits','kulstorm_vet','kulstorm_coins','kulstorm_owned','kulstorm_hero','kulstorm_bench','kulstorm_unlocked','kulstorm_runs','kulstorm_heroprog','kulstorm_best','kulstorm_tut'];
 $('reset-all').addEventListener('click',()=>{
   const b=$('reset-all');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to erase everything'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset save'); },3000); return; }
@@ -317,5 +326,5 @@ $('reset-all').addEventListener('click',()=>{
 $('reset-save').addEventListener('click',()=>{
   const b=$('reset-save');
   if(b.dataset.arm!=='1'){ b.dataset.arm='1'; b.textContent=tl('Tap again to reset'); setTimeout(()=>{ b.dataset.arm=''; b.textContent=tl('Reset coins and purchases'); },3000); return; }
-  VET={}; WARD={xp:0,own:[]}; OUTFITS={}; bank=0; owned=['rookie']; heroId='rookie'; benched=[]; unlocked=STARTER_ITEMS.slice(); runsDone=0; saveBank(); b.dataset.arm=''; b.textContent=tl('Reset done'); setTimeout(()=>{ b.textContent=tl('Reset coins and purchases'); },1500);
+  VET={}; TRAIN={}; WARD={xp:0,own:[]}; OUTFITS={}; bank=0; owned=['rookie']; heroId='rookie'; benched=[]; unlocked=STARTER_ITEMS.slice(); runsDone=0; saveBank(); b.dataset.arm=''; b.textContent=tl('Reset done'); setTimeout(()=>{ b.textContent=tl('Reset coins and purchases'); },1500);
 });

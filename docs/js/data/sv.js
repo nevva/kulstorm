@@ -557,6 +557,8 @@ const SV={
   'Fever dream':'Feberdröm',
   'Fever dream!':'Feberdröm!',
   'FEVER':'FEBER',
+  'Train · starts at lv {0}':'Träna · börjar på nv {0}',
+  'Fully trained · starts at lv {0}':'Fullt tränad · börjar på nv {0}',
   'The War Machine':'Krigsmaskinen',
   'The Wraith Queen':'Vålnadsdrottningen',
   'LASER!':'LASER!',

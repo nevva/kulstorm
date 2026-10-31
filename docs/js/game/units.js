@@ -39,6 +39,8 @@ const defaultOutfit=h=>({fem:false,skin:SKIN_COL[0],hair:'short',hairCol:HAIR_CO
 const heroOutfit=id=>{ const o=OUTFITS[id]; return o&&o.custom?o:null; };
 // Free pieces: the hero's own shirt colour, the first trousers and going without a hat.
 const outfitOwned=(item,h)=>item==='hat:'||item==='shirt:'+h.shirt||item==='pants:'+PANTS_COL[0]||WARD.own.indexOf(item)>=0;
+let TRAIN=load('kulstorm_train',{});
+const trainLvl=key=>TRAIN[key]||0;
 let VET=load('kulstorm_vet',{}),vetRun={},lastPromos=[];
 // The leader counts as their hero, so a hero earns medals whether leading or joining as a companion.
 const vetKey=m=>m.def.id==='leader'?'hero_'+((lastCfg&&lastCfg.hero)||heroId):m.def.id;

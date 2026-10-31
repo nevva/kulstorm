@@ -33,6 +33,7 @@ const HAIR_M=['short','short','buzz','spiky','mohawk','afro','curly','bald','sem
 const HAIR_F=['long','long','ponytail','buns','bob','braids','afro','pixie','curly'];
 const HAT_OK=new Set(['short','buzz','bald','semibald','long','ponytail','bob','braids','pixie']);
 const HATS=['bowler','cap','tophat','beanie','cowboy','beret','hardhat','fedora','party','viking'];
+const HAT_DROP=-0.09;
 const HAT_COL=[0x212121,0x37474f,0x5d4037,0xc62828,0x1565c0,0x2e7d32,0xf9a825,0x6a1b9a,0xfafafa];
 // o: a chosen outfit (fixed haircut, hat and hat colour); without it everything is random.
 function buildHairHat(g,fem,hair,skin,leader,o){
@@ -42,7 +43,7 @@ function buildHairHat(g,fem,hair,skin,leader,o){
   if(hat&&!HAT_OK.has(style)) style=o?(fem?'long':'short'):fem?pick(['long','ponytail','bob']):pick(['short','buzz','bald']);
   // All pieces are rounded and sized for the round head (centre y 1.45, radius about 0.25, face toward -z).
   const add=(geo,sc,p,rx)=>{ const m=M(geo,hair,sc,p,false); if(rx) m.rotation.x=rx; g.add(m); return m; };
-  const top=()=>add(G.rsph,[0.272,0.18,0.272],[0,1.57,0.02]);
+  const top=()=>{ if(!hat) add(G.rsph,[0.272,0.18,0.272],[0,1.57,0.02]); };
   const back=h=>add(G.rsph,[0.26,(h||0.22)*0.8,0.15],[0,1.6-(h||0.22)*0.45,0.13]);
   switch(style){
     case 'short': top(); back(); break;
@@ -63,19 +64,21 @@ function buildHairHat(g,fem,hair,skin,leader,o){
   }
   if(!hat) return style==='afro'?2.02:style==='spiky'||style==='mohawk'?1.97:1.84;
   const c=mat(hc(HAT_COL),{r:0.4}),c2=mat(o?HAT_COL[(o.hatCol+3)%HAT_COL.length]:pick(HAT_COL),{r:0.4});
+  // hats were sized for the old box head; on the round head they sit HAT_DROP lower so brims rest on the head
+  const hg=new THREE.Group(); hg.position.y=HAT_DROP; g.add(hg);
   switch(hat){
-    case 'bowler': { const k=mat(0x1a1a1a,{r:0.35}); g.add(M(G.sph,k,[0.25,0.2,0.25],[0,1.78,0])); g.add(M(G.cyl,k,[0.33,0.03,0.33],[0,1.76,0],false)); g.add(M(G.cyl,c2,[0.252,0.04,0.252],[0,1.79,0],false)); return 1.98; }
-    case 'cap': { const back=!o&&Math.random()<0.4; g.add(M(G.sph,c,[0.26,0.13,0.26],[0,1.75,0])); g.add(M(G.box,c,[0.4,0.03,0.24],[0,1.73,back?0.33:-0.33],false)); g.add(M(G.sph,c2,[0.04,0.03,0.04],[0,1.88,0],false)); return 1.9; }
-    case 'tophat': { const k=mat(hc([0x1a1a1a,0x1a1a1a,0x4e342e,0x6a1b9a]),{r:0.35}); g.add(M(G.cyl,k,[0.34,0.03,0.34],[0,1.76,0])); g.add(M(G.cyl,k,[0.22,0.42,0.22],[0,1.98,0])); g.add(M(G.cyl,c2,[0.225,0.07,0.225],[0,1.82,0],false)); return 2.19; }
-    case 'beanie': g.add(M(G.sph,c,[0.27,0.22,0.27],[0,1.7,0])); g.add(M(G.cyl,c2,[0.275,0.09,0.275],[0,1.69,0],false)); g.add(M(G.sph,c2,[0.08,0.08,0.08],[0,1.94,0],false)); return 2.02;
-    case 'cowboy': { const k=mat(hc([0x8d6e63,0x5d4037,0xd7ccc8,0x212121]),{r:0.5}); const b=M(G.cyl,k,[0.46,0.03,0.46],[0,1.77,0]); g.add(b); g.add(M(G.cyl,k,[0.2,0.22,0.22],[0,1.89,0])); g.add(M(G.cyl,c2,[0.205,0.05,0.225],[0,1.81,0],false)); [-1,1].forEach(s=>{ const r=M(G.box,k,[0.16,0.03,0.6],[s*0.38,1.8,0],false); r.rotation.z=s*0.5; g.add(r); }); return 2.0; }
-    case 'beret': { const b=M(G.sph,c,[0.29,0.07,0.29],[0.04,1.8,0.02]); b.rotation.z=-0.25; g.add(b); g.add(M(G.cyl,c,[0.02,0.06,0.02],[0.04,1.88,0.02],false)); return 1.9; }
-    case 'hardhat': { const y=mat(hc([0xffc107,0xff9800,0xfafafa]),{r:0.3}); g.add(M(G.sph,y,[0.27,0.19,0.27],[0,1.72,0])); g.add(M(G.cyl,y,[0.31,0.025,0.33],[0,1.72,-0.02],false)); g.add(M(G.box,y,[0.06,0.05,0.5],[0,1.89,0],false)); return 1.94; }
-    case 'fedora': { const k=mat(hc([0x5d4037,0x455a64,0x8d6e63,0x212121]),{r:0.45}); g.add(M(G.cyl,k,[0.36,0.03,0.36],[0,1.76,0])); g.add(M(G.cyl,k,[0.22,0.2,0.22],[0,1.87,0])); g.add(M(G.cyl,c2,[0.225,0.05,0.225],[0,1.8,0],false)); g.add(M(G.box,k,[0.04,0.04,0.3],[0,1.97,0],false)); return 2.0; }
-    case 'party': { const p=M(G.cone,c,[0.17,0.38,0.17],[0,1.9,0]); g.add(p); g.add(M(G.sph,c2,[0.06,0.06,0.06],[0,2.1,0],false)); return 2.16; }
-    case 'viking': { const steel=mat(0x90a4ae,{r:0.3,m:0.5}),horn=mat(0xfff3d0,{r:0.35}); g.add(M(G.sph,steel,[0.27,0.2,0.27],[0,1.71,0])); g.add(M(G.cyl,mat(0x8d6e63,{r:0.4}),[0.28,0.05,0.28],[0,1.68,0],false)); [-1,1].forEach(s=>{ const h=M(G.cone,horn,[0.06,0.26,0.06],[s*0.3,1.86,0],false); h.rotation.z=-s*0.6; g.add(h); }); return 1.98; }
+    case 'bowler': { const k=mat(0x1a1a1a,{r:0.35}); hg.add(M(G.sph,k,[0.25,0.2,0.25],[0,1.78,0])); hg.add(M(G.cyl,k,[0.33,0.03,0.33],[0,1.76,0],false)); hg.add(M(G.cyl,c2,[0.252,0.04,0.252],[0,1.79,0],false)); return 1.98+HAT_DROP; }
+    case 'cap': { const back=!o&&Math.random()<0.4; hg.add(M(G.sph,c,[0.26,0.13,0.26],[0,1.75,0])); hg.add(M(G.box,c,[0.4,0.03,0.24],[0,1.73,back?0.33:-0.33],false)); hg.add(M(G.sph,c2,[0.04,0.03,0.04],[0,1.88,0],false)); return 1.9+HAT_DROP; }
+    case 'tophat': { const k=mat(hc([0x1a1a1a,0x1a1a1a,0x4e342e,0x6a1b9a]),{r:0.35}); hg.add(M(G.cyl,k,[0.34,0.03,0.34],[0,1.76,0])); hg.add(M(G.cyl,k,[0.22,0.42,0.22],[0,1.98,0])); hg.add(M(G.cyl,c2,[0.225,0.07,0.225],[0,1.82,0],false)); return 2.19+HAT_DROP; }
+    case 'beanie': hg.add(M(G.sph,c,[0.27,0.22,0.27],[0,1.76,0])); hg.add(M(G.cyl,c2,[0.275,0.09,0.275],[0,1.75,0],false)); hg.add(M(G.sph,c2,[0.08,0.08,0.08],[0,2.0,0],false)); return 2.08+HAT_DROP;
+    case 'cowboy': { const k=mat(hc([0x8d6e63,0x5d4037,0xd7ccc8,0x212121]),{r:0.5}); const b=M(G.cyl,k,[0.46,0.03,0.46],[0,1.77,0]); hg.add(b); hg.add(M(G.cyl,k,[0.2,0.22,0.22],[0,1.89,0])); hg.add(M(G.cyl,c2,[0.205,0.05,0.225],[0,1.81,0],false)); [-1,1].forEach(s=>{ const r=M(G.box,k,[0.16,0.03,0.6],[s*0.38,1.8,0],false); r.rotation.z=s*0.5; hg.add(r); }); return 2.0+HAT_DROP; }
+    case 'beret': { const b=M(G.sph,c,[0.29,0.07,0.29],[0.04,1.8,0.02]); b.rotation.z=-0.25; hg.add(b); hg.add(M(G.cyl,c,[0.02,0.06,0.02],[0.04,1.88,0.02],false)); return 1.9+HAT_DROP; }
+    case 'hardhat': { const y=mat(hc([0xffc107,0xff9800,0xfafafa]),{r:0.3}); hg.add(M(G.sph,y,[0.27,0.19,0.27],[0,1.72,0])); hg.add(M(G.cyl,y,[0.31,0.025,0.33],[0,1.72,-0.02],false)); hg.add(M(G.box,y,[0.06,0.05,0.5],[0,1.89,0],false)); return 1.94+HAT_DROP; }
+    case 'fedora': { const k=mat(hc([0x5d4037,0x455a64,0x8d6e63,0x212121]),{r:0.45}); hg.add(M(G.cyl,k,[0.36,0.03,0.36],[0,1.76,0])); hg.add(M(G.cyl,k,[0.22,0.2,0.22],[0,1.87,0])); hg.add(M(G.cyl,c2,[0.225,0.05,0.225],[0,1.8,0],false)); hg.add(M(G.box,k,[0.04,0.04,0.3],[0,1.97,0],false)); return 2.0+HAT_DROP; }
+    case 'party': { const p=M(G.cone,c,[0.17,0.38,0.17],[0,1.9,0]); hg.add(p); hg.add(M(G.sph,c2,[0.06,0.06,0.06],[0,2.1,0],false)); return 2.16+HAT_DROP; }
+    case 'viking': { const steel=mat(0x90a4ae,{r:0.3,m:0.5}),horn=mat(0xfff3d0,{r:0.35}); hg.add(M(G.sph,steel,[0.27,0.2,0.27],[0,1.71,0])); hg.add(M(G.cyl,mat(0x8d6e63,{r:0.4}),[0.28,0.05,0.28],[0,1.68,0],false)); [-1,1].forEach(s=>{ const h=M(G.cone,horn,[0.06,0.26,0.06],[s*0.3,1.86,0],false); h.rotation.z=-s*0.6; hg.add(h); }); return 1.98+HAT_DROP; }
   }
-  return 1.84;
+  return 1.84+HAT_DROP;
 }
 function ponytailOn(g,hair){ g.add(M(G.rsph,hair,[0.08,0.07,0.07],[0,1.56,0.25],false)); const t=M(G.rsph,hair,[0.09,0.24,0.09],[0,1.36,0.33],false); t.rotation.x=-0.3; g.add(t); }
 // Squad members are chibi: rounded, smoothly shaded pieces with short legs, a small body and a big head. Parts are
@@ -219,7 +222,8 @@ function recomputeAuras(){
 function rollForm(m){
   const r=()=>Math.round(rand(0.85,1.15)*100)/100;
   m.form={hp:r(),dmg:r(),rate:r()};
-  m.maxHp=Math.round(m.maxHp*m.form.hp*vetBoost(m,'hp')); m.hp=m.maxHp;
+  const tl0=trainLvl(vetKey(m)); m.lvl=1+tl0;
+  m.maxHp=Math.round(m.maxHp*m.form.hp*vetBoost(m,'hp')*Math.pow(1.2,tl0)); m.hp=m.maxHp;
   const vr=vetRank(vetKey(m)); if(vr>=4) m.charges+=MEDALS[3].shield; m.legend=vr>=5;
 }
 const formRate=m=>(m.form?m.form.rate:1)*vetBoost(m,'rate');
