@@ -121,12 +121,42 @@ function spinMystery(o){
 }
 function grantItem(u,p){
   const css=u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
-  sayAt(p.x,2.6,p.z,u.name,css,u.desc);
-  if(u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }
-  else if(u.kind==='gubbe'){ const m=addMember(u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(u.shirt)); toast(tl('{0} joins!',u.name)); updatePower(0,true); }
-  else if(u.kind==='team'){ applyTeamPerk(u); toast(u.name+'!'); updatePower(0,true); }
-  else { applyPowerup(u,p); toast(u.name+'!'); }
+  roadText(u.kind==='gubbe'?tl('{0} joins!',u.name):u.name+'!',u.desc,css);
+  if(u.kind==='pet') addUnicorn();
+  else if(u.kind==='gubbe'){ const m=addMember(u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(u.shirt)); updatePower(0,true); }
+  else if(u.kind==='team'){ applyTeamPerk(u); updatePower(0,true); }
+  else applyPowerup(u,p);
 }
+// Road paint: what you just got is painted in big stretched letters on your lane ahead, like BUS or STOP markings,
+// in worn, lit paint that the squad runs over.
+const roadTexts=[],roadTexCache={};
+const ROAD_TEXT_LEN=6.5,ROAD_TEXT_W=3.4,roadTextGeo=new THREE.PlaneGeometry(1,1,1,10).rotateX(-Math.PI/2);
+function roadTextTex(title,sub,css){
+  const key=title+'|'+sub+'|'+css; if(roadTexCache[key]) return roadTexCache[key];
+  const c=document.createElement('canvas'); c.width=512; c.height=360; const x=c.getContext('2d');
+  x.textAlign='center'; x.textBaseline='middle'; x.fillStyle=css;
+  let fs=150; x.font=fs+'px Bungee, Impact, sans-serif'; while(x.measureText(title).width>480&&fs>60){ fs-=8; x.font=fs+'px Bungee, Impact, sans-serif'; }
+  x.fillText(title,256,sub?110:180);
+  if(sub){ x.fillStyle='#fff8e6'; x.font='800 44px Nunito, sans-serif'; wrapText(x,sub,480).slice(0,3).forEach((l,i)=>x.fillText(l,256,230+i*46)); }
+  // wear: knock small flecks out of the paint so it reads as painted on the tarmac
+  x.globalCompositeOperation='destination-out';
+  for(let i=0;i<900;i++){ x.globalAlpha=Math.random()*0.7; const r=Math.random()*3+0.5; x.beginPath(); x.arc(Math.random()*512,Math.random()*360,r,0,6.283); x.fill(); }
+  const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=4;
+  const keys=Object.keys(roadTexCache); if(keys.length>24){ roadTexCache[keys[0]].dispose(); delete roadTexCache[keys[0]]; }
+  return roadTexCache[key]=t;
+}
+function roadText(title,sub,css){
+  let d=roadTexts.find(q=>q.t<=0);
+  if(!d){ if(roadTexts.length>=3) d=roadTexts.reduce((a,b)=>a.t<b.t?a:b); else { const m=new THREE.Mesh(roadTextGeo,new THREE.MeshStandardMaterial({transparent:true,roughness:0.75,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2})); m.renderOrder=1; scene.add(m); d={m,t:0}; roadTexts.push(d); } }
+  // a later message on the same lane goes a bit further up the road so they don't overlap
+  const lane=laneOf(S.x),busy=roadTexts.filter(q=>q!==d&&q.t>0&&q.lane===lane).reduce((z,q)=>Math.min(z,q.m.position.z),-14);
+  d.m.material.map=roadTextTex(title,sub||'',css); d.m.material.needsUpdate=true; d.m.material.opacity=0.9;
+  d.m.scale.set(ROAD_TEXT_W,1,ROAD_TEXT_LEN); d.m.position.set(LANE_X[lane],0.03,Math.min(-14,busy-ROAD_TEXT_LEN-1)); d.m.visible=true; d.t=1; d.lane=lane;
+}
+function updateRoadText(dt){
+  for(const d of roadTexts){ if(d.t<=0) continue; const p=d.m.position; p.z+=scroll*dt; if(p.z>2){ d.m.material.opacity=Math.max(0,0.9-(p.z-2)*0.25); } if(p.z>8){ d.t=0; d.m.visible=false; } }
+}
+function clearRoadText(){ roadTexts.forEach(d=>{ d.t=0; d.m.visible=false; }); }
 // Timed power-ups: Frenzy doubles fire rate and Power Shot doubles damage while their timers run.
 const PW_T=10;
 const pwK=()=>S.pwDmg>0?2:1, pwRate=()=>S.pwRate>0?2:1;
