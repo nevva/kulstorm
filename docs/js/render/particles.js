@@ -152,8 +152,11 @@ function pushDmg(x,y,z,text,css,big,force,sub,life){
 }
 // A message that floats up from an enemy, like the hit numbers but readable for longer.
 function sayAt(x,y,z,text,css,sub){ pushDmg(x,y,z,text,css||'#fff',true,true,sub,1.8); }
+// In a crowd (a Frenzy into a horde) only the DMG_SHOW biggest hit totals are shown; the rest keep counting unseen.
+const DMG_SHOW=5;
 function updateDmg(dt){
-  const w=window.innerWidth,h=window.innerHeight;
+  const w=window.innerWidth,h=window.innerHeight,nums=dmgLive.filter(n=>n.num!=null);
+  const shown=nums.length>DMG_SHOW?new Set(nums.sort((a,b)=>b.num-a.num).slice(0,DMG_SHOW)):null;
   for(let i=dmgLive.length-1;i>=0;i--){
     const n=dmgLive[i]; n.life-=dt;
     if(n.life<=0){ n.el.hidden=true; dmgPool.push(n.el); dmgLive.splice(i,1); continue; }
@@ -161,7 +164,7 @@ function updateDmg(dt){
     if(!(n.num!=null&&n.life>n.max-0.2)) n.y+=1.4*dt;
     n.x+=n.vx*dt; n.z+=scroll*dt;
     tmpV.set(n.x,n.y-curveDrop(n.x,n.z),n.z).project(camera);
-    if(tmpV.z>1){ n.el.style.opacity='0'; continue; }
+    if(tmpV.z>1||(shown&&n.num!=null&&!shown.has(n))){ n.el.style.opacity='0'; continue; }
     const t=n.life/n.max;
     n.el.style.opacity=String(t<0.4?t/0.4:1);
     // the translate property (not transform) keeps the pop animation's scale centred on the number
