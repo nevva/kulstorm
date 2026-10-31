@@ -22,8 +22,8 @@ function updateXp(dt){
   }
   xpGems=xpGems.filter(c=>!c.dead);
   // A level-up sends a roadside shop building toward the squad; the buy screen opens as you pass it.
-  // At most one shop every SHOP_GAP metres; levels gained meanwhile are saved up and become extra picks in the next shop.
-  if(mode==='playing'&&R.pending>0&&!kiosk.active&&dist>=R.nextShopAt){ kiosk.active=true; kiosk.opened=false; kiosk.side=Math.random()<0.5?-1:1; kiosk.g.position.set(kiosk.side*(HALF+2.6),0,VIEW.spawn); kiosk.g.rotation.y=kiosk.side*0.5; kiosk.g.visible=true; toast(tl('Shop ahead!')); sfx.zone(); spawnPause=Math.max(spawnPause,4); }
+  // A roadside shop every SHOP_GAP metres, selling things for the run's coins.
+  if(mode==='playing'&&xpOn()&&!kiosk.active&&dist>=R.nextShopAt){ kiosk.active=true; kiosk.opened=false; kiosk.side=Math.random()<0.5?-1:1; kiosk.g.position.set(kiosk.side*(HALF+2.6),0,VIEW.spawn); kiosk.g.rotation.y=kiosk.side*0.5; kiosk.g.visible=true; toast(tl('Shop ahead!')); sfx.zone(); spawnPause=Math.max(spawnPause,4); }
   if(kiosk.active){
     const kp=kiosk.g.position; kp.z+=scroll*dt;
     kiosk.coin.rotation.y+=dt*3; kiosk.coin.position.y=4.3+0.2*Math.sin(time*3);
@@ -49,18 +49,25 @@ const kiosk=(function(){
 function refreshKioskSign(){ const x=kiosk.ctx; x.fillStyle='#ffd21f'; x.fillRect(0,0,256,96); x.fillStyle='#0d1030'; x.font='56px Bungee, Impact, sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(tl('SHOP'),128,52); kiosk.tex.needsUpdate=true; }
 function addXp(v){
   R.xp+=v; hudXp=-1;
-  while(R.xp>=R.need){ R.xp-=R.need; R.lvl++; R.need=Math.round(R.need*XP_GROW+6); R.pending++; }
+  while(R.xp>=R.need){ R.xp-=R.need; R.lvl++; R.need=Math.round(R.need*XP_GROW+6); autoLevel(); }
 }
-function clearXp(){ xpGems.forEach(c=>{ scene.remove(c.g); xpPool.push(c.g); }); xpGems=[]; kiosk.active=false; kiosk.g.visible=false; R.xp=0; R.lvl=1; R.need=XP_NEED0; R.ceremony=[]; R.pending=0; R.reroll=5; R.mysteries=0; R.coinsSpun=false; R.picks=0; R.nextShopAt=0; hudXp=-1; }
+// Each squad level levels up one member on the spot, the lowest-level one first (no pause, just the ceremony).
+// Once everyone is at the top level, a level heals the squad instead.
+function autoLevel(){
+  const can=squad.filter(m=>!m.dead&&!m.fever&&m.lvl<5);
+  if(!can.length){ squad.forEach(m=>healMember(m,Math.round(m.maxHp*0.25))); sfx.levelUp(); return; }
+  const low=Math.min(...can.map(m=>m.lvl)),m=pick(can.filter(x=>x.lvl===low));
+  m.lvl++; m.maxHp=Math.round(m.maxHp*1.2); m.hp=m.maxHp; updatePower(0,true); levelUpFx(m);
+}
+function clearXp(){ xpGems.forEach(c=>{ scene.remove(c.g); xpPool.push(c.g); }); xpGems=[]; kiosk.active=false; kiosk.g.visible=false; R.xp=0; R.lvl=1; R.need=XP_NEED0; R.ceremony=[]; R.pending=0; R.reroll=5; R.mysteries=0; R.coinsSpun=false; R.picks=0; R.nextShopAt=SHOP_FIRST; hudXp=-1; }
 const shopEl=$('shop');
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=ri(0,i); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function buildOffers(){
   const pool=[];
-  shuffle(squad.filter(m=>m.lvl<5)).slice(0,3).forEach(m=>pool.push({type:'lvl',m,cost:LVL_COST[m.lvl]}));
   if(squad.some(m=>m.hp<m.maxHp*0.95)) pool.push({type:'heal',cost:15});
   if(isUnlocked('banker')&&!hasPart('banker')&&squad.length<MAX_SQUAD&&Math.random()<0.45) pool.push({type:'banker',cost:30});
   const lockedUps=UPGRADES.filter(u=>upgradeFits(u)&&!isUnlocked(u.id));
-  if(lockedUps.length&&Math.random()<0.5){ const u=pick(lockedUps); pool.push({type:'item',u,cost:runPrice(u)}); }
+  shuffle(lockedUps).slice(0,2).forEach(u=>pool.push({type:'item',u,cost:runPrice(u)}));
   if(!pool.length) pool.push({type:'heal',cost:15});
   // The chest gamble is always one of the three offers.
   R.offers=shuffle(shuffle(pool).slice(0,2).concat({type:'mystery',cost:mysteryCost(false),gold:false,p:{x:S.x,z:-2}}));
@@ -75,8 +82,8 @@ function offerInfo(o){
   return {col:'#ffc83d',title:tl('The Banker'),desc:tl('New squad member: damage rises 1% per coin you carry, up to ×4.')};
 }
 function renderBuy(){
-  $('shoptitle').textContent=R.title||tl('Level {0}!',R.lvl);
-  $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun)))+(!R.title&&R.picks>1?' · '+tl('{0} picks left',R.picks):'');
+  $('shoptitle').textContent=R.title||tl('Roadside shop');
+  $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun)));
   const box=$('shopcards'); box.innerHTML='';
   R.offers.forEach((o,i)=>{
     const inf=offerInfo(o),b=document.createElement('button'); b.type='button'; b.className='offer'+(o.bought?' bought':''); b.id='offer'+i;
@@ -110,7 +117,7 @@ function buyOffer(o){
   return afterPick();
 }
 let shopRelock=false;
-const SHOP_GAP=250;
+const SHOP_FIRST=300,SHOP_GAP=600;
 // After a purchase in the level-up shop: use up a pick and stay open while picks remain (with fresh offers once all
 // three are bought). Returns true when the shop should close. Chest and wall choices always close.
 function afterPick(){
@@ -121,8 +128,8 @@ function afterPick(){
 }
 function openShop(){
   shopRelock=locked(); unlockMouse();
-  if(mode!=='playing'||!xpOn()) { R.pending=0; return; }
-  R.picks=Math.max(1,R.pending); R.pending=0; R.nextShopAt=dist+SHOP_GAP; mode='shop'; keys.l=keys.r=false; drag=null; R.title='';
+  if(mode!=='playing'||!xpOn()) return;
+  R.picks=99; R.nextShopAt=dist+SHOP_GAP; mode='shop'; keys.l=keys.r=false; drag=null; R.title='';
   buildOffers(); R.sel=Math.max(0,R.offers.findIndex(o=>coinsRun>=o.cost)); renderBuy(); shopEl.hidden=false; sfx.level();
   $('shop-done').focus({preventScroll:true});
 }

@@ -25,5 +25,5 @@ const OPT_DEFS=[
   ['music','Music','Lofi in its own genre per zone (jazz, bossa nova, hip hop, techno, ambient, trap), shaped by the enemies you blow up'],
   ['heroprog','Hero progression','The leader gathers XP between runs and earns talent points'],
   ['unicorns','Unicorns','Helpers that shoot rainbow roads that halve the damage the squad takes'],
-  ['xpshop','XP and shop screen','Enemies drop XP; each level opens a shop where you spend the run\'s coins'],
+  ['xpshop','XP and roadside shops','Enemies drop XP that levels up the squad as you go, and roadside shops sell items for the run\'s coins'],
 ];
