@@ -16,7 +16,11 @@ function clearRun(){
   VIEW.scale=1; VIEW.fogNear=44; VIEW.fogFar=96; VIEW.spawn=-78; camK=0.78;
   setZone(0,true); rebuildTiles();
 }
+// The starting squad gathers from the street in the first seconds: each one starts a bit further up the road.
+let startJoins=0;
+const startJoin=()=>{ const f=fromStreet(); f.z=-5-startJoins*3; startJoins++; return f; };
 function startGame(cfg){
+  startJoins=0;
   cfg=cfg||{hero:heroId,extras:[],perks:[],dist:0,lab:false};
   lastCfg=cfg; labRun=!!cfg.lab; menuSky=false; vetRun={};
   sfx.init(); sfx.resume(); music.ensure(); music.reset();
@@ -42,13 +46,13 @@ function startGame(cfg){
     S.T.dmg*=1+0.04*P('sharp'); S.T.rate*=1+0.03*P('fast'); S.T.coinMult*=1+0.05*P('rich');
     nextUpgradeAt=Math.max(dist+10,nextUpgradeAt-30*P('path'));
     const extra=P('reinf')>=6?2:P('reinf')>=3?1:0;
-    for(let i=0;i<extra;i++){ const pool=UPGRADES.filter(u=>u.kind==='gubbe'&&!(u.unique&&hasPart(u.id))); if(squad.length<MAX_SQUAD) addMember(pick(pool)); }
+    for(let i=0;i<extra;i++){ const pool=UPGRADES.filter(u=>u.kind==='gubbe'&&!(u.unique&&hasPart(u.id))); if(squad.length<MAX_SQUAD) addMember(pick(pool),startJoin()); }
   }
   if(!labRun){
-    startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD){ const m=addMember(companionDef(h)); m.charges+=h.shield||0; } });
+    startCompanions().forEach(h=>{ if(squad.length<MAX_SQUAD){ const m=addMember(companionDef(h),startJoin()); m.charges+=h.shield||0; } });
     squad.forEach(rollForm); toast(tl('Daily form')+': '+formText(L));
   }
-  (hero.extras||[]).concat(cfg.extras||[]).forEach(id=>{ const d=defById(id); if(d&&squad.length<MAX_SQUAD) addMember(d); });
+  (hero.extras||[]).concat(cfg.extras||[]).forEach(id=>{ const d=defById(id); if(d&&squad.length<MAX_SQUAD) addMember(d,startJoin()); });
   (cfg.perks||[]).forEach(id=>{ const d=defById(id); if(!d) return; if(d.kind==='pet'){ if(OPT.unicorns) addUnicorn(); } else applyTeamPerk(d); });
   camK=OPT.dyncam?0.78+0.065*(squad.length-1):1;
   bossBar.hidden=true; $('newbest').hidden=true;

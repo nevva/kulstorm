@@ -35,6 +35,13 @@ function updatePlayer(dt){
     if(recharge&&m.def.id==='shield'&&m.charges<3){ m.rt+=dt; if(m.rt>=12){ m.rt=0; m.charges++; hudShield=-1; sfx.shield(); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(0xffd21f)); } }
   }
 }
+// On arrival a recruit waves and high-fives the nearest squad mate: both raise a hand, they clap together, then wave it off.
+const WAVE_T=1;
+function greet(m){
+  let n=null,bd=1e9; for(const o of squad){ if(o===m||o.dead||o.joinT>0) continue; const d=o.g.position.distanceToSquared(m.g.position); if(d<bd){ bd=d; n=o; } }
+  m.waveT=WAVE_T; m.waveSide=n&&n.g.position.x<m.g.position.x?-1:1;
+  if(n){ n.waveT=WAVE_T; n.waveSide=-m.waveSide; m.fiveWith=n; }
+}
 // Fallen squad members tumble away in an arc before they vanish.
 const fallen=[];
 function updateFallen(dt){
@@ -70,7 +77,7 @@ function updateSquad(dt){
   for(const [m,x0,z0] of joining){
     const p=m.g.position,tx=x0+(p.x-x0)/k,tz=z0+(p.z-z0)/k,dx=tx-x0,dz=tz-z0,d=Math.hypot(dx,dz);
     m.joinT-=dt;
-    if(d<0.35||m.joinT<=0){ m.joinT=0; m.g.rotation.y=0; continue; }
+    if(d<0.35||m.joinT<=0){ m.joinT=0; m.g.rotation.y=0; if(d<0.35) greet(m); continue; }
     const step=Math.min(d,(scroll*0.9+3)*dt); p.x=x0+dx/d*step; p.z=z0+dz/d*step;
     const turn=((Math.atan2(-dx,-dz)-m.g.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI; m.g.rotation.y+=turn*(1-Math.exp(-dt*10));
   }
@@ -105,6 +112,14 @@ function updateSquad(dt){
     if(m.hurtT>0){ const q=Math.min(1,m.hurtT/0.3),off=0.28*q; g.position.z+=off; m.boff=(m.boff||0)+off; }
     if(S.victoryT>0&&air<=0&&!ball){ const q=Math.abs(Math.sin(S.victoryT*7+m.phase)); g.position.y+=q*0.35; u.armL.rotation.x=u.armR.rotation.x=Math.PI*0.95; u.armL.rotation.z=-0.3; u.armR.rotation.z=0.3; }
     else { u.armL.rotation.z=u.armR.rotation.z=0; }
+    if(m.waveT>0){
+      m.waveT=Math.max(0,m.waveT-dt); const q=1-m.waveT/WAVE_T,arm=m.waveSide<0?u.armL:u.armR;
+      // raise the hand (eased), hold for the clap, then a few soft waves while lowering it
+      const up=q<0.25?Math.sin(q/0.25*Math.PI/2):q<0.75?1:Math.cos((q-0.75)/0.25*Math.PI/2);
+      arm.rotation.x=1.35+(Math.PI*0.95-1.35)*up; arm.rotation.z=m.waveSide*(0.5*up+(q>0.4?Math.sin((q-0.4)*28)*0.35*up:0));
+      if(m.fiveWith&&q>=0.3&&!m.clapped){ m.clapped=true; const o=m.fiveWith.g.position,p=g.position; fxSparkle((o.x+p.x)/2,1.5,(o.z+p.z)/2,GOLD); sfx.pickup(); }
+      if(m.waveT<=0){ m.fiveWith=null; m.clapped=false; }
+    }
     if(m.hurtT>0){ m.hurtT-=dt; g.rotation.z+=(Math.random()-0.5)*0.5*m.hurtT; }
     const f=clamp(m.hp/m.maxHp,0,1); u.barFg.scale.x=0.7*f; u.barFg.position.x=-0.35*(1-f); u.barFg.material=f<0.3?barRed:barGreen;
     // headbutt: lean back and crouch, snap forward head first, spring back
