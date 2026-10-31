@@ -127,10 +127,10 @@ function grantItem(u,p){
   else if(u.kind==='team'){ applyTeamPerk(u); updatePower(0,true); }
   else applyPowerup(u,p);
 }
-// Road paint: what you just got is painted in big stretched letters on your lane ahead, like BUS or STOP markings,
+// Road paint: what you just got is painted in big stretched letters across the road ahead, like BUS or STOP markings,
 // in worn, lit paint that the squad runs over.
 const roadTexts=[],roadTexCache={};
-const ROAD_TEXT_LEN=6.5,ROAD_TEXT_W=3.4,roadTextGeo=new THREE.PlaneGeometry(1,1,1,10).rotateX(-Math.PI/2);
+const ROAD_TEXT_W=ROAD_W-0.4,ROAD_TEXT_LEN=ROAD_TEXT_W*360/512*2.1,roadTextGeo=new THREE.PlaneGeometry(1,1,1,10).rotateX(-Math.PI/2);
 function roadTextTex(title,sub,css){
   const key=title+'|'+sub+'|'+css; if(roadTexCache[key]) return roadTexCache[key];
   const c=document.createElement('canvas'); c.width=512; c.height=360; const x=c.getContext('2d');
@@ -148,13 +148,13 @@ function roadTextTex(title,sub,css){
 function roadText(title,sub,css){
   let d=roadTexts.find(q=>q.t<=0);
   if(!d){ if(roadTexts.length>=3) d=roadTexts.reduce((a,b)=>a.t<b.t?a:b); else { const m=new THREE.Mesh(roadTextGeo,new THREE.MeshStandardMaterial({transparent:true,roughness:0.75,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2})); m.renderOrder=1; scene.add(m); d={m,t:0}; roadTexts.push(d); } }
-  // a later message on the same lane goes a bit further up the road so they don't overlap
-  const lane=laneOf(S.x),busy=roadTexts.filter(q=>q!==d&&q.t>0&&q.lane===lane).reduce((z,q)=>Math.min(z,q.m.position.z),-14);
+  // a later message goes further up the road so they don't overlap
+  const busy=roadTexts.filter(q=>q!==d&&q.t>0).reduce((z,q)=>Math.min(z,q.m.position.z),-22+ROAD_TEXT_LEN/2);
   d.m.material.map=roadTextTex(title,sub||'',css); d.m.material.needsUpdate=true; d.m.material.opacity=0.9;
-  d.m.scale.set(ROAD_TEXT_W,1,ROAD_TEXT_LEN); d.m.position.set(LANE_X[lane],0.03,Math.min(-14,busy-ROAD_TEXT_LEN-1)); d.m.visible=true; d.t=1; d.lane=lane;
+  d.m.scale.set(ROAD_TEXT_W,1,ROAD_TEXT_LEN); d.m.position.set(0,0.03,Math.min(-22+ROAD_TEXT_LEN/2,busy-ROAD_TEXT_LEN-1)); d.m.visible=true; d.t=1;
 }
 function updateRoadText(dt){
-  for(const d of roadTexts){ if(d.t<=0) continue; const p=d.m.position; p.z+=scroll*dt; if(p.z>2){ d.m.material.opacity=Math.max(0,0.9-(p.z-2)*0.25); } if(p.z>8){ d.t=0; d.m.visible=false; } }
+  for(const d of roadTexts){ if(d.t<=0) continue; const p=d.m.position; p.z+=scroll*dt; if(p.z>ROAD_TEXT_LEN/2){ d.m.material.opacity=Math.max(0,0.9-(p.z-ROAD_TEXT_LEN/2)*0.2); } if(p.z>ROAD_TEXT_LEN/2+6){ d.t=0; d.m.visible=false; } }
 }
 function clearRoadText(){ roadTexts.forEach(d=>{ d.t=0; d.m.visible=false; }); }
 // Timed power-ups: Frenzy doubles fire rate and Power Shot doubles damage while their timers run.

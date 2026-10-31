@@ -152,6 +152,12 @@ body.fever-on #c{animation:feverhue 8s linear}
 #flash{position:fixed;inset:0;background:var(--coral);opacity:0;pointer-events:none;transition:opacity .4s}
 #flash.on{opacity:.45;transition:none}
 #pause,#shop,#over,#tiltask{background:rgba(13,16,48,.86)}
+/* Overlays ease in: the backdrop fades and the panel rises and settles, instead of snapping onto the screen. */
+#shop,#vet,#tiltask,#over,#pause{animation:scrIn .22s ease-out}
+#shop>.panel,#vet>.panel,#tiltask>.panel,#over>.panel,#pause>.panel{animation:panelIn .34s cubic-bezier(.2,1.25,.4,1)}
+@keyframes scrIn{from{opacity:0}}
+@keyframes panelIn{from{opacity:0;transform:translateY(18px) scale(.94)}}
+@media (prefers-reduced-motion:reduce){#shop>.panel,#vet>.panel,#tiltask>.panel,#over>.panel,#pause>.panel{animation:scrIn .2s ease-out}}
 #flash2{position:fixed;inset:0;background:#f4f8ff;opacity:0;pointer-events:none;transition:opacity .5s}
 #flash2.on{opacity:.75;transition:none}
 .hb-col{display:flex;flex-direction:column;align-items:center;gap:10px}
