@@ -68,9 +68,10 @@ function updateSquad(dt){
     const g=m.g,u=g.userData,t=time*13+m.phase;
     m.blinkT=(m.blinkT===undefined?rand(1,4):m.blinkT)-dt; if(u.eyes){ const shut=m.blinkT<0.12; u.eyes.forEach(e=>e.scale.y=shut?0.15:1); } if(m.blinkT<0) m.blinkT=rand(2,5);
     g.rotation.z=clamp((g.position.x-S.x)*0.12,-0.3,0.3);
-    u.legL.rotation.x=Math.sin(t)*0.9; u.legR.rotation.x=-Math.sin(t)*0.9;
+    const stride=mode==='playing'?clamp(scroll/4,0.15,1):1;
+    u.legL.rotation.x=Math.sin(t)*0.9*stride; u.legR.rotation.x=-Math.sin(t)*0.9*stride;
     const air=m.jy||0;
-    g.position.y=air>0?air:Math.abs(Math.sin(t))*0.07;
+    g.position.y=air>0?air:Math.abs(Math.sin(t))*0.07*stride;
     // ducking on the ground: curl up into a ball and roll forward one full turn, around the ball's centre
     const s0=m.def.id==='tank'?1.22:1,sliding=m.slide&&m.duckT>0&&air<=0,rolling=!sliding&&m.duckT>0&&air<=0&&!(m.butt>0)&&!(m.flip>0);
     if(rolling||m.rollA>0){ m.rollA=(m.rollA||0)+dt*Math.PI*2/DUCK_T; if(m.rollA>=Math.PI*2){ if(m.duckT>0.05) m.rollA-=Math.PI*2; else { m.rollA=0; g.rotation.x=0; } } }

@@ -27,7 +27,8 @@ function buildGun(def,g){
   g.add(gun);
   return {gun,tip};
 }
-// Haircuts and hats. The head is a 0.46 box centred at y 1.45 (top 1.67); the face points to -z, so the camera sees the back (+z).
+// Haircuts and hats, built in head space: the head is a ball centred at y 1.45 (top about 1.69); the face points to -z,
+// so the camera sees the back (+z).
 const HAIR_M=['short','short','buzz','spiky','mohawk','afro','curly','bald','semibald','quiff'];
 const HAIR_F=['long','long','ponytail','buns','bob','braids','afro','pixie','curly'];
 const HAT_OK=new Set(['short','buzz','bald','semibald','long','ponytail','bob','braids','pixie']);
@@ -39,24 +40,26 @@ function buildHairHat(g,fem,hair,skin,leader,o){
   const hat=o?o.hat:!leader&&Math.random()<0.4?pick(HATS):null;
   const hc=arr=>o?HAT_COL[o.hatCol]:pick(arr);
   if(hat&&!HAT_OK.has(style)) style=o?(fem?'long':'short'):fem?pick(['long','ponytail','bob']):pick(['short','buzz','bald']);
-  const top=()=>g.add(M(G.rsph,hair,[0.268,0.17,0.268],[0,1.58,0.01])),back=(h)=>g.add(M(G.rsph,hair,[0.25,(h||0.22)*0.75,0.13],[0,1.62-(h||0.22)/2,0.15],false));
-  const dome=()=>{};
+  // All pieces are rounded and sized for the round head (centre y 1.45, radius about 0.25, face toward -z).
+  const add=(geo,sc,p,rx)=>{ const m=M(geo,hair,sc,p,false); if(rx) m.rotation.x=rx; g.add(m); return m; };
+  const top=()=>add(G.rsph,[0.272,0.18,0.272],[0,1.57,0.02]);
+  const back=h=>add(G.rsph,[0.26,(h||0.22)*0.8,0.15],[0,1.6-(h||0.22)*0.45,0.13]);
   switch(style){
     case 'short': top(); back(); break;
-    case 'pixie': top(); back(0.3); g.add(M(G.box,hair,[0.3,0.08,0.14],[-0.08,1.77,-0.18],false)); break;
-    case 'buzz': g.add(M(G.rsph,hair,[0.258,0.12,0.258],[0,1.6,0.01])); break;
-    case 'spiky': g.add(M(G.box,hair,[0.48,0.08,0.48],[0,1.7,0])); for(const [x,z] of [[-0.14,-0.12],[0.14,-0.12],[0,0],[-0.14,0.13],[0.14,0.13]]) g.add(M(G.cone4,hair,[0.1,0.24,0.1],[x,1.85,z],false)); back(0.18); break;
-    case 'mohawk': g.add(M(G.box,hair,[0.12,0.24,0.5],[0,1.78,0.01])); break;
-    case 'afro': g.add(M(G.sph,hair,[0.36,0.3,0.36],[0,1.72,0.05])); break;
-    case 'curly': top(); back(); for(const [x,z] of [[-0.15,-0.14],[0.15,-0.14],[0,-0.05],[-0.16,0.1],[0.16,0.1],[0,0.18]]) g.add(M(G.sph,hair,[0.11,0.1,0.11],[x,1.81,z],false)); break;
-    case 'bald': dome(); break;
-    case 'semibald': dome(); g.add(M(G.box,hair,[0.48,0.2,0.06],[0,1.52,0.235],false)); [-1,1].forEach(s=>g.add(M(G.box,hair,[0.05,0.2,0.3],[s*0.235,1.52,0.06],false))); break;
-    case 'quiff': top(); back(); { const q=M(G.box,hair,[0.42,0.14,0.18],[0,1.83,-0.15],false); q.rotation.x=0.35; g.add(q); } break;
-    case 'long': top(); g.add(M(G.box,hair,[0.52,0.62,0.12],[0,1.38,0.22],false)); [-1,1].forEach(s=>g.add(M(G.box,hair,[0.07,0.42,0.4],[s*0.255,1.5,0.03],false))); break;
-    case 'bob': top(); g.add(M(G.box,hair,[0.52,0.36,0.1],[0,1.5,0.22],false)); [-1,1].forEach(s=>g.add(M(G.box,hair,[0.07,0.34,0.44],[s*0.255,1.52,0.01],false))); break;
+    case 'pixie': top(); back(0.28); add(G.rsph,[0.16,0.06,0.12],[-0.08,1.66,-0.17],-0.4); break;
+    case 'buzz': add(G.rsph,[0.258,0.13,0.258],[0,1.6,0.02]); break;
+    case 'spiky': top(); back(0.18); for(const [x,z] of [[-0.12,-0.1],[0.12,-0.1],[0,0.02],[-0.13,0.13],[0.13,0.13]]){ const c=add(G.cone,[0.07,0.2,0.07],[x,1.79,z]); c.rotation.z=-x*1.6; c.rotation.x=z*1.4; } break;
+    case 'mohawk': add(G.rsph,[0.06,0.17,0.27],[0,1.72,0.03]); break;
+    case 'afro': add(G.rsph,[0.36,0.3,0.34],[0,1.64,0.1]); break;
+    case 'curly': top(); back(); for(const [x,y,z] of [[-0.15,1.67,-0.1],[0.15,1.67,-0.1],[0,1.73,-0.06],[-0.18,1.62,0.1],[0.18,1.62,0.1],[0,1.7,0.14]]) add(G.rsph,[0.1,0.09,0.1],[x,y,z]); break;
+    case 'bald': break;
+    case 'semibald': add(G.rsph,[0.23,0.1,0.13],[0,1.44,0.16]); [-1,1].forEach(k=>add(G.rsph,[0.06,0.09,0.13],[k*0.23,1.44,0.05])); break;
+    case 'quiff': top(); back(); add(G.rsph,[0.18,0.09,0.15],[0,1.71,-0.13],-0.35); break;
+    case 'long': top(); add(G.rsph,[0.27,0.34,0.14],[0,1.34,0.15]); [-1,1].forEach(k=>add(G.rsph,[0.07,0.26,0.16],[k*0.24,1.36,0.04])); break;
+    case 'bob': top(); add(G.rsph,[0.28,0.2,0.16],[0,1.45,0.1]); [-1,1].forEach(k=>add(G.rsph,[0.08,0.19,0.19],[k*0.235,1.45,0])); break;
     case 'ponytail': top(); back(); ponytailOn(g,hair); break;
-    case 'buns': top(); back(); [-1,1].forEach(s=>g.add(M(G.sph,hair,[0.13,0.13,0.13],[s*0.21,1.8,0.12],false))); break;
-    case 'braids': top(); back(); [-1,1].forEach(s=>{ g.add(M(G.box,hair,[0.1,0.5,0.1],[s*0.16,1.32,0.28],false)); g.add(M(G.box,mat(hc(HAT_COL),{r:0.4}),[0.12,0.05,0.12],[s*0.16,1.08,0.28],false)); }); break;
+    case 'buns': top(); back(); [-1,1].forEach(k=>add(G.rsph,[0.12,0.12,0.12],[k*0.19,1.7,0.08])); break;
+    case 'braids': top(); back(); [-1,1].forEach(k=>{ add(G.rcyl,[0.055,0.42,0.055],[k*0.15,1.22,0.2]); g.add(M(G.rsph,mat(hc(HAT_COL),{r:0.4,s:true}),[0.065,0.04,0.065],[k*0.15,1.0,0.2],false)); }); break;
   }
   if(!hat) return style==='afro'?2.02:style==='spiky'||style==='mohawk'?1.97:1.84;
   const c=mat(hc(HAT_COL),{r:0.4}),c2=mat(o?HAT_COL[(o.hatCol+3)%HAT_COL.length]:pick(HAT_COL),{r:0.4});
@@ -74,7 +77,7 @@ function buildHairHat(g,fem,hair,skin,leader,o){
   }
   return 1.84;
 }
-function ponytailOn(g,hair){ g.add(M(G.box,hair,[0.14,0.1,0.1],[0,1.6,0.27],false)); const t=M(G.box,hair,[0.16,0.44,0.14],[0,1.42,0.36],false); t.rotation.x=-0.25; g.add(t); }
+function ponytailOn(g,hair){ g.add(M(G.rsph,hair,[0.08,0.07,0.07],[0,1.56,0.25],false)); const t=M(G.rsph,hair,[0.09,0.24,0.09],[0,1.36,0.33],false); t.rotation.x=-0.3; g.add(t); }
 // Squad members are chibi: rounded, smoothly shaded pieces with short legs, a small body and a big head. Parts are
 // modelled at full size and then fitted together: legs and body scale down from the hip, the head scales up from the
 // neck. The face points to -z (the camera mostly sees the back), so role gear and medal ribbons sit on the back.

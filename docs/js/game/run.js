@@ -3,7 +3,7 @@
 let lastCfg=null;
 function clearSquad(){ squad.forEach(m=>{ scene.remove(m.g); m.beams.forEach(b=>scene.remove(b)); }); squad=[]; clearFallen(); }
 function clearRun(){
-  enemies.forEach(e=>{ scene.remove(e.g); e.mats.forEach(m=>m.emissive.setRGB(0,0,0)); (pools[e.type]||(pools[e.type]=[])).push(e); }); enemies=[]; boss=null;
+  enemies.forEach(e=>{ scene.remove(e.g); e.mats.forEach(m=>m.emissive.setRGB(0,0,0)); (pools[e.type]||(pools[e.type]=[])).push(e); }); enemies=[]; boss=null; bossHalt=0;
   bullets.clear(); ebullets.clear(); clearStars(); delayed.length=0; blobs.clear(); chunks.clear();
   hearts.forEach(h=>{ scene.remove(h.g); heartPool.push(h.g); }); hearts=[];
   coins.forEach(c=>{ scene.remove(c.g); coinPool.push(c.g); }); coins=[];
@@ -73,7 +73,7 @@ function frame(now){
 }
 function update(dt){
   time+=dt;
-  if(mode==='playing'){ dist+=scroll*dt; updatePower(dt); updateDifficulty(); checkEvents(); spawner(dt); }
+  if(mode==='playing'){ dist+=scroll*dt; updatePower(dt); updateDifficulty(); bossHaltStep(dt); checkEvents(); spawner(dt); }
   else if(mode==='menu'){ scroll=5; }
   else if(mode==='dead'){ deadT+=dt; scroll+=(0-scroll)*(1-Math.exp(-dt*1.5)); if(deadT>1.4&&!overShown) showOver(); }
   updateWorld(dt); updateScenery(dt); updateWalls(dt);

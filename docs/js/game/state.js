@@ -20,4 +20,8 @@ function updateDifficulty(){
   DIFF.crowd=1+0.03*extra;
   scroll=8-1.5*e+Math.min(5,d*0.22);
 }
+// Boss stand: once the boss has arrived the squad stops running and holds its ground while the monsters charge in;
+// the road starts rolling again when the boss falls. bossHalt eases 0 to 1 and scales the road speed.
+let bossHalt=0;
+function bossHaltStep(dt){ bossHalt+=((boss&&!boss.dead&&boss.hold?1:0)-bossHalt)*(1-Math.exp(-dt*1.5)); scroll*=1-bossHalt; }
 const delayed=[];

@@ -23,7 +23,7 @@ function spawner(dt){
   if(waveClock%24>20) return;
   spawnT-=dt;
   if(spawnT>0) return;
-  spawnT=DIFF.spawn/DIFF.crowd*(boss?2.4:1)*rand(0.7,1.3);
+  spawnT=DIFF.spawn/DIFF.crowd*(boss?1.3:1)*rand(0.7,1.3);
   if(aliveCount()>=enemyCap()){ spawnT=0.35; return; }
   const sz=VIEW.spawn;
   if(dist>1500&&!LABOFF.has('shambler')&&Math.random()<0.025){
