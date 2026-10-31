@@ -7,6 +7,12 @@ function buildHeart(){
   const c=M(G.cone,m,[0.42,0.5,0.42],[0,-0.15,0],false); c.rotation.x=Math.PI; g.add(c);
   return g;
 }
+// While the road stands still for a boss fight, hearts and coins fly to the squad on their own.
+function bossPull(p,dt){
+  if(mode!=='playing'||bossHalt<0.5) return;
+  const dx=S.x-p.x,dz=0-p.z,d=Math.hypot(dx,dz); if(d<0.1) return;
+  const sp=Math.min(d/dt,10+d*1.5); p.x+=dx/d*sp*dt; p.z+=dz/d*sp*dt;
+}
 function spawnHeart(x,z,amt){
   const g=heartPool.pop()||buildHeart();
   g.position.set(x,0.7,z); g.scale.setScalar(0.75+amt/30*0.7); g.visible=true; scene.add(g);
@@ -16,6 +22,7 @@ function updateHearts(dt){
   for(const h of hearts){
     const p=h.g.position; h.t+=dt; p.z+=scroll*dt; h.g.rotation.y+=dt*3; p.y=0.7+0.15*Math.sin(h.t*4);
     if(S.A&&S.A.magnet&&mode==='playing'){ const dx=S.x-p.x,dz=0-p.z,d=Math.hypot(dx,dz); if(d<9&&d>0.1){ p.x+=dx/d*12*dt; p.z+=dz/d*12*dt; } }
+    bossPull(p,dt);
     let got=false;
     if(mode==='playing') for(const m of squad){ if(Math.abs(m.g.position.x-p.x)<0.9&&Math.abs(m.g.position.z-p.z)<0.9){ got=true; break; } }
     if(got){
@@ -55,6 +62,7 @@ function updateCoins(dt){
   for(const c of coins){
     const p=c.g.position; c.t+=dt; p.z+=(scroll+c.vz)*dt; p.x+=c.vx*dt; c.vz*=0.9; c.vx*=0.9; c.g.rotation.y+=dt*(c.val>1?2:4); p.y=0.55+0.12*Math.sin(c.t*5);
     if(S.A&&S.A.magnet&&mode==='playing'){ const dx=S.x-p.x,dz=0-p.z,d=Math.hypot(dx,dz); if(d<9&&d>0.1){ p.x+=dx/d*14*dt; p.z+=dz/d*14*dt; } }
+    bossPull(p,dt);
     if(mode==='playing') for(const m of squad){ if(Math.abs(m.g.position.x-p.x)<reach&&Math.abs(m.g.position.z-p.z)<reach){ c.dead=true; break; } }
     if(c.dead){ coinsRun+=c.val*S.T.coinMult; sfx.coin(); fxSpark(p.x,p.y,p.z,GOLD); hudCoins=-1; if(c.val>1) pushDmg(p.x,1.6,p.z,'+'+c.val,'#ffc83d',false); }
     else if(p.z>4) c.dead=true;
