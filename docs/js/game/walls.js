@@ -34,7 +34,7 @@ function signTexture(u,boss,locked){
   if(boss){ x.strokeStyle='#ffc83d'; x.lineWidth=14; x.strokeRect(7,7,498,370); }
   x.textAlign='center'; x.textBaseline='middle';
   x.fillStyle='#0d1030'; x.font='800 30px Nunito, sans-serif';
-  if(locked) x.fillText(tl('LOCKED · GAMBLE FOR IT'),256,38); else x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
+  if(locked) x.fillText(tl('LOCKED · 50% CHANCE'),256,38); else x.fillText((boss?tl('BOSS REWARD'):u.kind==='team'?tl('FOR EVERYONE'):u.kind==='pet'?tl('HELPER'):tl('NEW RECRUIT'))+' · '+RARITY[u.rarity].toUpperCase(),256,38);
   let fs=54; x.font=fs+'px Bungee, Impact, sans-serif';
   while(x.measureText(u.name).width>470&&fs>28){ fs-=4; x.font=fs+'px Bungee, Impact, sans-serif'; }
   x.fillStyle=u.kind==='gubbe'?hexCss(u.shirt):'#0d1030';
@@ -96,10 +96,10 @@ function breakWall(w){
   removeWall(w);
   if(w.gid) for(const o of walls){ if(o!==w&&!o.dead&&o.gid===w.gid){ o.dead=true; fxShatter(o.g.position.x,o.g.position.z,wallPieceMat(o),o.boss?wallGoldMat:wallPostMat,0.7); removeWall(o); } }
   if(OPT.coins) spawnCoin(p.x+rand(-0.5,0.5),p.z,Math.min(3,stackMax()));
-  // A locked wall pauses like an empty chest: gamble for a chance at its perk, or take free coins.
+  // A locked wall is a coin flip with no pause: half the time you get its perk for this run, otherwise a handful of coins.
   if(w.locked){
-    if(mode==='playing') openItemShop(w.u.name,[{type:'mystery',cost:mysteryCost(w.boss),gold:w.boss,target:w.u,p:p.clone()},{type:'coins',cost:0,gold:w.boss,p:p.clone()}]);
-    return;
+    if(Math.random()>=WALL_GAMBLE_WIN){ const n=chestCoinRoll(w.boss); roadText(tl('+{0} coins',n),tl('{0} stayed locked',w.u.name),'#ffc83d'); collectCoins(n); sfx.coin(); return; }
+    sfx.combo();
   }
   if(w.u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }
   else if(w.u.kind==='gubbe'){ const m=addMember(w.u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(w.u.shirt)); toast(tl('{0} joins!',w.u.name)); }
