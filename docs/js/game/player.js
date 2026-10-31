@@ -36,7 +36,7 @@ function updatePlayer(dt){
   }
 }
 // On arrival a recruit waves and high-fives the nearest squad mate: both raise a hand, they clap together, then wave it off.
-const WAVE_T=1;
+const WAVE_T=1,JOIN_SPEED=7;
 function greet(m){
   let n=null,bd=1e9; for(const o of squad){ if(o===m||o.dead||o.joinT>0) continue; const d=o.g.position.distanceToSquared(m.g.position); if(d<bd){ bd=d; n=o; } }
   m.waveT=WAVE_T; m.waveSide=n&&n.g.position.x<m.g.position.x?-1:1;
@@ -72,13 +72,13 @@ function updateSquad(dt){
   }else{
     squad.forEach(m=>{ const g=m.g,s=m.slot,tx=clamp(S.x+s[0],-HALF+0.4,HALF-0.4); g.position.x+=(tx-g.position.x)*k; g.position.z+=(s[1]-g.position.z)*k; });
   }
-  // a new recruit walks in from where they were found instead of snapping into place: undo this frame's move, recover
+  // a new recruit walks in at one steady pace (JOIN_SPEED) from where they were found instead of snapping into place: undo this frame's move, recover
   // where the formation wanted them, and stroll there (with the road carrying them along), turned toward where they walk
   for(const [m,x0,z0] of joining){
     const p=m.g.position,tx=x0+(p.x-x0)/k,tz=z0+(p.z-z0)/k,dx=tx-x0,dz=tz-z0,d=Math.hypot(dx,dz);
     m.joinT-=dt;
     if(d<0.35||m.joinT<=0){ m.joinT=0; m.g.rotation.y=0; if(d<0.35) greet(m); continue; }
-    const step=Math.min(d,(scroll*0.9+3)*dt); p.x=x0+dx/d*step; p.z=z0+dz/d*step;
+    const step=Math.min(d,JOIN_SPEED*dt); p.x=x0+dx/d*step; p.z=z0+dz/d*step;
     const turn=((Math.atan2(-dx,-dz)-m.g.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI; m.g.rotation.y+=turn*(1-Math.exp(-dt*10));
   }
   squad.forEach(m=>{

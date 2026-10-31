@@ -193,7 +193,7 @@ function addMember(def,from){
   if(OPT.snake&&last) g.position.set(last.x,0,last.z+0.78); else g.position.set(S.x+m.slot[0],0,m.slot[1]);
   if(def.id==='medic') squad.forEach(o=>{ o.hp=Math.min(o.maxHp,o.hp+30); });
   recomputeAuras();
-  if(from){ m.g.position.set(from.x,0,from.z); m.joinT=3; }
+  if(from){ m.g.position.set(from.x,0,from.z); m.joinT=10; }
   return m;
 }
 function hasPart(id){ return squad.some(m=>m.def.id===id)||S.perks.some(p=>p.id===id); }
