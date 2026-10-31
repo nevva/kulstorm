@@ -557,6 +557,7 @@ const SV={
   'Fever dream':'Feberdröm',
   'Fever dream!':'Feberdröm!',
   'FEVER':'FEBER',
+  'LEVEL {0}!':'NIVÅ {0}!',
   '{0} picks left':'{0} val kvar',
   'Elite down!':'Elit nedlagd!',
   'Pickup':'Upplockning',

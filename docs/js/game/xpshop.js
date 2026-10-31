@@ -1,6 +1,8 @@
 'use strict';
 // ---------- XP crystals, run levels and the buy screen
-const R={xp:0,lvl:1,need:14,pending:0,reroll:5,offers:[],sel:0,title:'',spinning:false,mysteries:0,coinsSpun:false,picks:0,nextShopAt:0};
+// Levels: the first needs XP_NEED0 XP and each next one XP_GROW times more (+6), so shops come less and less often.
+const XP_NEED0=24,XP_GROW=1.45;
+const R={xp:0,lvl:1,need:XP_NEED0,ceremony:[],pending:0,reroll:5,offers:[],sel:0,title:'',spinning:false,mysteries:0,coinsSpun:false,picks:0,nextShopAt:0};
 const xpOn=()=>OPT.xpshop&&OPT.coins;
 let xpGems=[]; const xpPool=[]; const xpMat=mat(0xb07cff,{e:0.6,r:0.2});
 function spawnXp(x,z,v){
@@ -47,9 +49,9 @@ const kiosk=(function(){
 function refreshKioskSign(){ const x=kiosk.ctx; x.fillStyle='#ffd21f'; x.fillRect(0,0,256,96); x.fillStyle='#0d1030'; x.font='56px Bungee, Impact, sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(tl('SHOP'),128,52); kiosk.tex.needsUpdate=true; }
 function addXp(v){
   R.xp+=v; hudXp=-1;
-  while(R.xp>=R.need){ R.xp-=R.need; R.lvl++; R.need=Math.round(R.need*1.35+4); R.pending++; }
+  while(R.xp>=R.need){ R.xp-=R.need; R.lvl++; R.need=Math.round(R.need*XP_GROW+6); R.pending++; }
 }
-function clearXp(){ xpGems.forEach(c=>{ scene.remove(c.g); xpPool.push(c.g); }); xpGems=[]; kiosk.active=false; kiosk.g.visible=false; R.xp=0; R.lvl=1; R.need=14; R.pending=0; R.reroll=5; R.mysteries=0; R.coinsSpun=false; R.picks=0; R.nextShopAt=0; hudXp=-1; }
+function clearXp(){ xpGems.forEach(c=>{ scene.remove(c.g); xpPool.push(c.g); }); xpGems=[]; kiosk.active=false; kiosk.g.visible=false; R.xp=0; R.lvl=1; R.need=XP_NEED0; R.ceremony=[]; R.pending=0; R.reroll=5; R.mysteries=0; R.coinsSpun=false; R.picks=0; R.nextShopAt=0; hudXp=-1; }
 const shopEl=$('shop');
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=ri(0,i); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function buildOffers(){
@@ -97,7 +99,7 @@ function buyOffer(o){
   const btn=$('offer'+R.offers.indexOf(o));
   if(o.bought||!btn||btn.disabled){ if(!o.bought){ $('shopwallet').textContent=(coinsRun<o.cost?tl("Can't afford"):tl("Can't buy"))+' · '+tl('{0} coins this run',fmt(Math.floor(coinsRun))); sfx.hurt(); } return false; }
   coinsRun-=o.cost; o.bought=true; hudCoins=-1;
-  if(o.type==='lvl'){ const m=o.m; m.lvl++; m.maxHp=Math.round(m.maxHp*1.2); m.hp=m.maxHp; fxSparkle(m.g.position.x,1.4,m.g.position.z,C(m.def.shirt)); }
+  if(o.type==='lvl'){ const m=o.m; m.lvl++; m.maxHp=Math.round(m.maxHp*1.2); m.hp=m.maxHp; R.ceremony.push(m); }
   else if(o.type==='heal'){ squad.forEach(m=>{ m.hp=m.maxHp; }); }
   else if(o.type==='item') grantItem(o.u,{x:S.x,z:-2});
   // Only the first coin pick of a run spins; later ones pay out at once.
@@ -137,7 +139,23 @@ function closeShop(){
   if(shopRelock&&OPT.mouse) lockMouse(); shopRelock=false;
   for(const m of squad) m.invuln=0.6;
   updateHUD();
+  // the level-up celebrations play once the game is running again, one after another
+  R.ceremony.splice(0).forEach((m,i)=>setTimeout(()=>levelUpFx(m),150+i*350));
 }
+// Level-up ceremony on the member: a hop, a burst of confetti, an expanding gold ring, a rising fanfare and its new level.
+const lvlRings=[];
+function levelUpFx(m){
+  if(mode!=='playing'||m.dead||squad.indexOf(m)<0) return;
+  const p=m.g.position;
+  if((m.jy||0)<=0.05){ m.vy=6; m.dbUsed=true; }
+  for(let i=0;i<28;i++){ const a=rand(0,6.28),sp=rand(1.5,4.5); chunks.spawn(p.x,1.3,p.z,Math.cos(a)*sp,rand(5,9),Math.sin(a)*sp,rand(0.9,1.4),0.08,0.04,pick(RAINBOW),pick(RAINBOW),WHITE,12,0.5,false,rand(6,16)); }
+  fxSparkle(p.x,1.4,p.z,GOLD);
+  let r=lvlRings.find(q=>q.t<=0); if(!r){ r={m:new THREE.Mesh(G.ring,new THREE.MeshBasicMaterial({color:0xffd21f,transparent:true,depthWrite:false})),t:0}; r.m.rotation.x=Math.PI/2; scene.add(r.m); lvlRings.push(r); }
+  r.t=0.6; r.m.position.set(p.x,0.15,p.z); r.m.visible=true;
+  pushDmg(p.x,2.9,p.z,tl('LEVEL {0}!',m.lvl),'#ffd21f',true,true,m.def.short,1.4);
+  sfx.levelUp(); shake(0.25);
+}
+function updateLevelRings(dt){ for(const r of lvlRings){ if(r.t<=0) continue; r.t-=dt; const k=1-r.t/0.6; r.m.scale.setScalar(0.4+2.2*k); r.m.material.opacity=1-k; r.m.position.z+=scroll*dt; if(r.t<=0) r.m.visible=false; } }
 $('shop-done').addEventListener('click',closeShop);
 // Taps anywhere on the shop screen during a spin skip it (offer buttons skip through buyOffer).
 shopEl.addEventListener('pointerdown',e=>{ if(R.spinning&&R.skipSpin&&!e.target.closest('.offer')) R.skipSpin(); });

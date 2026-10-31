@@ -87,6 +87,8 @@ const sfx=(function(){
       thump(t+0.16,140,50,0.3,0.45,0.25); [523,659,784,1046,1318].forEach((f,i)=>{ mallet(t+0.16+i*0.06,f,0.7,0.15,0.35); ring(t+0.16+i*0.06,f*2,0.9,0.025,0.4); }); },
     upgrade(){ if(!ok()) return; const t=T(); thump(t,120,45,0.3,0.5,0.25); [523,659,784,1046].forEach((f,i)=>mallet(t+i*0.085,f,0.5,0.17,0.3)); },
     // Damage milestone: a bright chime that climbs a step per milestone, with a soft thump under the bigger ones.
+    // Squad member level-up: a bright rising arpeggio over a thump, with a shimmer on top.
+    levelUp(){ if(!ok()) return; const t=T(); thump(t,120,48,0.3,0.45,0.25); [523,659,784,1047,1319].forEach((f,i)=>{ mallet(t+i*0.07,f,0.5,0.15,0.35); ring(t+i*0.07+0.03,f*2,0.6,0.02,0.45); }); nz(t+0.3,0.4,0.05,'highpass',7000,9000,0.7,0.5,0.05); },
     milestone(lv){ if(!ok()||!gate('ms',90)) return; const t=T(),f=523*Math.pow(2,Math.min(lv,10)*2/12); if(lv>=3) thump(t,130,50,0.18,0.3,0.15); mallet(t,f,0.35,0.13,0.3); mallet(t+0.06,f*1.5,0.4,0.1,0.35); ring(t+0.06,f*2,0.5,0.025,0.4); },
     combo(){ if(!ok()) return; const t=T(); thump(t,100,38,0.4,0.6,0.3); thump(t+0.18,100,38,0.3,0.45,0.3); [392,523,659,784,1046,1318].forEach((f,i)=>mallet(t+i*0.06,f,0.5,0.14,0.35)); },
     zone(){ if(!ok()) return; const t=T(); thump(t,92,44,0.45,0.42,0.3); nz(t,0.7,0.09,'lowpass',200,1300,0.8,0.3,0.45); },

@@ -79,7 +79,7 @@ function update(dt){
   updateWorld(dt); updateScenery(dt); updateWalls(dt);
   if(mode==='playing'){ updatePlayer(dt); updateSquad(dt); updateFire(dt); updateDelayed(dt); }
   else if(mode==='menu'){ S.x=0; updateSquad(dt); }
-  updateBullets(dt); updateEnemies(dt); updateEnemyBullets(dt); updateHearts(dt); updateCoins(dt); updateFever(dt); updateDeathFx(dt); updateRoadText(dt); updateZaps(dt); updateWeather(dt); updateObstacles(dt); updateXp(dt); updateChests(dt); updateUnicorns(dt); updateBossFx(dt); if(mode==='playing') updateOD(dt); updatePound(dt);
+  updateBullets(dt); updateEnemies(dt); updateEnemyBullets(dt); updateHearts(dt); updateCoins(dt); updateFever(dt); updateDeathFx(dt); updateRoadText(dt); updateLevelRings(dt); updateZaps(dt); updateWeather(dt); updateObstacles(dt); updateXp(dt); updateChests(dt); updateUnicorns(dt); updateBossFx(dt); if(mode==='playing') updateOD(dt); updatePound(dt);
   blobs.update(dt,scroll); chunks.update(dt,scroll); updateShards(dt); updateBlobShadows();
   updateCamera(dt); updateSky(dt); updateColors(dt);
   if(mode==='playing') updateHUD();
