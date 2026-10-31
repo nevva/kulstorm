@@ -49,6 +49,7 @@ function updateSquad(dt){
   if(S.victoryT>0) S.victoryT=Math.max(0,S.victoryT-dt);
   const k=1-Math.exp(-dt*10),kf=1-Math.exp(-dt*7);
   for(const m of squad) if(m.boff){ m.g.position.z-=m.boff; m.boff=0; }
+  const joining=squad.filter(m=>m.joinT>0).map(m=>[m,m.g.position.x,m.g.position.z]);
   if(S.pwLine>0&&mode==='playing'){
     const order=chainOrder(),n=order.length;
     order.forEach((m,i)=>{ const g=m.g; g.position.x+=(lineSlotX(i,n)-g.position.x)*k; g.position.z+=(0-g.position.z)*k; });
@@ -63,6 +64,15 @@ function updateSquad(dt){
     }
   }else{
     squad.forEach(m=>{ const g=m.g,s=m.slot,tx=clamp(S.x+s[0],-HALF+0.4,HALF-0.4); g.position.x+=(tx-g.position.x)*k; g.position.z+=(s[1]-g.position.z)*k; });
+  }
+  // a new recruit walks in from where they were found instead of snapping into place: undo this frame's move, recover
+  // where the formation wanted them, and stroll there (with the road carrying them along), turned toward where they walk
+  for(const [m,x0,z0] of joining){
+    const p=m.g.position,tx=x0+(p.x-x0)/k,tz=z0+(p.z-z0)/k,dx=tx-x0,dz=tz-z0,d=Math.hypot(dx,dz);
+    m.joinT-=dt;
+    if(d<0.35||m.joinT<=0){ m.joinT=0; m.g.rotation.y=0; continue; }
+    const step=Math.min(d,(scroll*0.9+3)*dt); p.x=x0+dx/d*step; p.z=z0+dz/d*step;
+    const turn=((Math.atan2(-dx,-dz)-m.g.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI; m.g.rotation.y+=turn*(1-Math.exp(-dt*10));
   }
   squad.forEach(m=>{
     const g=m.g,u=g.userData,t=time*13+m.phase;
@@ -122,6 +132,7 @@ const tipV=new THREE.Vector3();
 function updateFire(dt){
   const A=S.A;
   for(const m of squad){
+    if(m.joinT>0) continue;
     const w=WEAPONS[m.def.weapon||'pistol'];
     if(w.laser){ laserMember(m,w,A,dt); continue; }
     const rate=w.rate*A.rate*formRate(m)*flowK()*odRate()*pwRate()*feverRate();

@@ -179,7 +179,8 @@ function cycleFront(dir){ return;
   S.frontM=squad[next]; layoutSquad();
   toast(tl('{0} at the front',S.frontM.def.name)); sfx.zone();
 }
-function addMember(def){
+// from: where a recruit was found ({x,z}); they stroll into the squad from there.
+function addMember(def,from){
   const g=buildGubbe(def); scene.add(g);
   const hp=memberBaseHealth(def)+(def.id==='leader'?0:S.T.hpBonus);
   const m={def,g,hp,maxHp:hp,cd:rand(0,0.3),phase:rand(0,6.3),recoil:0,beams:[],laserTick:rand(0,0.1),invuln:0,charges:def.id==='shield'?3:0,rt:0,hurtT:0,slot:FORM[0],dead:false,dealt:0,lvl:1,jumpT:0,duckT:0,jumpDelay:-1,duckDelay:-1,jy:0,vy:0,dbUsed:false,flip:0};
@@ -190,6 +191,7 @@ function addMember(def){
   if(OPT.snake&&last) g.position.set(last.x,0,last.z+0.78); else g.position.set(S.x+m.slot[0],0,m.slot[1]);
   if(def.id==='medic') squad.forEach(o=>{ o.hp=Math.min(o.maxHp,o.hp+30); });
   recomputeAuras();
+  if(from){ m.g.position.set(clamp(from.x,-HALF+0.4,HALF-0.4),0,from.z); m.joinT=3; }
   return m;
 }
 function hasPart(id){ return squad.some(m=>m.def.id===id)||S.perks.some(p=>p.id===id); }

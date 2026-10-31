@@ -121,7 +121,7 @@ function breakWall(w){
     sfx.combo();
   }
   if(w.u.kind==='pet'){ addUnicorn(); toast(tl('A unicorn joins!')); }
-  else if(w.u.kind==='gubbe'){ const m=addMember(w.u); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(w.u.shirt)); toast(tl('{0} joins!',w.u.name)); }
+  else if(w.u.kind==='gubbe'){ const m=addMember(w.u,{x:p.x,z:p.z-1.5}); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(w.u.shirt)); toast(tl('{0} joins!',w.u.name)); }
   else { applyTeamPerk(w.u); toast(w.u.name+'!'); }
   sfx.upgrade();
 }
