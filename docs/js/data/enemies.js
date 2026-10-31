@@ -28,5 +28,7 @@ const ENEMY={
   hydra:{hp:300,speed:0,r:2.4,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.2},
   spider:{hp:300,speed:0,r:1.9,dmg:0,unlock:1e9,w:0,boss:true,hpK:0.95},
   golem:{hp:300,speed:0,r:2.2,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.3},
+  mech:{hp:300,speed:0,r:2.2,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.25},
+  wraith:{hp:300,speed:0,r:1.6,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.0},
 };
-const BOSS_NAMES={boss:'The Troll King',snake:'The Giant Serpent',hydra:'The Three-Headed Dragon',spider:'The Spider Queen',golem:'The Stone Golem'};
+const BOSS_NAMES={boss:'The Troll King',snake:'The Giant Serpent',hydra:'The Three-Headed Dragon',spider:'The Spider Queen',golem:'The Stone Golem',mech:'The War Machine',wraith:'The Wraith Queen'};

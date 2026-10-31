@@ -2,8 +2,8 @@
 // ---------- bosses: one every 600 m, a different kind each time (never the same twice in a row).
 // Shared rules use e.isBoss (no knockback, heart and coin rain on death); each kind has a look (build*) and an attack loop (BOSS_AI).
 // Lane attacks are telegraphed with a flashing strip so the player can dodge into another lane.
-const BOSS_Z=-9,BOSS_TYPES=['boss','snake','hydra','spider','golem'];
-const VENOM=C(0x76ff03),FIREB=C(0xff8a1f),WEB=C(0xeeeeee),ROCK=C(0xffb74d);
+const BOSS_Z=-9,BOSS_TYPES=['boss','snake','hydra','spider','golem','mech','wraith'];
+const VENOM=C(0x76ff03),FIREB=C(0xff8a1f),WEB=C(0xeeeeee),ROCK=C(0xffb74d),MISSILE=C(0xff6d00),SOUL=C(0x69f0ae);
 let bossForce=null,lastBoss=null;
 function pickBoss(){
   if(bossForce) return bossForce;
@@ -86,7 +86,30 @@ function buildGolem(){
   [legL,legR].forEach(l=>{ l.add(M(G.box,dark,[1.0,1.1,1.0],[0,-0.55,0])); g.add(l); });
   g.userData={mats:[m],body,arms,legL,legR}; return g;
 }
-Object.assign(ENEMY_BUILD,{boss:buildBoss,snake:buildSnake,hydra:buildHydra,spider:buildSpider,golem:buildGolem});
+// The war machine: a robot on treads. Twin cannon bursts, missile pods, and a laser that sweeps lane by lane.
+function buildMech(){
+  const g=new THREE.Group(),m=matV(0x607d8b,{r:0.4,m:0.4}),dark=mat(0x263238,{r:0.4,m:0.4}),red=mat(0xff1744,{e:1.4}),yel=mat(0xffd21f,{r:0.3});
+  const body=new THREE.Group(); g.add(body);
+  body.add(M(G.box,m,[2.6,2.0,1.8],[0,2.5,0])); body.add(M(G.box,yel,[2.62,0.18,1.82],[0,1.6,0],false));
+  body.add(M(G.sph,m,[0.85,0.7,0.85],[0,3.75,0.1])); body.add(M(G.box,red,[1.0,0.18,0.1],[0,3.8,0.85],false));
+  [-1,1].forEach(s=>{ body.add(M(G.box,dark,[0.8,0.6,1.4],[s*1.6,3.75,-0.1])); for(let i=0;i<2;i++) body.add(M(G.cyl,yel,[0.12,0.1,0.12],[s*1.6+(i?0.18:-0.18),3.85,0.62],false)); });
+  const arms=[-1,1].map(s=>{ const a=new THREE.Group(); a.position.set(s*1.75,2.6,0.2); a.add(M(G.box,dark,[0.6,0.6,0.6],[0,0,0])); const c=M(G.cyl,m,[0.22,1.4,0.22],[0,-0.1,0.7]); c.rotation.x=Math.PI/2; a.add(c); body.add(a); return a; });
+  [-1,1].forEach(s=>g.add(M(G.box,dark,[0.8,0.9,2.4],[s*1.1,0.45,0])));
+  g.userData={mats:[m],body,arms}; return g;
+}
+// The wraith queen: a floating crowned ghost that teleports between lanes, fires slow soul orbs and summons ghosts.
+function buildWraith(){
+  const g=new THREE.Group(),m=matV(0x4a148c,{r:0.5}),pale=matV(0xe1bee7,{r:0.4}),gold=mat(0xffd21f,{r:0.25,m:0.6}),soul=mat(0x69f0ae,{e:1.4});
+  [m,pale].forEach(x=>{ x.transparent=true; x.opacity=0.92; });
+  const body=new THREE.Group(); g.add(body);
+  const cloak=M(G.cone,m,[1.5,3.2,1.5],[0,1.9,0]); cloak.rotation.x=Math.PI; body.add(cloak);
+  body.add(M(G.sph,pale,[0.62,0.68,0.62],[0,3.75,0.1])); body.add(M(G.sph,m,[0.75,0.75,0.75],[0,3.85,-0.12]));
+  for(let i=0;i<5;i++){ const a=i/5*6.28; body.add(M(G.cone,gold,[0.1,0.35,0.1],[Math.cos(a)*0.45,4.55,0.1+Math.sin(a)*0.45])); }
+  const hands=[-1,1].map(s=>{ const h=M(G.sph,soul,[0.3,0.3,0.3],[s*1.5,2.6,0.6],false); body.add(h); return h; });
+  eyes(body,3.8,0.62,0.16,0.22,mat(0x69f0ae,{e:1.5}));
+  g.userData={mats:[m,pale],body,hands}; return g;
+}
+Object.assign(ENEMY_BUILD,{boss:buildBoss,snake:buildSnake,hydra:buildHydra,spider:buildSpider,golem:buildGolem,mech:buildMech,wraith:buildWraith});
 BOSS_TYPES.forEach(k=>{ ENEMY[k].build=ENEMY_BUILD[k]; });
 
 // ---------- shared boss helpers
@@ -148,6 +171,42 @@ function updateBoss(e,dt,playing){
 function headPos(e,h){ const p=e.g.position,q=h.grp.position; return [p.x+q.x,p.y+q.y,p.z+q.z+0.9]; }
 
 const BOSS_AI={
+  mech(e,dt,b,act){
+    const p=e.g.position,u=e.u;
+    if(e.hold) p.x+=(Math.sin(e.t*0.5)*2.2-p.x)*(1-Math.exp(-dt*2));
+    u.arms.forEach((a,i)=>{ a.rotation.x=Math.sin(e.t*2+i)*0.08-(b.aimT>0?0.25:0); }); if(b.aimT>0) b.aimT-=dt;
+    if(!act) return;
+    b.cd-=dt; if(b.cd>0) return;
+    b.n++; const angry=e.hp<e.maxHp*0.5,pat=b.n%3;
+    if(pat===1){ // twin cannon bursts along locked lines
+      [-1,1].forEach(s=>{ const x=p.x+s*1.75,z=p.z+1.6; volley(b,x,2.5,z,[aimAt(x,z)],12+DIFF.speed,EB_COL,TELL,angry?4:3,0.15); }); b.aimT=TELL; b.cd=1.9;
+    } else if(pat===2){ // missile pods: a fan from each shoulder
+      [-1,1].forEach(s=>{ const x=p.x+s*1.6,z=p.z+0.8; volley(b,x,3.8,z,fanAngles(aimAt(x,z),angry?4:3,0.2),8+DIFF.speed,MISSILE,TELL+0.1); }); b.cd=2.0;
+    } else { // laser sweep: lane after lane, so keep moving the way it came from
+      const order=Math.random()<0.5?[0,1,2]:[2,1,0],gap=angry?0.35:0.5;
+      order.forEach((l,i)=>{ laneWarn(l,1.0+i*gap,0xff1744); b.q.push({t:1.0+i*gap,fn:()=>{ laneHit(l,22,tl('LASER!'),CYAN); for(let z=-6;z<3;z+=1.5) fxSpark(LANE_X[l]+rand(-1.2,1.2),0.4,z,CYAN); }}); });
+      sayAt(p.x,5,p.z,tl('Laser sweep!'),'#ff5c7a',tl('Keep moving')); sfx.zap(); b.cd=1.0+2*gap+1.6;
+    }
+  },
+  wraith(e,dt,b,act){
+    const p=e.g.position,u=e.u,ms=e.mats;
+    p.y=0.6+Math.sin(e.t*2)*0.3; u.body.rotation.y=Math.sin(e.t*0.8)*0.2;
+    u.hands.forEach((h,i)=>{ h.position.y=2.6+Math.sin(e.t*3+i*2)*0.25; });
+    // teleport: fade out, jump to another spot, fade back in
+    if(b.st==='fade'){ b.st_t-=dt; ms.forEach(m=>m.opacity=0.12+0.8*Math.max(0,b.st_t/0.4)); if(b.st_t<=0){ p.x=b.tx; b.st='appear'; b.st_t=0.4; for(let i=0;i<14;i++) blobs.spawn(p.x+rand(-1,1),rand(1,4),p.z+0.5,rand(-1,1),rand(0.5,2),rand(-1,1),0.8,0.3,0.03,WHITE,C(0xce93d8),C(0x4a148c),-1,0,false,0); } return; }
+    if(b.st==='appear'){ b.st_t-=dt; ms.forEach(m=>m.opacity=0.92-0.8*Math.max(0,b.st_t/0.4)); if(b.st_t<=0) b.st='idle'; return; }
+    if(!act) return;
+    b.cd-=dt; if(b.cd>0) return;
+    b.n++; const angry=e.hp<e.maxHp*0.5,pat=b.n%3;
+    if(pat===1){ // slow soul orbs, easy to read and weave through
+      const z=p.z+1; volley(b,p.x,2.4,z,fanAngles(aimAt(p.x,z),angry?9:7,0.2),6+DIFF.speed,SOUL,TELL+0.1); b.cd=angry?1.5:2.0;
+    } else if(pat===2){ // summon ghosts in every lane
+      for(let i=0;i<(angry?4:3);i++){ const l=i%LANES; pendSpawn.push({t:i*0.2,type:'ghost',lane:l,x:LANE_X[l]+rand(-1,1),z:p.z+2}); }
+      sayAt(p.x,5,p.z,tl('Rise!'),'#ce93d8'); b.cd=2.2;
+    } else { // vanish and reappear over another lane
+      b.st='fade'; b.st_t=0.4; b.tx=clamp(LANE_X[ri(0,LANES-1)]+rand(-0.8,0.8),-3.6,3.6); sfx.zap(); b.cd=angry?0.9:1.4;
+    }
+  },
   boss(e,dt,b,act){
     const p=e.g.position,u=e.u;
     if(e.hold) p.x=Math.sin(e.t*0.7)*2.6;
