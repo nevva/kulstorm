@@ -475,7 +475,7 @@ const SV={
   'PARRY!':'PARERAT!',
   'Strike back now':'Slå tillbaka nu',
   'Chests':'Kistor',
-  'A chest holds a random item you have unlocked in the Armory. Before you buy Money Maker it is empty, but you can pay coins from the run for a mystery item.':'En kista innehåller en slumpad pryl som du har låst upp i Förrådet. Innan du köper Pengamaskin är den tom, men du kan betala mynt från rundan för en hemlig pryl.',
+  'A chest holds a random item you have unlocked in the Armory. Before you buy Money Maker it is empty, but a quick spin still gives you coins and sometimes an item.':'En kista innehåller en slumpad pryl som du har låst upp i Förrådet. Innan du köper Pengamaskin är den tom, men en snabb snurr ger ändå mynt och ibland en pryl.',
   'Armory':'Förråd',
   'Unlocked items come out of chests for free and show up on walls more often. Locked items can still be bought with coins from a run, but only for that run.':'Upplåsta prylar kommer gratis ur kistor och dyker oftare upp på väggar. Låsta prylar kan ändå köpas med mynt från en runda, men bara för den rundan.',
   'Squad members':'Gubbar',

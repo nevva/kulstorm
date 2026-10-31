@@ -81,10 +81,27 @@ function chestCoinRoll(gold){
   return Math.max(1,Math.round(ri(3,8)*k));
 }
 // An empty chest pauses the game: gamble run coins for a random item (locked or not) for this run, or take a random handful of coins.
+// An empty chest spins a quick lottery in a corner of the screen while you keep running: CHEST_ITEM_CHANCE of the time
+// an item (any item, for this run) plus coins, otherwise just coins.
+const CHEST_ITEM_CHANCE=0.25,chestSpinEl=$('chestspin');
+let chestSpinBusy=false;
 function offerMystery(c){
   const p=c.g.position.clone();
-  if(mode!=='playing'){ sayAt(p.x,2.6,p.z,tl('Empty'),'#b9bde0'); return; }
-  openItemShop(c.gold?tl('Empty golden chest'):tl('Empty chest'),[{type:'mystery',cost:mysteryCost(c.gold),gold:c.gold,p},{type:'coins',cost:0,gold:c.gold,p}]);
+  if(mode!=='playing'||chestSpinBusy){ const n=chestCoinRoll(c.gold); collectCoins(n); return; }
+  const pool=chestPool().filter(powerUsable),n=chestCoinRoll(c.gold),item=Math.random()<CHEST_ITEM_CHANCE?rollChest(c.gold,pool):null;
+  const css=u=>u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
+  const nameEl=chestSpinEl.querySelector('b'),subEl=chestSpinEl.querySelector('small');
+  chestSpinBusy=true; chestSpinEl.hidden=false; chestSpinEl.classList.remove('won'); subEl.textContent=tl('Spinning…');
+  let t=0,delay=40;
+  const tick=()=>{
+    if(mode==='dead'||mode==='menu'){ chestSpinEl.hidden=true; chestSpinBusy=false; return; }
+    if(t++<14){ if(Math.random()<0.5){ nameEl.textContent=tl('+{0} coins',Math.max(1,Math.round(n*rand(0.5,1.8)))); nameEl.style.color='#ffc83d'; } else { const u=pick(pool); nameEl.textContent=u.name; nameEl.style.color=css(u); } sfx.coin(); delay*=1.15; setTimeout(tick,delay); return; }
+    nameEl.textContent=item?item.name:tl('+{0} coins',n); nameEl.style.color=item?css(item):'#ffc83d';
+    subEl.textContent=item?tl('+{0} coins',n):''; chestSpinEl.classList.add('won');
+    if(item){ grantItem(item,p); sfx.unlock(); } collectCoins(n);
+    setTimeout(()=>{ chestSpinEl.hidden=true; chestSpinBusy=false; },1400);
+  };
+  tick();
 }
 // Won coins go straight into the run's purse, the same as picking them up.
 function collectCoins(n){
