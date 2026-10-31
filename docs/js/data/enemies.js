@@ -30,5 +30,6 @@ const ENEMY={
   golem:{hp:300,speed:0,r:2.2,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.3},
   mech:{hp:300,speed:0,r:2.2,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.25},
   wraith:{hp:300,speed:0,r:1.6,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.0},
+  plant:{hp:300,speed:0,r:2.0,dmg:0,unlock:1e9,w:0,boss:true,hpK:1.1},
 };
-const BOSS_NAMES={boss:'The Troll King',snake:'The Giant Serpent',hydra:'The Three-Headed Dragon',spider:'The Spider Queen',golem:'The Stone Golem',mech:'The War Machine',wraith:'The Wraith Queen'};
+const BOSS_NAMES={boss:'The Troll King',snake:'The Giant Serpent',hydra:'The Three-Headed Dragon',spider:'The Spider Queen',golem:'The Stone Golem',mech:'The War Machine',wraith:'The Wraith Queen',plant:'The Thorn Bloom'};
