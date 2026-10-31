@@ -87,7 +87,7 @@ function removeFeverOrb(){ if(!feverOrb) return; scene.remove(feverOrb.g); fever
 function startFever(){
   S.feverT=FEVER_T; document.body.classList.add('fever-on'); sfx.odStart(); sfx.combo(); shake(0.8); toast(tl('Fever dream!'));
   const pool=UPGRADES.filter(u=>u.kind==='gubbe'&&!u.unique);
-  while(squad.length<MAX_SQUAD){ const m=addMember(pick(pool),{x:S.x+rand(-4,4),z:rand(-16,-10)}); m.fever=true; const p=m.g.position; fxSparkle(p.x,1.2,p.z,C(0xb388ff)); }
+  while(squad.length<MAX_SQUAD){ const m=addMember(pick(pool),fromStreet()); m.fever=true; const p=m.g.position; fxSparkle(p.x,1.2,p.z,C(0xb388ff)); }
   recomputeAuras(); updatePower(0,true);
 }
 function endFever(){

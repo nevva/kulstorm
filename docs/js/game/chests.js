@@ -140,7 +140,7 @@ function grantItem(u,p){
   const css=u.kind==='power'?hexCss(u.color):u.kind==='gubbe'?hexCss(u.shirt):WALL_CSS[u.rarity];
   roadText(u.kind==='gubbe'?tl('{0} joins!',u.name):u.name+'!',u.desc,css);
   if(u.kind==='pet') addUnicorn();
-  else if(u.kind==='gubbe'){ const m=addMember(u,{x:p.x,z:Math.min(p.z,-2)-1}); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(u.shirt)); updatePower(0,true); }
+  else if(u.kind==='gubbe'){ const m=addMember(u,fromStreet()); fxSparkle(m.g.position.x,1.2,m.g.position.z,C(u.shirt)); updatePower(0,true); }
   else if(u.kind==='team'){ applyTeamPerk(u); updatePower(0,true); }
   else applyPowerup(u,p);
 }

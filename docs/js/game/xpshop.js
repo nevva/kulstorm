@@ -112,7 +112,7 @@ function buyOffer(o){
   // Only the first coin pick of a run spins; later ones pay out at once.
   else if(o.type==='coins'&&R.coinsSpun){ collectCoins(chestCoinRoll(o.gold)); return afterPick(); }
   else if(o.type==='mystery'||o.type==='coins'){ if(o.type==='coins') R.coinsSpun=true; else R.mysteries++; updatePower(0,true); $('shopwallet').textContent=tl('{0} coins this run',fmt(Math.floor(coinsRun))); spinMystery(o); return false; }
-  else { addMember(defById('banker'),{x:S.x+(Math.random()<0.5?-5:5),z:-6}); }
+  else { addMember(defById('banker'),fromStreet()); }
   sfx.buy(); updatePower(0,true); renderBuy();
   return afterPick();
 }
