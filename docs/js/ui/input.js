@@ -45,7 +45,7 @@ window.addEventListener('keydown',e=>{
     else if(k===' '||k==='Enter'){ e.preventDefault(); if(!e.repeat){ const o=R.offers[R.sel]; if(o&&buyOffer(o)) closeShop(); } e.stopImmediatePropagation(); return; }
     else if(k==='Escape'){ e.preventDefault(); if(!R.title) closeShop(); }
     else if(k==='r'||k==='R'){ e.preventDefault(); shopReroll(); }
-    else if(/^[1-3]$/.test(k)){ const i=+k-1; if(R.offers[i]){ R.sel=i; if(buyOffer(R.offers[i])) closeShop(); else if(!R.spinning){ const msg=$('shopwallet').textContent; renderBuy(); $('shopwallet').textContent=msg; } } }
+    else if(/^[1-4]$/.test(k)){ const i=+k-1; if(R.offers[i]){ R.sel=i; if(buyOffer(R.offers[i])) closeShop(); else if(!R.spinning){ const msg=$('shopwallet').textContent; renderBuy(); $('shopwallet').textContent=msg; } } }
     e.stopImmediatePropagation(); return;
   }
   if(e.target&&(e.target.tagName==='BUTTON'||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')) return;

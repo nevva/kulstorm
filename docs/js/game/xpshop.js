@@ -69,8 +69,8 @@ function buildOffers(){
   const lockedUps=UPGRADES.filter(u=>upgradeFits(u)&&!isUnlocked(u.id));
   shuffle(lockedUps).slice(0,2).forEach(u=>pool.push({type:'item',u,cost:runPrice(u)}));
   if(!pool.length) pool.push({type:'heal',cost:15});
-  // The chest gamble is always one of the three offers.
-  R.offers=shuffle(shuffle(pool).slice(0,2).concat({type:'mystery',cost:mysteryCost(false),gold:false,p:{x:S.x,z:-2}}));
+  // Up to four offers, one of them always the chest gamble; you buy one.
+  R.offers=shuffle(shuffle(pool).slice(0,3).concat({type:'mystery',cost:mysteryCost(false),gold:false,p:{x:S.x,z:-2}}));
 }
 function offerInfo(o){
   if(o.type==='lvl') return {col:hexCss(o.m.def.shirt),title:o.m.def.name+' → '+tl('lv {0}',o.m.lvl+1),desc:tl('+20% damage and +20% max HP, fully healed. Now level {0}.',o.m.lvl)};
@@ -129,7 +129,7 @@ function afterPick(){
 function openShop(){
   shopRelock=locked(); unlockMouse();
   if(mode!=='playing'||!xpOn()) return;
-  R.picks=99; R.nextShopAt=dist+SHOP_GAP; mode='shop'; keys.l=keys.r=false; drag=null; R.title='';
+  R.picks=1; R.nextShopAt=dist+SHOP_GAP; mode='shop'; keys.l=keys.r=false; drag=null; R.title='';
   buildOffers(); R.sel=Math.max(0,R.offers.findIndex(o=>coinsRun>=o.cost)); renderBuy(); shopEl.hidden=false; sfx.level();
   $('shop-done').focus({preventScroll:true});
 }

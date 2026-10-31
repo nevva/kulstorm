@@ -299,7 +299,7 @@ const SV={
   'New offers · 5':'Nya erbjudanden · 5',
   'Continue':'Fortsätt',
   'Skip':'Hoppa över',
-  'Tap offers to buy them, then Done. Keyboard: A/D or ←/→ selects, Space buys, Esc leaves, R rerolls the offers.':'Tryck på erbjudanden för att köpa, sedan Klar. Tangentbord: A/D eller ←/→ väljer, Space köper, Esc lämnar, R ger nya erbjudanden.',
+  'Pick one offer to buy, or Skip. Keyboard: A/D or ←/→ selects, Space buys, Esc skips, R rerolls the offers.':'Välj ett erbjudande att köpa, eller Hoppa över. Tangentbord: A/D eller ←/→ väljer, Space köper, Esc hoppar över, R ger nya erbjudanden.',
   'Paused':'Paus',
   'meters':'meter',
   'enemies':'fiender',
